@@ -23,7 +23,7 @@ namespace Common
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
     [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.mini.pw.edu.pl/ucc/", IsNullable = false)]
-    public partial class RegisterResponse
+    public partial class RegisterResponse : Message
     {
 
         private ulong idField;
