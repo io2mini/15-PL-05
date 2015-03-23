@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Communication Server", "Communication Server\Communication Server.csproj", "{0C95F801-DA3B-4A99-A105-040A165A2021}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Messages\Common.csproj", "{AC1302E2-F903-44D2-A0B9-EB65263DD10A}"
@@ -10,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Computational Node", "Computational Node\Computational Node.csproj", "{F4A624A5-AA57-4BD1-8023-FD9106EE71D4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Computational Client", "Computational Client\Computational Client.csproj", "{DAF31FC8-F1DF-49EC-9F7E-8E5A0FF0E6A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommunicationServer", "CommunicationServer\CommunicationServer.csproj", "{20EF763B-27EC-4E8B-95F3-D059E153172A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +41,10 @@ Global
 		{DAF31FC8-F1DF-49EC-9F7E-8E5A0FF0E6A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DAF31FC8-F1DF-49EC-9F7E-8E5A0FF0E6A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DAF31FC8-F1DF-49EC-9F7E-8E5A0FF0E6A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20EF763B-27EC-4E8B-95F3-D059E153172A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20EF763B-27EC-4E8B-95F3-D059E153172A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20EF763B-27EC-4E8B-95F3-D059E153172A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20EF763B-27EC-4E8B-95F3-D059E153172A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,9 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommunicationServer
+namespace SystemComponent
 {
     public class CommunicationServer : SystemComponent
     {
+
     }
 }
