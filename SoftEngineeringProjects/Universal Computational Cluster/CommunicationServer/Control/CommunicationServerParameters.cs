@@ -8,8 +8,8 @@ namespace SystemComponent.Control
 {
     public class CommunicationServerParameters
     {
-        public int Time { get; set; }
+        public ulong Time { get; set; }
         public bool IsBackup { get; set; }
-        public int Port { get; set; }
+        public uint Port { get; set; }
     }
 }

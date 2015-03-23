@@ -26,7 +26,7 @@ namespace SystemComponent
             while (isWorking)
             {
                 newLine = Console.ReadLine();
-                string[] parameters = uI.ReadParameters(newLine);
+                CommunicationServerParameters csP = uI.ReadParameters(newLine);
             }
         }
     }
