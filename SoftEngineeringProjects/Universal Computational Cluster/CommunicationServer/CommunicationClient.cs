@@ -9,7 +9,7 @@ namespace SystemComponent
 {
     public class CommunicationServer
     {
-        private static bool isWorking;
+        private static bool isWorking = true;
 
         public bool IsWorking { get; set; }
 
