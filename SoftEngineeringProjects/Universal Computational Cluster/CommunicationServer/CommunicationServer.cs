@@ -15,7 +15,7 @@ namespace Common.Components
         const String Register = "Register", Status = "Status";
         Dictionary<ulong, bool> TimerStoppers;
         Dictionary<ulong, Timer> Timers;
-        Dictionary<ulong, TcpListener> Sockets;
+        Dictionary<ulong, Socket> Sockets;
         ulong FreeKey;
         protected override void Initialize()
         {
@@ -32,7 +32,7 @@ namespace Common.Components
         {
             FreeKey = 0;
             TimerStoppers = new Dictionary<ulong, bool>();
-            Sockets = new Dictionary<ulong, TcpClient>();
+            Sockets = new Dictionary<ulong, Socket>();
         }
         protected override void HandleMessage(Messages.Message message, string key)
         {
@@ -56,13 +56,14 @@ namespace Common.Components
             Noop.BackupCommunicationServers.BackupCommunicationServer = BackupServer;
             return Noop;
         }
-        protected void SendMessageToComponent(TcpListener tcpListener,Message m)
+        protected void SendMessageToComponent(Socket tcpListener,Message m)
         {
             try
             {
 
                 String message = m.GetMessage();
-                var tcpClient = new TcpClient((IPEndPoint)tcpListener.LocalEndpoint);
+                
+                
                 NetworkStream stream = tcpClient.GetStream();
                 StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
                 writer.AutoFlush = false;
