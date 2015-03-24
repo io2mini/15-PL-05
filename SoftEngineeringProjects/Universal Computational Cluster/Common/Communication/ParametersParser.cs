@@ -31,6 +31,10 @@ namespace Common.Communication
                 {
                     cInfo.IsBackup = true;
                 }
+                else if (parameters[i] == ADDRESS_PARAMTER)
+                {
+                    cInfo.CommunicationServerAddress = new Uri(parameters[i]);
+                }
                 else if (parameters[i] == PORT_PARAMETER && i < parameters.Length - 1)
                 {
                     uint port;

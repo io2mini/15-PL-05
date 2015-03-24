@@ -7,7 +7,7 @@
     <ProjectGuid>{AC1302E2-F903-44D2-A0B9-EB65263DD10A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Common</RootNamespace>
+    <RootNamespace>Common.Components.UserInterface</RootNamespace>
     <AssemblyName>Messages</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -1,7 +1,7 @@
 ﻿using System.Xml.Serialization;
 
 
-namespace Common
+namespace Common.Messages
 {
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.18020")]
     [System.SerializableAttribute()]

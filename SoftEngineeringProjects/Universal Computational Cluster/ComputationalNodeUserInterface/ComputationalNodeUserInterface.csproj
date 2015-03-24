@@ -7,7 +7,7 @@
     <ProjectGuid>{C2654458-A300-449A-9A81-559FB8E2E4A7}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ComputionalNodeUserInterface</RootNamespace>
+    <RootNamespace>Common.Components.UserInterface.UserInterface</RootNamespace>
     <AssemblyName>ComputionalNodeUserInterface</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

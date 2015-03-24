@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ComputationalClient
+namespace Common.Components
 {
-    public class ComputationalClient
+    public class ComputationalClient : SystemComponent
     {
+        public ComputationalClient() : base() { }
     }
 }

@@ -12,6 +12,6 @@ namespace Common.Communication
         public ushort CommunicationServerPort { get; set; }
         public ulong Time { get; set; }
         public bool IsBackup { get; set; }
-        
+
     }
 }

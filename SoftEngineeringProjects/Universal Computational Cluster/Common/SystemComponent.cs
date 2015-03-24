@@ -8,22 +8,30 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Common.Exceptions;
+using Common.Messages;
 
 namespace Common
 {
     public abstract class SystemComponent
     {
-        protected CommunicationInfo communicationServerInfo;
+        protected CommunicationInfo communicationInfo;
+        public bool IsWorking { get; set; }
         protected TcpClient tcpClient;
-        public CommunicationInfo CommunicationServerInfo { 
-            get { return communicationServerInfo; } 
-            set { communicationServerInfo = value; } 
+
+        public SystemComponent()
+        {
+            IsWorking = true;
+        }
+
+        public CommunicationInfo CommunicationInfo { 
+            get { return communicationInfo; } 
+            set { communicationInfo = value; } 
         }
 
         protected virtual void SaveConfig(string path)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(CommunicationInfo));
-            xmlSerializer.Serialize(new FileStream(path, FileMode.Create), communicationServerInfo);
+            xmlSerializer.Serialize(new FileStream(path, FileMode.Create), communicationInfo);
 
         }
         protected virtual void LoadConfig(string path)
@@ -31,7 +39,7 @@ namespace Common
             XmlSerializer xmlDeSerializer = new XmlSerializer(typeof(CommunicationInfo));
             try
             {
-                communicationServerInfo = (CommunicationInfo)xmlDeSerializer.Deserialize(new FileStream(path, FileMode.Open));
+                communicationInfo = (CommunicationInfo)xmlDeSerializer.Deserialize(new FileStream(path, FileMode.Open));
             }
             catch (FileNotFoundException e)
             {
@@ -42,13 +50,13 @@ namespace Common
         protected void InicializeConnection()
         {
             try{
-                tcpClient = new TcpClient(communicationServerInfo.CommunicationServerAddress.AbsolutePath, 
-                (int) communicationServerInfo.CommunicationServerPort);
+                tcpClient = new TcpClient(communicationInfo.CommunicationServerAddress.AbsolutePath, 
+                (int) communicationInfo.CommunicationServerPort);
             }
             catch(SocketException e)
             {
                 String message = String.Format("Problems with connecting to Communication Server host: {0} ; port: {1}",
-                    communicationServerInfo.CommunicationServerAddress.AbsolutePath, communicationServerInfo.CommunicationServerPort);
+                    communicationInfo.CommunicationServerAddress.AbsolutePath, communicationInfo.CommunicationServerPort);
                 throw new ConnectionException(message,e);
             }
             
