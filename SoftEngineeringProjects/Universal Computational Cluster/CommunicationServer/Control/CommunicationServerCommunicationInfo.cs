@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-namespace SystemComponent.Control
+using Common;
+using Common.Communication;
+namespace CommunicationServer.Control
 {
-    public class CommunicationServerParameters
+    public class CommunicationServerCommunicationInfo : CommunicationInfo
     {
         public ulong Time { get; set; }
         public bool IsBackup { get; set; }
