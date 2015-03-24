@@ -1,4 +1,6 @@
 ﻿using Common.Communication;
+using Common.Exceptions;
+using Common.Messages;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,9 +8,9 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using System.Xml.Serialization;
-using Common.Exceptions;
-using Common.Messages;
+
 
 namespace Common
 {
@@ -17,15 +19,20 @@ namespace Common
         protected CommunicationInfo communicationInfo;
         public bool IsWorking { get; set; }
         protected TcpClient tcpClient;
-
         public SystemComponent()
         {
             IsWorking = true;
         }
 
-        public CommunicationInfo CommunicationInfo { 
-            get { return communicationInfo; } 
-            set { communicationInfo = value; } 
+        public CommunicationInfo CommunicationInfo
+        {
+            get { return communicationInfo; }
+            set { communicationInfo = value; }
+        }
+
+        protected virtual void Validate(string XML)
+        {
+            XDocument Message = XDocument.Parse(XML);
         }
 
         protected virtual void SaveConfig(string path)

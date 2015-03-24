@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- The Error message is used to inform components that they or their tasks are unknown to the server
+(possibly because the data have not been synchronized and switch to BackupCS occured)
+-->
+<!-- Another case when Error message is used is when an exception occures on a component (TM or CN)
+to inform the CS or the client to inform about the exception that occured on the CS  -->
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"  targetNamespace="http://www.mini.pw.edu.pl/ucc/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="Error">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ErrorType">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <!-- The component is unknown to CS, after receiving such message the component should send Register message to receive new ID-->
+              <xs:enumeration value="UnknownSender" />
+              <!-- The task is unknown to CS, after receiving such message the component should remain in Idle/partially Idle state-->
+              <xs:enumeration value="InvalidOperation" />
+              <!-- The exception occured and exception message is forwarded to Server or Client.
+              It is CS or CC decision if they retry the same task/ignore the component/restart the component (with UnknownSender) -->
+              <xs:enumeration value="ExceptionOccured" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+		<!-- Additional message for debugging purposes / user friendly information. One MUST not rely on its contents. -->
+        <xs:element name="ErrorMessage" type="xs:string" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
