@@ -13,18 +13,21 @@ using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml;
 using Common.Properties;
+using System.Threading;
 
 namespace Common
 {
     public abstract class SystemComponent
     {
         protected CommunicationInfo communicationInfo;
+        protected NoOperationBackupCommunicationServersBackupCommunicationServer BackupServer;
         protected TcpClient tcpClient;
         protected Dictionary<string, string> Schemas;
         protected Dictionary<string, Type> MessageTypes;
         protected List<string> DictionaryKeys;
         const String RegisterResponse = "RegisterResponse", NoOperation = "NoOperation";
         public bool IsWorking { get; set; }
+        protected Timer StatusReporter;
         public SystemComponent()
         {
             IsWorking = true;
@@ -35,13 +38,18 @@ namespace Common
             get { return communicationInfo; } 
             set { communicationInfo = value; } 
         }
+        protected Status GenerateStatusReport()
+        {
+            return new Status();
+        }
         protected virtual void RegisterResponseHandler(RegisterResponse message)
         {
-            throw new NotImplementedException();
+
+            StatusReporter = new Timer((o) => { SendMessage(GenerateStatusReport()); }, null, 0, (int)message.Timeout * 1000);
         }
         protected virtual void NoOperationHandler(NoOperation message)
         {
-            throw new NotImplementedException();
+            BackupServer = message.BackupCommunicationServers.BackupCommunicationServer;
 
         }
         protected virtual void HandleMessage(Message message, string key)
