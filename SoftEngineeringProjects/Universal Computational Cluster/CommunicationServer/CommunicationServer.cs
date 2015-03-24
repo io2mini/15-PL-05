@@ -36,18 +36,18 @@ namespace Common.Components
             Sockets = new Dictionary<ulong, Socket>();
         }
 
-        protected override void HandleMessage(Messages.Message message, string key)
+        protected override void HandleMessage(Messages.Message message, string key,Socket socket)
         {
             switch (key)
             {
                 case Register:
-                    RegisterHandler((Register)message);
+                    RegisterHandler((Register)message,socket);
                     return;
                 case Status:
                     StatusHandler((Status)message);
                     return;
                 default:
-                    base.HandleMessage(message, key);
+                    base.HandleMessage(message, key,socket);
                     return;
             }
         }
@@ -107,7 +107,7 @@ namespace Common.Components
             return true;
         }
 
-        private void RegisterHandler(Register register)
+        private void RegisterHandler(Register register,Socket socket)
         {
             if (register.DeregisterSpecified)
             {
@@ -119,11 +119,25 @@ namespace Common.Components
             }
 
             ulong id = FirstFreeID++;
+            Sockets.Add(id, socket);
             TimerStoppers.Add(id, true);
             Timers.Add(id,new Timer((u) => {
                 if (!TimerStoppers[(ulong)u]) TimerStoppers.Remove((ulong)u);
                 else TimerStoppers[(ulong)u] = false;
             }, id, 0, (int)CommunicationInfo.Time));
+            RegisterResponse response = new RegisterResponse();
+            response.Id = id;
+            response.Timeout = (uint)CommunicationInfo.Time;
+            response.BackupCommunicationServers = new RegisterResponseBackupCommunicationServers();
+            response.BackupCommunicationServers.BackupCommunicationServer =
+                new RegisterResponseBackupCommunicationServersBackupCommunicationServer();
+            response.BackupCommunicationServers.BackupCommunicationServer.address =
+                BackupServer.address;
+            response.BackupCommunicationServers.BackupCommunicationServer.port =
+                BackupServer.port;
+            response.BackupCommunicationServers.BackupCommunicationServer.portSpecified =
+                BackupServer.portSpecified;
+            SendMessageToComponent(socket, response);
         }
     }
 }

@@ -62,7 +62,7 @@ namespace Common
             BackupServer = message.BackupCommunicationServers.BackupCommunicationServer;
 
         }
-        protected virtual void HandleMessage(Message message, string key)
+        protected virtual void HandleMessage(Message message, string key,Socket socket)
         {
             switch (key)
             {
@@ -88,7 +88,7 @@ namespace Common
             MessageTypes.Add(NoOperation, typeof(NoOperation));
 
         }
-        protected virtual void Validate(string XML)
+        protected virtual void Validate(string XML,Socket socket)
         {
             XDocument Message = XDocument.Parse(XML);
             foreach (String Key in DictionaryKeys)
@@ -99,7 +99,7 @@ namespace Common
                 Message.Validate(schemas, (o, e) => { error = true; });
                 if(!error)
                 {
-                    HandleMessage(null,"");
+                    HandleMessage(null,"",socket);
                 }
             }
         }
