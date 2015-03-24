@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Communication\CommunicationInfo.cs" />
+    <Compile Include="Exceptions\ParsingArgumentException.cs" />
     <Compile Include="Exceptions\ConnectionException.cs" />
     <Compile Include="Exceptions\MessageNotSentException.cs" />
     <Compile Include="Messages\DivideProblem.cs" />

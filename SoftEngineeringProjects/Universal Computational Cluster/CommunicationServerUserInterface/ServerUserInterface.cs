@@ -19,7 +19,7 @@ namespace Common.UserInterface
             while (communicationServer.IsWorking)
             {
                 newLine = Console.ReadLine();
-                communicationServer.CommunicationInfo = ParametersParser.ReadParameters(newLine);
+                communicationServer.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.CommunicationServer);
             }
         }
     }

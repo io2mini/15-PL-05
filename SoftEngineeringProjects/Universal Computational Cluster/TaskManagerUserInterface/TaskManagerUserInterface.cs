@@ -19,7 +19,7 @@ namespace Common.UserInterface
             while (taskManager.IsWorking)
             {
                 newLine = Console.ReadLine();
-                taskManager.CommunicationInfo = ParametersParser.ReadParameters(newLine);
+                taskManager.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.TaskManager);
             }
         }
     }

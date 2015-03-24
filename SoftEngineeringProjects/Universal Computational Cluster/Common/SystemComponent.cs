@@ -17,6 +17,15 @@ using System.Threading;
 
 namespace Common
 {
+    public enum SystemComponentType
+    {
+        CommunicationServer,
+        BackupCommunicationServer,
+        ComputationalClient,
+        ComputationalNode,
+        TaskManager,
+    }
+
     public abstract class SystemComponent
     {
         protected CommunicationInfo communicationInfo;
@@ -33,6 +42,7 @@ namespace Common
             IsWorking = true;
             Initialize();
         }
+
         public CommunicationInfo CommunicationInfo
         { 
             get { return communicationInfo; } 
