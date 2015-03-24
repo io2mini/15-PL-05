@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace Common
+namespace Common.Messages
 {
     [System.SerializableAttribute()]
     public abstract class Message
@@ -14,6 +14,7 @@ namespace Common
         static public Message ParseXML(Type type)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(type);
+            return null;
         }
         public String GetMessage()
         {

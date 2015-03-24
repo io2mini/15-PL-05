@@ -7,7 +7,7 @@
     <ProjectGuid>{50A24B1C-83B9-464A-8C1D-8BD8759ED6B1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TaskManagerUserInterface</RootNamespace>
+    <RootNamespace>Common.Components.UserInterface.Components</RootNamespace>
     <AssemblyName>TaskManagerUserInterface</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

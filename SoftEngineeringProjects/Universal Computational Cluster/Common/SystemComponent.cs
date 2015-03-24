@@ -1,4 +1,6 @@
 ﻿using Common.Communication;
+using Common.Exceptions;
+using Common.Messages;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,20 +14,24 @@ using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml;
 
+
 namespace Common
 {
     public abstract class SystemComponent
     {
-        protected CommunicationInfo communicationServerInfo;
+        protected CommunicationInfo communicationInfo;
         protected TcpClient tcpClient;
         protected Dictionary<string, string> Schemas;
         protected Dictionary<string, Type> MessageTypes;
         protected List<string> DictionaryKeys;
-        public CommunicationInfo CommunicationServerInfo
+        public bool IsWorking { get; set; }
+
+        public CommunicationInfo CommunicationInfo
         { 
-            get { return communicationServerInfo; } 
-            set { communicationServerInfo = value; } 
+            get { return communicationInfo; } 
+            set { communicationInfo = value; } 
         }
+
         protected virtual void HandleMessage(Message message, string key)
         {
             switch (key)
@@ -33,6 +39,7 @@ namespace Common
                 
             }
         }
+
         protected virtual void Validate(string XML)
         {
             XDocument Message = XDocument.Parse(XML);
@@ -44,15 +51,15 @@ namespace Common
                 Message.Validate(schemas, (o, e) => { error = true; });
                 if(!error)
                 {
-                    HandleMessage(
+                    HandleMessage(null,"");
                 }
-
             }
-        }
+          }
+
         protected virtual void SaveConfig(string path)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(CommunicationInfo));
-            xmlSerializer.Serialize(new FileStream(path, FileMode.Create), communicationServerInfo);
+            xmlSerializer.Serialize(new FileStream(path, FileMode.Create), communicationInfo);
 
 
         }
@@ -61,7 +68,7 @@ namespace Common
             XmlSerializer xmlDeSerializer = new XmlSerializer(typeof(CommunicationInfo));
             try
             {
-                communicationServerInfo = (CommunicationInfo)xmlDeSerializer.Deserialize(new FileStream(path, FileMode.Open));
+                communicationInfo = (CommunicationInfo)xmlDeSerializer.Deserialize(new FileStream(path, FileMode.Open));
             }
             catch (FileNotFoundException e)
             {
@@ -72,13 +79,13 @@ namespace Common
         protected void InicializeConnection()
         {
             try{
-                tcpClient = new TcpClient(communicationServerInfo.CommunicationServerAddress.AbsolutePath, 
-                (int) communicationServerInfo.CommunicationServerPort);
+                tcpClient = new TcpClient(communicationInfo.CommunicationServerAddress.AbsolutePath, 
+                (int) communicationInfo.CommunicationServerPort);
             }
             catch(SocketException e)
             {
                 String message = String.Format("Problems with connecting to Communication Server host: {0} ; port: {1}",
-                    communicationServerInfo.CommunicationServerAddress.AbsolutePath, communicationServerInfo.CommunicationServerPort);
+                    communicationInfo.CommunicationServerAddress.AbsolutePath, communicationInfo.CommunicationServerPort);
                 throw new ConnectionException(message,e);
             }
             
