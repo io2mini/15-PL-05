@@ -43,6 +43,7 @@
     <Compile Include="Exceptions\ConnectionException.cs" />
     <Compile Include="Exceptions\MessageNotSentException.cs" />
     <Compile Include="Messages\DivideProblem.cs" />
+    <Compile Include="Messages\Error.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\NoOperation.cs" />
     <Compile Include="Messages\PartialProblems.cs" />
