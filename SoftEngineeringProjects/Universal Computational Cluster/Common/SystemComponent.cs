@@ -9,7 +9,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Common.Exceptions;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml;
@@ -25,17 +24,35 @@ namespace Common
         protected Dictionary<string, Type> MessageTypes;
         protected List<string> DictionaryKeys;
         public bool IsWorking { get; set; }
-
+        public SystemComponent()
+        {
+            IsWorking = true;
+            
+        }
         public CommunicationInfo CommunicationInfo
         { 
             get { return communicationInfo; } 
             set { communicationInfo = value; } 
         }
+        protected virtual void RegisterResponseHandler(RegisterResponse message)
+        {
+            throw new NotImplementedException();
+        }
+        protected virtual void NoOperationHandler(NoOperation message)
+        {
+            throw new NotImplementedException();
 
+        }
         protected virtual void HandleMessage(Message message, string key)
         {
             switch (key)
             {
+                case "RegisterResponse":
+                    RegisterResponseHandler((RegisterResponse)message);
+                    return;
+                case "NoOperation":
+                    NoOperationHandler((NoOperation)message);
+                    return;
                 
             }
         }
