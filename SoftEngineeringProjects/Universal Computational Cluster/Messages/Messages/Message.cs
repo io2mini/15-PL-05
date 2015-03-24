@@ -11,5 +11,9 @@ namespace Common
     [System.SerializableAttribute()]
     public abstract class Message
     {
+        public String GetMessage()
+        {
+            return null;
+        }
     }
 }
