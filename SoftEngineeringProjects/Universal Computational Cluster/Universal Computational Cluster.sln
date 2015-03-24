@@ -3,15 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Communication Server", "Communication Server\Communication Server.csproj", "{0C95F801-DA3B-4A99-A105-040A165A2021}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Messages\Common.csproj", "{AC1302E2-F903-44D2-A0B9-EB65263DD10A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task Manager", "Task Manager\Task Manager.csproj", "{40BEAA1F-12C4-4F6F-B9C9-E19E8633A164}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Computational Node", "Computational Node\Computational Node.csproj", "{F4A624A5-AA57-4BD1-8023-FD9106EE71D4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Computational Client", "Computational Client\Computational Client.csproj", "{DAF31FC8-F1DF-49EC-9F7E-8E5A0FF0E6A3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommunicationServer", "CommunicationServer\CommunicationServer.csproj", "{20EF763B-27EC-4E8B-95F3-D059E153172A}"
 EndProject
@@ -21,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0C95F801-DA3B-4A99-A105-040A165A2021}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0C95F801-DA3B-4A99-A105-040A165A2021}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0C95F801-DA3B-4A99-A105-040A165A2021}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0C95F801-DA3B-4A99-A105-040A165A2021}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AC1302E2-F903-44D2-A0B9-EB65263DD10A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AC1302E2-F903-44D2-A0B9-EB65263DD10A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC1302E2-F903-44D2-A0B9-EB65263DD10A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -37,10 +29,6 @@ Global
 		{F4A624A5-AA57-4BD1-8023-FD9106EE71D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4A624A5-AA57-4BD1-8023-FD9106EE71D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4A624A5-AA57-4BD1-8023-FD9106EE71D4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DAF31FC8-F1DF-49EC-9F7E-8E5A0FF0E6A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DAF31FC8-F1DF-49EC-9F7E-8E5A0FF0E6A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DAF31FC8-F1DF-49EC-9F7E-8E5A0FF0E6A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DAF31FC8-F1DF-49EC-9F7E-8E5A0FF0E6A3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{20EF763B-27EC-4E8B-95F3-D059E153172A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{20EF763B-27EC-4E8B-95F3-D059E153172A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20EF763B-27EC-4E8B-95F3-D059E153172A}.Release|Any CPU.ActiveCfg = Release|Any CPU
