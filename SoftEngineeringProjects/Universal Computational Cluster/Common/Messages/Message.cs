@@ -17,7 +17,7 @@ namespace Common.Messages
             Message message = (Message)xmlSerializer.Deserialize(new StringReader(Message));
             return message;
         }
-        public String GetMessage()
+        public String toString()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(this.GetType());
             StringWriter writer = new StringWriter();

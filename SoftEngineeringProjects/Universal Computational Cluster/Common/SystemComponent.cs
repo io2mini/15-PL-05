@@ -143,7 +143,7 @@ namespace Common
         {
             try
             {
-                String message = m.GetMessage();
+                String message = m.toString();
                 NetworkStream stream = tcpClient.GetStream();
                 StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
                 writer.AutoFlush = false;

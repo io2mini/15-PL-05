@@ -16,7 +16,8 @@ namespace Common.Components
         Dictionary<ulong, bool> TimerStoppers;
         Dictionary<ulong, Timer> Timers;
         Dictionary<ulong, Socket> Sockets;
-        ulong FreeKey;
+        ulong FirstFreeID;
+
         protected override void Initialize()
         {
             base.Initialize();
@@ -27,13 +28,14 @@ namespace Common.Components
             MessageTypes.Add(Status, typeof(Status));
             MessageTypes.Add(Register, typeof(Register));
         }
-        public CommunicationServer()
-            : base()
+
+        public CommunicationServer() : base()
         {
-            FreeKey = 0;
+            FirstFreeID = 0;
             TimerStoppers = new Dictionary<ulong, bool>();
             Sockets = new Dictionary<ulong, Socket>();
         }
+
         protected override void HandleMessage(Messages.Message message, string key)
         {
             switch (key)
@@ -49,6 +51,7 @@ namespace Common.Components
                     return;
             }
         }
+
         private NoOperation GenerateNoOperationMessage()
         {
             NoOperation Noop = new NoOperation();
@@ -56,20 +59,31 @@ namespace Common.Components
             Noop.BackupCommunicationServers.BackupCommunicationServer = BackupServer;
             return Noop;
         }
-        protected void SendMessageToComponent(Socket tcpListener,Message m)
+
+        private static void SendCallback(IAsyncResult ar)
         {
             try
             {
+                Socket handler = (Socket)ar.AsyncState;
+                int bytesSent = handler.EndSend(ar);
+                // na potrzeby testów
+                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
+                handler.Shutdown(SocketShutdown.Both);
+                handler.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
 
-                String message = m.GetMessage();
-                
-                
-                NetworkStream stream = tcpClient.GetStream();
-                StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
-                writer.AutoFlush = false;
-                writer.Write(Encoding.UTF8.GetBytes(message).Length);
-                writer.Write(message);
-                writer.Flush();
+        protected void SendMessageToComponent(Socket socket, Message m)
+        {
+            try
+            {
+                byte[] byteData = Encoding.ASCII.GetBytes(m.toString());
+                socket.BeginSend(byteData, 0, byteData.Length, 0,
+                    new AsyncCallback(SendCallback), socket);
             }
             catch (Exception e)
             {
@@ -77,11 +91,13 @@ namespace Common.Components
                 throw new MessageNotSentException(message, e);
             }
         }
+
         private void StatusHandler(Status status)
         {
             TimerStoppers[status.Id] = true;
             SendMessageToComponent(Sockets[status.Id], GenerateNoOperationMessage());
         }
+
         private bool Deregister(ulong Id)
         {
             if (!Sockets.ContainsKey(Id)) return false;
@@ -90,6 +106,7 @@ namespace Common.Components
             Timers.Remove(Id);
             return true;
         }
+
         private void RegisterHandler(Register register)
         {
             if (register.DeregisterSpecified)
@@ -101,7 +118,7 @@ namespace Common.Components
                 }
             }
 
-            ulong id = FreeKey++;
+            ulong id = FirstFreeID++;
             TimerStoppers.Add(id, true);
             Timers.Add(id,new Timer((u) => {
                 if (!TimerStoppers[(ulong)u]) TimerStoppers.Remove((ulong)u);
