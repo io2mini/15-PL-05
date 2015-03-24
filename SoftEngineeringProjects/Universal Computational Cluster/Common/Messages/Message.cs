@@ -11,6 +11,10 @@ namespace Common
     [System.SerializableAttribute()]
     public abstract class Message
     {
+        static public Message ParseXML(Type type)
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(type);
+        }
         public String GetMessage()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(this.GetType());

@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Common.Exceptions;
 using System.Xml.Linq;
+using System.Xml.Schema;
+using System.Xml;
 
 namespace Common
 {
@@ -16,19 +18,42 @@ namespace Common
     {
         protected CommunicationInfo communicationServerInfo;
         protected TcpClient tcpClient;
-        public CommunicationInfo CommunicationServerInfo { 
+        protected Dictionary<string, string> Schemas;
+        protected Dictionary<string, Type> MessageTypes;
+        protected List<string> DictionaryKeys;
+        public CommunicationInfo CommunicationServerInfo
+        { 
             get { return communicationServerInfo; } 
             set { communicationServerInfo = value; } 
+        }
+        protected virtual void HandleMessage(Message message, string key)
+        {
+            switch (key)
+            {
+                
+            }
         }
         protected virtual void Validate(string XML)
         {
             XDocument Message = XDocument.Parse(XML);
+            foreach (String Key in DictionaryKeys)
+            {
+                XmlSchemaSet schemas = new XmlSchemaSet();
+                schemas.Add("", XmlReader.Create(new StringReader(Schemas[Key])));
+                bool error = false;
+                Message.Validate(schemas, (o, e) => { error = true; });
+                if(!error)
+                {
+                    HandleMessage(
+                }
 
+            }
         }
         protected virtual void SaveConfig(string path)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(CommunicationInfo));
             xmlSerializer.Serialize(new FileStream(path, FileMode.Create), communicationServerInfo);
+
 
         }
         protected virtual void LoadConfig(string path)
