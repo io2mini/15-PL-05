@@ -54,15 +54,21 @@ namespace Common
             
         }
 
-        protected void SendMessage()
+        protected void SendMessage(Message m)
         {
             try
             {
-
+                String message = m.GetMessage();
+                NetworkStream stream = tcpClient.GetStream();
+                StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
+                writer.AutoFlush = false;
+                writer.Write(Encoding.UTF8.GetBytes(message).Length);
+                writer.Write(message);
+                writer.Flush();
             }
             catch(Exception e)
             {
-                String message = "";
+                String message = "Unable to send message";
                 throw new MessageNotSentException(message, e);
             }
         }
