@@ -101,10 +101,22 @@ namespace Common.Components
         private bool Deregister(ulong Id)
         {
             if (!Sockets.ContainsKey(Id)) return false;
+            Sockets[Id].Close();
             Sockets.Remove(Id);
             TimerStoppers.Remove(Id);
             Timers.Remove(Id);
             return true;
+        }
+
+        private void ReceiveMessage(Socket socket)
+        {
+            while(socket.IsBound)
+            {
+                byte[] byteArray = new Byte[1024];
+                socket.Receive(byteArray);
+                String message = System.Text.Encoding.UTF8.GetString(byteArray);
+                Validate(message, socket);
+            }
         }
 
         private void RegisterHandler(Register register,Socket socket)
@@ -138,6 +150,28 @@ namespace Common.Components
             response.BackupCommunicationServers.BackupCommunicationServer.portSpecified =
                 BackupServer.portSpecified;
             SendMessageToComponent(socket, response);
+        }
+
+        public void StartListening()
+        {
+            byte[] bytes = new Byte[1024];
+            IPAddress ipAddress = IPAddress.Parse(communicationInfo.CommunicationServerAddress.AbsolutePath);
+            TcpListener tcpListener = new TcpListener(ipAddress,(int) communicationInfo.CommunicationServerPort);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, (int)communicationInfo.CommunicationServerPort);
+            try
+            {
+                Socket socket = tcpListener.AcceptSocket();
+                while (true)
+                {
+                    ReceiveMessage(socket);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
         }
     }
 }
