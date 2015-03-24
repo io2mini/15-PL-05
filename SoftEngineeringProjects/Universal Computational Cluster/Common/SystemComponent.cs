@@ -9,10 +9,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml;
-using System.Xml.Linq;
-
+using Common.Properties;
 
 namespace Common
 {
@@ -32,11 +32,13 @@ namespace Common
         protected Dictionary<string, string> Schemas;
         protected Dictionary<string, Type> MessageTypes;
         protected List<string> DictionaryKeys;
+        const String RegisterResponse = "RegisterResponse", NoOperation = "NoOperation";
         public bool IsWorking { get; set; }
 
         public SystemComponent()
         {
             IsWorking = true;
+            Initialize();
         }
 
         public CommunicationInfo CommunicationInfo
@@ -44,15 +46,41 @@ namespace Common
             get { return communicationInfo; } 
             set { communicationInfo = value; } 
         }
+        protected virtual void RegisterResponseHandler(RegisterResponse message)
+        {
+            throw new NotImplementedException();
+        }
+        protected virtual void NoOperationHandler(NoOperation message)
+        {
+            throw new NotImplementedException();
 
+        }
         protected virtual void HandleMessage(Message message, string key)
         {
             switch (key)
             {
+                case RegisterResponse:
+                    RegisterResponseHandler((RegisterResponse)message);
+                    return;
+                case NoOperation:
+                    NoOperationHandler((NoOperation)message);
+                    return;
                 
             }
         }
+        protected virtual void Initialize()
+        {
+            DictionaryKeys = new List<string>();
+            Schemas = new Dictionary<string, string>();
+            MessageTypes = new Dictionary<string, Type>();
+            DictionaryKeys.Add(RegisterResponse);
+            DictionaryKeys.Add(NoOperation);
+            Schemas.Add(RegisterResponse, Resources.RegisterResponse);
+            Schemas.Add(NoOperation, Resources.NoOperation);
+            MessageTypes.Add(RegisterResponse, typeof(RegisterResponse));
+            MessageTypes.Add(NoOperation, typeof(NoOperation));
 
+        }
         protected virtual void Validate(string XML)
         {
             XDocument Message = XDocument.Parse(XML);
@@ -67,7 +95,7 @@ namespace Common
                     HandleMessage(null,"");
                 }
             }
-          }
+        }
 
         protected virtual void SaveConfig(string path)
         {

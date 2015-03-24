@@ -22,7 +22,7 @@ namespace Common.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Common.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Common.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace Common.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -71,7 +71,7 @@ namespace Common.Properties {
         ///      &lt;!-- the ID of the problem instance assigned by the server --&gt;
         ///      &lt;xs:element name=&quot;Id&quot; type= [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string DivideProblem {
+        public static string DivideProblem {
             get {
                 return ResourceManager.GetString("DivideProblem", resourceCulture);
             }
@@ -86,7 +86,7 @@ namespace Common.Properties {
         ///to inform the CS or the client to inform about the exception that occured on the CS  --&gt;
         ///&lt;xs:schema attributeFormDefault=&quot;unqualified&quot; elementFormDefault=&quot;qualified&quot;  targetN [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string Error {
+        public static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
             }
@@ -105,7 +105,7 @@ namespace Common.Properties {
         ///              &lt;xs:element name=&quot;BackupCommunicationServer&quot; minOccurs=&quot;0&quot;&gt;
         ///  [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string NoOperation {
+        public static string NoOperation {
             get {
                 return ResourceManager.GetString("NoOperation", resourceCulture);
             }
@@ -123,7 +123,7 @@ namespace Common.Properties {
         ///      &lt;!-- the ID of the problem instance assigned by the server --&gt;
         ///      &lt;xs:eleme [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string PartialProblems {
+        public static string PartialProblems {
             get {
                 return ResourceManager.GetString("PartialProblems", resourceCulture);
             }
@@ -142,7 +142,7 @@ namespace Common.Properties {
         ///              &lt;xs:enumeration value=&quot;TaskManager&quot; /&gt;
         ///         [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string Register {
+        public static string Register {
             get {
                 return ResourceManager.GetString("Register", resourceCulture);
             }
@@ -159,7 +159,7 @@ namespace Common.Properties {
         ///        &lt;!-- the communication timeout in seconds configured on Communication Server --&gt;
         ///        &lt;xs:elem [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string RegisterResponse {
+        public static string RegisterResponse {
             get {
                 return ResourceManager.GetString("RegisterResponse", resourceCulture);
             }
@@ -176,7 +176,7 @@ namespace Common.Properties {
         ///        &lt;!-- the ID of the problem instance assigned by the server --&gt;
         ///        &lt;xs:element name= [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string Solution {
+        public static string Solution {
             get {
                 return ResourceManager.GetString("Solution", resourceCulture);
             }
@@ -195,7 +195,7 @@ namespace Common.Properties {
         ///  &lt;/xs:element&gt;
         ///&lt;/xs:schema&gt;.
         /// </summary>
-        internal static string SolutionRequest {
+        public static string SolutionRequest {
             get {
                 return ResourceManager.GetString("SolutionRequest", resourceCulture);
             }
@@ -212,7 +212,7 @@ namespace Common.Properties {
         ///      &lt;!-- the optional time restriction for solving the problem (in ms) --&gt;
         ///      &lt;xs:element minOccurs=&quot;0&quot; name=&quot; [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string SolveRequest {
+        public static string SolveRequest {
             get {
                 return ResourceManager.GetString("SolveRequest", resourceCulture);
             }
@@ -232,7 +232,7 @@ namespace Common.Properties {
         ///  &lt;/xs:element&gt;
         ///&lt;/xs:schema&gt;.
         /// </summary>
-        internal static string SolveRequestResponse {
+        public static string SolveRequestResponse {
             get {
                 return ResourceManager.GetString("SolveRequestResponse", resourceCulture);
             }
@@ -251,7 +251,7 @@ namespace Common.Properties {
         ///        &lt;xs:complexType&gt;
         ///          &lt; [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string Status {
+        public static string Status {
             get {
                 return ResourceManager.GetString("Status", resourceCulture);
             }

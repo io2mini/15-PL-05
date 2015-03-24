@@ -40,9 +40,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Communication\CommunicationInfo.cs" />
+    <Compile Include="Exceptions\ParsingArgumentException.cs" />
     <Compile Include="Exceptions\ConnectionException.cs" />
     <Compile Include="Exceptions\MessageNotSentException.cs" />
-    <Compile Include="Exceptions\ParsingArgumentsException.cs" />
     <Compile Include="Messages\DivideProblem.cs" />
     <Compile Include="Messages\Error.cs" />
     <Compile Include="Messages\Message.cs" />
@@ -66,7 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>

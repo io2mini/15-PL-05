@@ -11,10 +11,11 @@ namespace Common.Messages
     [System.SerializableAttribute()]
     public abstract class Message
     {
-        static public Message ParseXML(Type type)
+        static public Message ParseXML(Type type,string Message)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(type);
-            return null;
+            Message message = (Message)xmlSerializer.Deserialize(new StringReader(Message));
+            return message;
         }
         public String GetMessage()
         {

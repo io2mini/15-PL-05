@@ -30,7 +30,7 @@ namespace Common.Communication
                         {
                             String message = "Wrong number of arguments passed, give -address [address] -port [port] -backup"
                                 + "-t [timeout]";
-                            throw new ParsingArgumentsException(message);
+                            throw new ParsingArgumentException(message);
                         }
                     }
                     else
@@ -38,7 +38,7 @@ namespace Common.Communication
                         if (parameters.Length != 4)
                         {
                             String message = "Wrong number of arguments passed, give -port [port] -t [timeout]";
-                            throw new ParsingArgumentsException(message);
+                            throw new ParsingArgumentException(message);
                         }
                     }
                     break;
@@ -46,7 +46,7 @@ namespace Common.Communication
                     if(parameters.Length != 4)
                     {
                         String message = "Wrong number of arguments passed, give -address [address] -port [port]";
-                        throw new ParsingArgumentsException(message);
+                        throw new ParsingArgumentException(message);
                     }
                     break;
             }
@@ -85,7 +85,7 @@ namespace Common.Communication
                 catch (UriFormatException e)
                 {
                     String message = "Couldn't create end point adress";
-                    throw new ParsingArgumentsException(message, e);
+                    throw new ParsingArgumentException(message, e);
                 }
 
             }
@@ -99,13 +99,13 @@ namespace Common.Communication
                 catch (UriFormatException e)
                 {
                     String message = "Couldn't create port";
-                    throw new ParsingArgumentsException(message, e);
+                    throw new ParsingArgumentException(message, e);
                 }
             }
             else
             {
                 String message = String.Format("No parameter match : {0}", parameters[i]);
-                throw new ParsingArgumentsException(message);
+                throw new ParsingArgumentException(message);
             }
         }
 
@@ -121,7 +121,7 @@ namespace Common.Communication
                 catch (UriFormatException e)
                 {
                     String message = "Couldn't create timeout";
-                    throw new ParsingArgumentsException(message, e);
+                    throw new ParsingArgumentException(message, e);
                 }
 
             }
@@ -135,13 +135,13 @@ namespace Common.Communication
                 catch (UriFormatException e)
                 {
                     String message = "Couldn't create port";
-                    throw new ParsingArgumentsException(message, e);
+                    throw new ParsingArgumentException(message, e);
                 }
             }
             else
             {
                 String message = String.Format("No parameter match : {0}", parameters[i]);
-                throw new ParsingArgumentsException(message);
+                throw new ParsingArgumentException(message);
             }
         }
 
@@ -157,7 +157,7 @@ namespace Common.Communication
                 catch (UriFormatException e)
                 {
                     String message = "Couldn't create timeout";
-                    throw new ParsingArgumentsException(message, e);
+                    throw new ParsingArgumentException(message, e);
                 }
 
             }
@@ -170,7 +170,7 @@ namespace Common.Communication
                 catch (UriFormatException e)
                 {
                     String message = "Couldn't create end point adress";
-                    throw new ParsingArgumentsException(message, e);
+                    throw new ParsingArgumentException(message, e);
                 }
 
             }
@@ -184,7 +184,7 @@ namespace Common.Communication
                 catch (UriFormatException e)
                 {
                     String message = "Couldn't create port";
-                    throw new ParsingArgumentsException(message, e);
+                    throw new ParsingArgumentException(message, e);
                 }
             }
             else if (parameters[i] == BACKUP_PARAMETER)
@@ -194,7 +194,7 @@ namespace Common.Communication
             else
             {
                 String message = String.Format("No parameter match : {0}", parameters[i]);
-                throw new ParsingArgumentsException(message);
+                throw new ParsingArgumentException(message);
             }
            
         }
