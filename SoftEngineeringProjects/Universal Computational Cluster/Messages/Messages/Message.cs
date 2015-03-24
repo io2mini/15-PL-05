@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using System.Xml.Serialization;
 
 namespace Common
@@ -13,7 +13,10 @@ namespace Common
     {
         public String GetMessage()
         {
-            return null;
+            XmlSerializer xmlSerializer = new XmlSerializer(this.GetType());
+            StringWriter writer = new StringWriter();
+            xmlSerializer.Serialize(writer, this);
+            return writer.ToString();
         }
     }
 }
