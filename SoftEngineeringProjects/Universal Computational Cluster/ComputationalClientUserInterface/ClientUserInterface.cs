@@ -12,13 +12,13 @@ namespace Common.UserInterface
     {
         static void Main(string[] args)
         {
-            ComputationalClient computationalNode = new ComputationalClient();
+            ComputationalClient computationalClient = new ComputationalClient();
             Console.WriteLine("Computational Client started successfully");
             String newLine;
-            while (computationalNode.IsWorking)
+            while (computationalClient.IsWorking)
             {
                 newLine = Console.ReadLine();
-                computationalNode.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalClient);
+                computationalClient.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalClient);
             }
         }
     }
