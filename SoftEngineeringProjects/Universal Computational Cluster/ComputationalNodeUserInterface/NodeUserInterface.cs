@@ -18,7 +18,7 @@ namespace Common.UserInterface
             while (computationalNode.IsWorking)
             {
                 newLine = Console.ReadLine();
-                computationalNode.CommunicationInfo = ParametersParser.ReadParameters(newLine);
+                computationalNode.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalNode);
             }
         }
     }

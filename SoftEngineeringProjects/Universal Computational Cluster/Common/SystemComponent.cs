@@ -9,14 +9,22 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Common.Exceptions;
-using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml;
+using System.Xml.Linq;
 
 
 namespace Common
 {
+    public enum SystemComponentType
+    {
+        CommunicationServer,
+        BackupCommunicationServer,
+        ComputationalClient,
+        ComputationalNode,
+        TaskManager,
+    }
+
     public abstract class SystemComponent
     {
         protected CommunicationInfo communicationInfo;
@@ -25,6 +33,11 @@ namespace Common
         protected Dictionary<string, Type> MessageTypes;
         protected List<string> DictionaryKeys;
         public bool IsWorking { get; set; }
+
+        public SystemComponent()
+        {
+            IsWorking = true;
+        }
 
         public CommunicationInfo CommunicationInfo
         { 

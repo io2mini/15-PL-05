@@ -42,6 +42,7 @@
     <Compile Include="Communication\CommunicationInfo.cs" />
     <Compile Include="Exceptions\ConnectionException.cs" />
     <Compile Include="Exceptions\MessageNotSentException.cs" />
+    <Compile Include="Exceptions\ParsingArgumentsException.cs" />
     <Compile Include="Messages\DivideProblem.cs" />
     <Compile Include="Messages\Error.cs" />
     <Compile Include="Messages\Message.cs" />
