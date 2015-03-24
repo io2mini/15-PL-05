@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Common.Exceptions;
+using System.Xml.Linq;
 
 namespace Common
 {
@@ -19,7 +20,11 @@ namespace Common
             get { return communicationServerInfo; } 
             set { communicationServerInfo = value; } 
         }
+        protected virtual void Validate(string XML)
+        {
+            XDocument Message = XDocument.Parse(XML);
 
+        }
         protected virtual void SaveConfig(string path)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(CommunicationInfo));
