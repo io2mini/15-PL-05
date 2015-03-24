@@ -46,19 +46,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserInterface.cs" />
+    <Compile Include="ServerUserInterface.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{ac1302e2-f903-44d2-a0b9-eb65263dd10a}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CommunicationServer\CommunicationServer.csproj">
       <Project>{20ef763b-27ec-4e8b-95f3-d059e153172a}</Project>
       <Name>CommunicationServer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Messages\Common.csproj">
-      <Project>{ac1302e2-f903-44d2-a0b9-eb65263dd10a}</Project>
-      <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

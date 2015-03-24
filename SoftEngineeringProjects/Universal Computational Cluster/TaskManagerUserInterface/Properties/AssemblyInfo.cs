@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ComputationalClient")]
+[assembly: AssemblyTitle("TaskManagerUserInterface")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ComputationalClient")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCompany("Consafe Logistics AB")]
+[assembly: AssemblyProduct("TaskManagerUserInterface")]
+[assembly: AssemblyCopyright("Copyright © Consafe Logistics AB 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("7687abda-155e-4730-ad27-6307c090ee64")]
+[assembly: Guid("a043ca83-7188-406f-b750-77e0235aba4e")]
 
 // Version information for an assembly consists of the following four values:
 //

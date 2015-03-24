@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{40BEAA1F-12C4-4F6F-B9C9-E19E8633A164}</ProjectGuid>
+    <ProjectGuid>{AC1302E2-F903-44D2-A0B9-EB65263DD10A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Task_Manager</RootNamespace>
-    <AssemblyName>Task Manager</AssemblyName>
+    <RootNamespace>Common</RootNamespace>
+    <AssemblyName>Messages</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -39,14 +39,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TaskManager.cs" />
+    <Compile Include="Communication\CommunicationInfo.cs" />
+    <Compile Include="Exceptions\ConnectionException.cs" />
+    <Compile Include="Exceptions\MessageNotSentException.cs" />
+    <Compile Include="Messages\DivideProblem.cs" />
+    <Compile Include="Messages\Error.cs" />
+    <Compile Include="Messages\Message.cs" />
+    <Compile Include="Messages\NoOperation.cs" />
+    <Compile Include="Messages\PartialProblems.cs" />
+    <Compile Include="Messages\Register.cs" />
+    <Compile Include="Messages\RegisterResponse.cs" />
+    <Compile Include="Messages\Solution.cs" />
+    <Compile Include="Messages\SolveRequest.cs" />
+    <Compile Include="Messages\SolveRequestResponse.cs" />
+    <Compile Include="Messages\Status.cs" />
+    <Compile Include="Communication\ParametersParser.cs" />
+    <Compile Include="Problem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj">
-      <Project>{ac1302e2-f903-44d2-a0b9-eb65263dd10a}</Project>
-      <Name>Common</Name>
-    </ProjectReference>
+    <Compile Include="SystemComponent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
