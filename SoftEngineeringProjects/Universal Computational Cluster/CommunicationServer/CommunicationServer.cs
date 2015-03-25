@@ -29,6 +29,7 @@ namespace Common.Components
             Sockets = new Dictionary<ulong, Socket>();
 
         }
+
         /// <summary>
         /// Inicjalizacja słowników typami wiadomościami unikalnymi dla CS.
         /// </summary>
@@ -52,6 +53,7 @@ namespace Common.Components
             thread.IsBackground = true;
             thread.Start();
         }
+
         /// <summary>
         /// Override metody z SystemComponentu, do obsługi wiadomości, rozszerzona o wiadomości unikalne dla tego komponentu.
         /// </summary>
@@ -73,6 +75,7 @@ namespace Common.Components
                     return;
             }
         }
+
         /// <summary>
         /// Metoda generująca nooperation message do odesłania do komponentu.
         /// </summary>
@@ -84,6 +87,7 @@ namespace Common.Components
             Noop.BackupCommunicationServers.BackupCommunicationServer = BackupServer;
             return Noop;
         }
+
         /// <summary>
         /// Metoda stworzona na potrzeby testów, służąca do raportowania przesłanych bajtów.
         /// </summary>
@@ -104,6 +108,7 @@ namespace Common.Components
                 Console.WriteLine(e.ToString());
             }
         }
+
         /// <summary>
         /// Metoda wysyłająca wiadomość do komponentu.
         /// </summary>
@@ -124,6 +129,7 @@ namespace Common.Components
                 throw new MessageNotSentException(exceptionMessage, e);
             }
         }
+
         /// <summary>
         /// Metoda obsługująca otrzymaną wiadomość typu status.
         /// </summary>
@@ -133,6 +139,7 @@ namespace Common.Components
             TimerStoppers[status.Id] = true;
             SendMessageToComponent(status.Id, GenerateNoOperationMessage());
         }
+
         /// <summary>
         /// Metoda usuwająca komponent i zrywająca z nim połączenie.
         /// </summary>
@@ -147,6 +154,7 @@ namespace Common.Components
             Timers.Remove(Id);
             return true;
         }
+
         /// <summary>
         /// Metoda obsługująca nasłuchiwanie komunikatów od konkretnego komponentu.
         /// </summary>
@@ -162,6 +170,7 @@ namespace Common.Components
                 Validate(message, socket);
             }
         }
+
         /// <summary>
         /// Metoda pośrednia do obsługi nasłuchu.
         /// </summary>
@@ -170,6 +179,7 @@ namespace Common.Components
         {
             ReceiveMessage((Socket)socket);
         }
+
         /// <summary>
         /// Metoda obsługująca otrzymaną Register message.
         /// </summary>
@@ -208,6 +218,7 @@ namespace Common.Components
                 BackupServer.portSpecified;
             SendMessageToComponent(id, response);
         }
+
         /// <summary>
         /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
         /// </summary>
@@ -232,7 +243,6 @@ namespace Common.Components
             {
                 Console.WriteLine(e.ToString());
             }
-
         }
     }
 }
