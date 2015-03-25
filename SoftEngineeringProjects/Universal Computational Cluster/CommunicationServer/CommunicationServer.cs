@@ -36,8 +36,14 @@ namespace Common.Components
             isOnline = true;
             TimerStoppers = new Dictionary<ulong, bool>();
             Sockets = new Dictionary<ulong, Socket>();
-        }
 
+        }
+        public void Start()
+        {
+            Thread thread = new Thread(StartListening);
+            thread.IsBackground = true;
+            thread.Start();
+        }
         protected override void HandleMessage(Messages.Message message, string key, Socket socket)
         {
             switch (key)
@@ -169,8 +175,9 @@ namespace Common.Components
                 while (isOnline)
                 {
                     Socket socket = tcpListener.AcceptSocket();
-                    Thread T = new Thread(new ParameterizedThreadStart(ReceiveMessage));
-                    T.Start(socket);
+                    Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
+                    thread.IsBackground = true;
+                    thread.Start(socket);
                 }
 
             }

@@ -104,14 +104,14 @@ namespace Common
             }
         }
 
-        protected virtual void SaveConfig(string path)
+        public virtual void SaveConfig(string path)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(CommunicationInfo));
             xmlSerializer.Serialize(new FileStream(path, FileMode.Create), communicationInfo);
 
 
         }
-        protected virtual void LoadConfig(string path)
+        public virtual void LoadConfig(string path)
         {
             XmlSerializer xmlDeSerializer = new XmlSerializer(typeof(CommunicationInfo));
             try
