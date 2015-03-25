@@ -12,12 +12,26 @@ namespace Common.Components
 {
     public class CommunicationServer : SystemComponent
     {
+        const int TIMEOUT_MODIFIER = 3;
         const String Register = "Register", Status = "Status";
         Dictionary<ulong, bool> TimerStoppers;
         Dictionary<ulong, Timer> Timers;
         Dictionary<ulong, Socket> Sockets;
         ulong FirstFreeID;
-        bool isOnline { get; set; }
+
+
+        public CommunicationServer()
+            : base()
+        {
+            FirstFreeID = 0;
+
+            TimerStoppers = new Dictionary<ulong, bool>();
+            Sockets = new Dictionary<ulong, Socket>();
+
+        }
+        /// <summary>
+        /// Inicjalizacja słowników typami wiadomościami unikalnymi dla CS.
+        /// </summary>
         protected override void Initialize()
         {
             base.Initialize();
@@ -29,21 +43,21 @@ namespace Common.Components
             MessageTypes.Add(Register, typeof(Register));
         }
 
-        public CommunicationServer()
-            : base()
-        {
-            FirstFreeID = 0;
-            isOnline = true;
-            TimerStoppers = new Dictionary<ulong, bool>();
-            Sockets = new Dictionary<ulong, Socket>();
-
-        }
-        public void Start()
+        /// <summary>
+        /// Metoda rozpoczynająca nasłuchiwania asynchroniczne na wiadomości.
+        /// </summary>
+        public override void Start()
         {
             Thread thread = new Thread(StartListening);
             thread.IsBackground = true;
             thread.Start();
         }
+        /// <summary>
+        /// Override metody z SystemComponentu, do obsługi wiadomości, rozszerzona o wiadomości unikalne dla tego komponentu.
+        /// </summary>
+        /// <param name="message">Otrzymana wiadomość.</param>
+        /// <param name="key">Nazwa schemy której otrzymujemy.</param>
+        /// <param name="socket">Socket z którego przyszła wiadomość.</param>
         protected override void HandleMessage(Messages.Message message, string key, Socket socket)
         {
             switch (key)
@@ -59,7 +73,10 @@ namespace Common.Components
                     return;
             }
         }
-
+        /// <summary>
+        /// Metoda generująca nooperation message do odesłania do komponentu.
+        /// </summary>
+        /// <returns>NoOperation message zawierający dane o backupach.</returns>
         private NoOperation GenerateNoOperationMessage()
         {
             NoOperation Noop = new NoOperation();
@@ -67,7 +84,10 @@ namespace Common.Components
             Noop.BackupCommunicationServers.BackupCommunicationServer = BackupServer;
             return Noop;
         }
-
+        /// <summary>
+        /// Metoda stworzona na potrzeby testów, służąca do raportowania przesłanych bajtów.
+        /// </summary>
+        /// <param name="ar">Parametr Callbacku, z którego uzyskujemy socket.</param>
         private static void SendCallback(IAsyncResult ar)
         {
             try
@@ -84,28 +104,40 @@ namespace Common.Components
                 Console.WriteLine(e.ToString());
             }
         }
-
-        protected void SendMessageToComponent(Socket socket, Message m)
+        /// <summary>
+        /// Metoda wysyłająca wiadomość do komponentu.
+        /// </summary>
+        /// <param name="Id">Komponent do którego wysyłamy wiadomość.</param>
+        /// <param name="message">Wiadomość do wysłaniu.</param>
+        protected void SendMessageToComponent(ulong Id, Message message)
         {
             try
             {
-                byte[] byteData = Encoding.ASCII.GetBytes(m.toString());
+                var socket = Sockets[Id]; // Jeśli Id jest nieznane patrz Error Message
+                byte[] byteData = Encoding.ASCII.GetBytes(message.toString());
                 socket.BeginSend(byteData, 0, byteData.Length, 0,
                     new AsyncCallback(SendCallback), socket);
             }
             catch (Exception e)
             {
-                String message = "Unable to send message";
-                throw new MessageNotSentException(message, e);
+                String exceptionMessage = "Unable to send message";
+                throw new MessageNotSentException(exceptionMessage, e);
             }
         }
-
+        /// <summary>
+        /// Metoda obsługująca otrzymaną wiadomość typu status.
+        /// </summary>
+        /// <param name="status">Otrzymany status.</param>
         private void StatusHandler(Status status)
         {
             TimerStoppers[status.Id] = true;
-            SendMessageToComponent(Sockets[status.Id], GenerateNoOperationMessage());
+            SendMessageToComponent(status.Id, GenerateNoOperationMessage());
         }
-
+        /// <summary>
+        /// Metoda usuwająca komponent i zrywająca z nim połączenie.
+        /// </summary>
+        /// <param name="Id">ID komponentu do derejestracji.</param>
+        /// <returns></returns>
         private bool Deregister(ulong Id)
         {
             if (!Sockets.ContainsKey(Id)) return false;
@@ -115,22 +147,34 @@ namespace Common.Components
             Timers.Remove(Id);
             return true;
         }
-
+        /// <summary>
+        /// Metoda obsługująca nasłuchiwanie komunikatów od konkretnego komponentu.
+        /// </summary>
+        /// <param name="socket">Socket na którym odbywa się nasłuchiwanie.</param>
         private void ReceiveMessage(Socket socket)
         {
             while (socket.IsBound)
             {
                 byte[] byteArray = new Byte[1024];
-             //TODO try catch?
+                //TODO: try catch?
                 socket.Receive(byteArray);
                 String message = System.Text.Encoding.UTF8.GetString(byteArray);
                 Validate(message, socket);
             }
         }
+        /// <summary>
+        /// Metoda pośrednia do obsługi nasłuchu.
+        /// </summary>
+        /// <param name="socket">sochet, na którym nasłuchujemy.</param>
         private void ReceiveMessage(Object socket)
         {
             ReceiveMessage((Socket)socket);
         }
+        /// <summary>
+        /// Metoda obsługująca otrzymaną Register message.
+        /// </summary>
+        /// <param name="register">Otrzymana wiadomość.</param>
+        /// <param name="socket">Socket na którym ją otrzymaliśmy.</param>
         private void RegisterHandler(Register register, Socket socket)
         {
             if (register.DeregisterSpecified)
@@ -152,7 +196,7 @@ namespace Common.Components
             }, id, 0, (int)CommunicationInfo.Time));
             RegisterResponse response = new RegisterResponse();
             response.Id = id;
-            response.Timeout = (uint)CommunicationInfo.Time;
+            response.Timeout = TIMEOUT_MODIFIER * (uint)CommunicationInfo.Time;
             response.BackupCommunicationServers = new RegisterResponseBackupCommunicationServers();
             response.BackupCommunicationServers.BackupCommunicationServer =
                 new RegisterResponseBackupCommunicationServersBackupCommunicationServer();
@@ -162,9 +206,11 @@ namespace Common.Components
                 BackupServer.port;
             response.BackupCommunicationServers.BackupCommunicationServer.portSpecified =
                 BackupServer.portSpecified;
-            SendMessageToComponent(socket, response);
+            SendMessageToComponent(id, response);
         }
-
+        /// <summary>
+        /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
+        /// </summary>
         public void StartListening()
         {
             byte[] bytes = new Byte[1024];
@@ -173,7 +219,7 @@ namespace Common.Components
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, (int)communicationInfo.CommunicationServerPort);
             try
             {
-                while (isOnline)
+                while (IsWorking)
                 {
                     Socket socket = tcpListener.AcceptSocket();
                     Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
