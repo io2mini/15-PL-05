@@ -121,6 +121,7 @@ namespace Common.Components
             while (socket.IsBound)
             {
                 byte[] byteArray = new Byte[1024];
+             //TODO try catch?
                 socket.Receive(byteArray);
                 String message = System.Text.Encoding.UTF8.GetString(byteArray);
                 Validate(message, socket);
