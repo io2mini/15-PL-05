@@ -12,7 +12,7 @@ namespace Common.Components
 {
     public class CommunicationServer : SystemComponent
     {
-        const int TIMEOUT_MODIFIER = 3;
+        const int TimeoutModifier = 3;
         const String Register = "Register", Status = "Status";
         Dictionary<ulong, bool> TimerStoppers;
         Dictionary<ulong, Timer> Timers;
@@ -196,7 +196,7 @@ namespace Common.Components
             }, id, 0, (int)CommunicationInfo.Time));
             RegisterResponse response = new RegisterResponse();
             response.Id = id;
-            response.Timeout = TIMEOUT_MODIFIER * (uint)CommunicationInfo.Time;
+            response.Timeout = TimeoutModifier * (uint)CommunicationInfo.Time;
             response.BackupCommunicationServers = new RegisterResponseBackupCommunicationServers();
             response.BackupCommunicationServers.BackupCommunicationServer =
                 new RegisterResponseBackupCommunicationServersBackupCommunicationServer();

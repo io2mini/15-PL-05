@@ -28,15 +28,20 @@ namespace Common
 
     public abstract class SystemComponent
     {
+
         protected CommunicationInfo communicationInfo;
         protected NoOperationBackupCommunicationServersBackupCommunicationServer BackupServer;
         protected TcpClient tcpClient;
         protected Dictionary<string, string> Schemas;
         protected Dictionary<string, Type> MessageTypes;
         protected List<string> DictionaryKeys;
+        protected ulong Id { get; set; }
         const String RegisterResponse = "RegisterResponse", NoOperation = "NoOperation";
+        const uint MilisecondsMultiplier = 1000;
+        public const string Path = "";
         public bool IsWorking { get; set; }
         protected Timer StatusReporter;
+
         /// <summary>
         /// Metoda rozpoczynająca działanie komponentu (wysyła register message)
         /// </summary>
@@ -56,6 +61,7 @@ namespace Common
             get { return communicationInfo; }
             set { communicationInfo = value; }
         }
+
         /// <summary>
         /// Metoda generująca Status Report komponentu do wysłania do serwera
         /// </summary>
@@ -65,15 +71,20 @@ namespace Common
             //TODO: Faktycznie wypełnić raport
             return new Status();
         }
+
         /// <summary>
-        /// Metoda reaguje na register response, tworząc  wątek, który regularnie co Timeout wysyła wiadomość typu Status Report do serwera
+        /// Metoda reaguje na register response, tworząc  wątek, który regularnie co Timeout wysyła wiadomość
+        /// typu Status Report do serwera
         /// </summary>
         /// <param name="message"> Message typu Register Response na który reagujemy</param>
         protected virtual void RegisterResponseHandler(RegisterResponse message)
         {
             communicationInfo.Time = message.Timeout;
-            StatusReporter = new Timer((o) => { SendMessage(GenerateStatusReport()); }, null, 0, (int)message.Timeout * 1000);
+            Id = message.Id;
+            StatusReporter = new Timer((o) => { SendMessage(GenerateStatusReport()); }, null, 0, 
+                (int)message.Timeout * MilisecondsMultiplier);
         }
+
         /// <summary>
         /// Metoda reaguje na NoOperation, aktualizując dane o Backup Serwerze
         /// </summary>
@@ -81,8 +92,8 @@ namespace Common
         protected virtual void NoOperationHandler(NoOperation message)
         {
             BackupServer = message.BackupCommunicationServers.BackupCommunicationServer;
-
         }
+
         /// <summary>
         /// Ogólna metoda wywołująca odpowiedni handler dla otrzymanej wiadomości
         /// </summary>
@@ -99,9 +110,9 @@ namespace Common
                 case NoOperation:
                     NoOperationHandler((NoOperation)message);
                     return;
-
             }
         }
+
         /// <summary>
         /// Metoda inicjalizujące słowniki do analizy wiadomości
         /// </summary>
@@ -116,8 +127,8 @@ namespace Common
             Schemas.Add(NoOperation, Resources.NoOperation);
             MessageTypes.Add(RegisterResponse, typeof(RegisterResponse));
             MessageTypes.Add(NoOperation, typeof(NoOperation));
-
         }
+
         /// <summary>
         /// Metoda walidująca wiadomości z istniejącymi schemami
         /// </summary>
@@ -138,6 +149,7 @@ namespace Common
                 }
             }
         }
+
         /// <summary>
         /// Metoda serializująca informacje komunikacyjne do pliku
         /// </summary>
@@ -146,9 +158,8 @@ namespace Common
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(CommunicationInfo));
             xmlSerializer.Serialize(new FileStream(path, FileMode.Create), communicationInfo);
-
-
         }
+
         /// <summary>
         /// Metoda deserializująca informacje komunikacyjne z pliku
         /// </summary>
@@ -165,6 +176,7 @@ namespace Common
                 throw new ArgumentException("Config file not found", e);
             }
         }
+
         /// <summary>
         /// Metoda inicjalizująca połączenie do serwera
         /// </summary>
@@ -183,6 +195,7 @@ namespace Common
             }
 
         }
+
         /// <summary>
         /// Metoda wysyłająca Message do serwera
         /// </summary>

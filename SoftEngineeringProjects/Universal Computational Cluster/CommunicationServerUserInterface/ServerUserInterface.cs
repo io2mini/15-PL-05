@@ -10,12 +10,11 @@ namespace Common.UserInterface
 {
     public class ServerUserInterface
     {
-        const string PATH = "";
         static void Main(string[] args)
         {
             CommunicationServer communicationServer = new CommunicationServer();
             Console.WriteLine("Communication Server started successfully");
-            String newLine;
+            string newLine;
             bool hasBeenRead = false;
             while (communicationServer.IsWorking)
             {
@@ -24,7 +23,7 @@ namespace Common.UserInterface
                 {
                     if (!hasBeenRead)
                     {
-                        communicationServer.LoadConfig(PATH);
+                        communicationServer.LoadConfig(SystemComponent.Path);
                     }
                     break;
                 }
