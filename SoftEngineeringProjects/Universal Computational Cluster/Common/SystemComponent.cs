@@ -37,6 +37,14 @@ namespace Common
         const String RegisterResponse = "RegisterResponse", NoOperation = "NoOperation";
         public bool IsWorking { get; set; }
         protected Timer StatusReporter;
+        /// <summary>
+        /// Metoda rozpoczynająca działanie komponentu (wysyła register message)
+        /// </summary>
+        public virtual void Start()
+        {
+            throw new NotImplementedException();
+        }
+
         public SystemComponent()
         {
             IsWorking = true;
@@ -44,25 +52,44 @@ namespace Common
         }
 
         public CommunicationInfo CommunicationInfo
-        { 
-            get { return communicationInfo; } 
-            set { communicationInfo = value; } 
+        {
+            get { return communicationInfo; }
+            set { communicationInfo = value; }
         }
+        /// <summary>
+        /// Metoda generująca Status Report komponentu do wysłania do serwera
+        /// </summary>
+        /// <returns>Status - Status Report komponentu</returns>
         protected Status GenerateStatusReport()
         {
+            //TODO: Faktycznie wypełnić raport
             return new Status();
         }
+        /// <summary>
+        /// Metoda reaguje na register response, tworząc  wątek, który regularnie co Timeout wysyła wiadomość typu Status Report do serwera
+        /// </summary>
+        /// <param name="message"> Message typu Register Response na który reagujemy</param>
         protected virtual void RegisterResponseHandler(RegisterResponse message)
         {
-
+            communicationInfo.Time = message.Timeout;
             StatusReporter = new Timer((o) => { SendMessage(GenerateStatusReport()); }, null, 0, (int)message.Timeout * 1000);
         }
+        /// <summary>
+        /// Metoda reaguje na NoOperation, aktualizując dane o Backup Serwerze
+        /// </summary>
+        /// <param name="message"> Message typu NoOperation na który reagujemy</param>
         protected virtual void NoOperationHandler(NoOperation message)
         {
             BackupServer = message.BackupCommunicationServers.BackupCommunicationServer;
 
         }
-        protected virtual void HandleMessage(Message message, string key,Socket socket)
+        /// <summary>
+        /// Ogólna metoda wywołująca odpowiedni handler dla otrzymanej wiadomości
+        /// </summary>
+        /// <param name="message">Otrzymana wiadomość</param>
+        /// <param name="key">Nazwa schemy której otrzymujemy</param>
+        /// <param name="socket">Socket z którego przyszła wiadomość</param>
+        protected virtual void HandleMessage(Message message, string key, Socket socket)
         {
             switch (key)
             {
@@ -72,9 +99,12 @@ namespace Common
                 case NoOperation:
                     NoOperationHandler((NoOperation)message);
                     return;
-                
+
             }
         }
+        /// <summary>
+        /// Metoda inicjalizujące słowniki do analizy wiadomości
+        /// </summary>
         protected virtual void Initialize()
         {
             DictionaryKeys = new List<string>();
@@ -88,22 +118,30 @@ namespace Common
             MessageTypes.Add(NoOperation, typeof(NoOperation));
 
         }
-        protected virtual void Validate(string XML,Socket socket)
+        /// <summary>
+        /// Metoda walidująca wiadomości z istniejącymi schemami
+        /// </summary>
+        /// <param name="XML">wiadomość w postaci łańcucha znaków</param>
+        /// <param name="socket">Socket z którego otrzymano</param>
+        protected virtual void Validate(string XML, Socket socket)
         {
-            XDocument Message = XDocument.Parse(XML);
+            XDocument message = XDocument.Parse(XML);
             foreach (String Key in DictionaryKeys)
             {
                 XmlSchemaSet schemas = new XmlSchemaSet();
                 schemas.Add("", XmlReader.Create(new StringReader(Schemas[Key])));
                 bool error = false;
-                Message.Validate(schemas, (o, e) => { error = true; });
-                if(!error)
+                message.Validate(schemas, (o, e) => { error = true; });
+                if (!error)
                 {
-                    HandleMessage(null,"",socket);
+                    HandleMessage(Message.ParseXML(MessageTypes[Key], XML), Key, socket);
                 }
             }
         }
-
+        /// <summary>
+        /// Metoda serializująca informacje komunikacyjne do pliku
+        /// </summary>
+        /// <param name="path">Ścieżka pliku</param>
         public virtual void SaveConfig(string path)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(CommunicationInfo));
@@ -111,6 +149,10 @@ namespace Common
 
 
         }
+        /// <summary>
+        /// Metoda deserializująca informacje komunikacyjne z pliku
+        /// </summary>
+        /// <param name="path">Ścieżka pliku</param>
         public virtual void LoadConfig(string path)
         {
             XmlSerializer xmlDeSerializer = new XmlSerializer(typeof(CommunicationInfo));
@@ -123,24 +165,31 @@ namespace Common
                 throw new ArgumentException("Config file not found", e);
             }
         }
-
+        /// <summary>
+        /// Metoda inicjalizująca połączenie do serwera
+        /// </summary>
         protected void InicializeConnection()
         {
-            try{
-                tcpClient = new TcpClient(communicationInfo.CommunicationServerAddress.AbsolutePath, 
-                (int) communicationInfo.CommunicationServerPort);
+            try
+            {
+                tcpClient = new TcpClient(communicationInfo.CommunicationServerAddress.AbsolutePath,
+                (int)communicationInfo.CommunicationServerPort);
             }
-            catch(SocketException e)
+            catch (SocketException e)
             {
                 String message = String.Format("Problems with connecting to Communication Server host: {0} ; port: {1}",
                     communicationInfo.CommunicationServerAddress.AbsolutePath, communicationInfo.CommunicationServerPort);
-                throw new ConnectionException(message,e);
+                throw new ConnectionException(message, e);
             }
-            
-        }
 
+        }
+        /// <summary>
+        /// Metoda wysyłająca Message do serwera
+        /// </summary>
+        /// <param name="m">Message do wysłania</param>
         protected void SendMessage(Message m)
         {
+            //TO DO BCS Handling
             try
             {
                 String message = m.toString();
@@ -151,7 +200,7 @@ namespace Common
                 writer.Write(message);
                 writer.Flush();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 String message = "Unable to send message";
                 throw new MessageNotSentException(message, e);
