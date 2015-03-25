@@ -24,10 +24,18 @@ namespace Common.Components
             : base()
         {
             FirstFreeID = 0;
-
+            Timers = new Dictionary<ulong, Timer>();
             TimerStoppers = new Dictionary<ulong, bool>();
             Sockets = new Dictionary<ulong, Socket>();
 
+        }
+
+        /// <summary>
+        /// Override metody komponentu rozpoczynająca nasłuchiwania serwera
+        /// </summary>
+        public override void Start()
+        {
+            InitializeMessageQueue();
         }
 
         /// <summary>
@@ -44,15 +52,6 @@ namespace Common.Components
             MessageTypes.Add(Register, typeof(Register));
         }
 
-        /// <summary>
-        /// Metoda rozpoczynająca nasłuchiwania asynchroniczne na wiadomości.
-        /// </summary>
-        public override void Start()
-        {
-            Thread thread = new Thread(StartListening);
-            thread.IsBackground = true;
-            thread.Start();
-        }
 
         /// <summary>
         /// Override metody z SystemComponentu, do obsługi wiadomości, rozszerzona o wiadomości unikalne dla tego komponentu.
@@ -155,31 +154,7 @@ namespace Common.Components
             return true;
         }
 
-        /// <summary>
-        /// Metoda obsługująca nasłuchiwanie komunikatów od konkretnego komponentu.
-        /// </summary>
-        /// <param name="socket">Socket na którym odbywa się nasłuchiwanie.</param>
-        private void ReceiveMessage(Socket socket)
-        {
-            while (socket.IsBound)
-            {
-                byte[] byteArray = new Byte[1024];
-                //TODO: try catch?
-                socket.Receive(byteArray);
-                String message = System.Text.Encoding.UTF8.GetString(byteArray);
-                Validate(message, socket);
-            }
-        }
-
-        /// <summary>
-        /// Metoda pośrednia do obsługi nasłuchu.
-        /// </summary>
-        /// <param name="socket">sochet, na którym nasłuchujemy.</param>
-        private void ReceiveMessage(Object socket)
-        {
-            ReceiveMessage((Socket)socket);
-        }
-
+        
         /// <summary>
         /// Metoda obsługująca otrzymaną Register message.
         /// </summary>
@@ -219,30 +194,6 @@ namespace Common.Components
             SendMessageToComponent(id, response);
         }
 
-        /// <summary>
-        /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
-        /// </summary>
-        public void StartListening()
-        {
-            byte[] bytes = new Byte[1024];
-            IPAddress ipAddress = IPAddress.Parse(communicationInfo.CommunicationServerAddress.AbsolutePath);
-            TcpListener tcpListener = new TcpListener(ipAddress, (int)communicationInfo.CommunicationServerPort);
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, (int)communicationInfo.CommunicationServerPort);
-            try
-            {
-                while (IsWorking)
-                {
-                    Socket socket = tcpListener.AcceptSocket();
-                    Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
-                    thread.IsBackground = true;
-                    thread.Start(socket);
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
+       
     }
 }

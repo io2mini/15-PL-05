@@ -14,6 +14,7 @@ using System.Xml.Schema;
 using System.Xml;
 using Common.Properties;
 using System.Threading;
+using System.Net;
 
 namespace Common
 {
@@ -35,25 +36,120 @@ namespace Common
         protected Dictionary<string, string> Schemas;
         protected Dictionary<string, Type> MessageTypes;
         protected List<string> DictionaryKeys;
+        protected Queue<Tuple<String, Socket>> MessageQueue;
+        protected AutoResetEvent MessageQueueMutex;
         protected ulong Id { get; set; }
         const String RegisterResponse = "RegisterResponse", NoOperation = "NoOperation";
         const uint MilisecondsMultiplier = 1000;
+
         public const string Path = "";
         public bool IsWorking { get; set; }
         protected Timer StatusReporter;
-
-        /// <summary>
-        /// Metoda rozpoczynająca działanie komponentu (wysyła register message)
-        /// </summary>
-        public virtual void Start()
-        {
-            throw new NotImplementedException();
-        }
 
         public SystemComponent()
         {
             IsWorking = true;
             Initialize();
+        }
+
+        /// <summary>
+        /// Metoda rozpoczynająca działanie komponentu (wysyła register message)
+        /// Metoda nadpisywana przez Communication Server
+        /// </summary>
+        public virtual void Start()
+        {
+            InitializeMessageQueue();
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Metoda inicializująca kolejkę wiadomości
+        /// </summary>
+        protected void InitializeMessageQueue()
+        {
+            MessageQueueMutex = new AutoResetEvent(true);
+            MessageQueue = new Queue<Tuple<String, Socket>>();
+            Thread thread = new Thread(MessageQueueWork);
+            thread.IsBackground = true;
+            thread.Start();
+            Thread listener = new Thread(StartListening);
+            listener.IsBackground = true;
+            listener.Start();
+        }
+
+        /// <summary>
+        /// Metoda obsługi kolejki wiadomości
+        /// </summary>
+        private void MessageQueueWork()
+        {
+            while(true)
+            {
+                MessageQueueMutex.WaitOne();
+                while(MessageQueue.Count > 0)
+                {
+                    var Message = MessageQueue.Dequeue();
+                    Validate(Message.Item1, Message.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
+        /// </summary>
+        public void StartListening()
+        {
+            byte[] bytes = new Byte[1024];
+            IPAddress ipAddress = IPAddress.Parse(communicationInfo.CommunicationServerAddress.AbsolutePath);
+            TcpListener tcpListener = new TcpListener(ipAddress, (int)communicationInfo.CommunicationServerPort);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, (int)communicationInfo.CommunicationServerPort);
+            try
+            {
+                while (IsWorking)
+                {
+                    Socket socket = tcpListener.AcceptSocket();
+                    Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
+                    thread.IsBackground = true;
+                    thread.Start(socket);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Metoda obsługująca nasłuchiwanie komunikatów od konkretnego komponentu.
+        /// </summary>
+        /// <param name="socket">Socket na którym odbywa się nasłuchiwanie.</param>
+        private void ReceiveMessage(Socket socket)
+        {
+            while (socket.IsBound)
+            {
+                byte[] byteArray = new Byte[1024];
+                //TODO: try catch?
+                socket.Receive(byteArray);
+                String message = System.Text.Encoding.UTF8.GetString(byteArray);
+                MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
+                MessageQueueMutex.Reset();
+            }
+        }
+        
+        /// <summary>
+        /// Metoda pośrednia do obsługi nasłuchu.
+        /// </summary>
+        /// <param name="socket">sochet, na którym nasłuchujemy.</param>
+        private void ReceiveMessage(Object socket)
+        {
+            ReceiveMessage((Socket)socket);
+        }
+
+
+
+        protected void HandShake()
+        {
+
         }
 
         public CommunicationInfo CommunicationInfo
