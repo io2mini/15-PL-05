@@ -17,7 +17,7 @@ namespace Common.Components
         Dictionary<ulong, Timer> Timers;
         Dictionary<ulong, Socket> Sockets;
         ulong FirstFreeID;
-
+        bool isOnline { get; set; }
         protected override void Initialize()
         {
             base.Initialize();
@@ -29,25 +29,27 @@ namespace Common.Components
             MessageTypes.Add(Register, typeof(Register));
         }
 
-        public CommunicationServer() : base()
+        public CommunicationServer()
+            : base()
         {
             FirstFreeID = 0;
+            isOnline = true;
             TimerStoppers = new Dictionary<ulong, bool>();
             Sockets = new Dictionary<ulong, Socket>();
         }
 
-        protected override void HandleMessage(Messages.Message message, string key,Socket socket)
+        protected override void HandleMessage(Messages.Message message, string key, Socket socket)
         {
             switch (key)
             {
                 case Register:
-                    RegisterHandler((Register)message,socket);
+                    RegisterHandler((Register)message, socket);
                     return;
                 case Status:
                     StatusHandler((Status)message);
                     return;
                 default:
-                    base.HandleMessage(message, key,socket);
+                    base.HandleMessage(message, key, socket);
                     return;
             }
         }
@@ -110,7 +112,7 @@ namespace Common.Components
 
         private void ReceiveMessage(Socket socket)
         {
-            while(socket.IsBound)
+            while (socket.IsBound)
             {
                 byte[] byteArray = new Byte[1024];
                 socket.Receive(byteArray);
@@ -118,8 +120,11 @@ namespace Common.Components
                 Validate(message, socket);
             }
         }
-
-        private void RegisterHandler(Register register,Socket socket)
+        private void ReceiveMessage(Object socket)
+        {
+            ReceiveMessage((Socket)socket);
+        }
+        private void RegisterHandler(Register register, Socket socket)
         {
             if (register.DeregisterSpecified)
             {
@@ -133,7 +138,8 @@ namespace Common.Components
             ulong id = FirstFreeID++;
             Sockets.Add(id, socket);
             TimerStoppers.Add(id, true);
-            Timers.Add(id,new Timer((u) => {
+            Timers.Add(id, new Timer((u) =>
+            {
                 if (!TimerStoppers[(ulong)u]) TimerStoppers.Remove((ulong)u);
                 else TimerStoppers[(ulong)u] = false;
             }, id, 0, (int)CommunicationInfo.Time));
@@ -156,14 +162,15 @@ namespace Common.Components
         {
             byte[] bytes = new Byte[1024];
             IPAddress ipAddress = IPAddress.Parse(communicationInfo.CommunicationServerAddress.AbsolutePath);
-            TcpListener tcpListener = new TcpListener(ipAddress,(int) communicationInfo.CommunicationServerPort);
+            TcpListener tcpListener = new TcpListener(ipAddress, (int)communicationInfo.CommunicationServerPort);
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, (int)communicationInfo.CommunicationServerPort);
             try
             {
-                Socket socket = tcpListener.AcceptSocket();
-                while (true)
+                while (isOnline)
                 {
-                    ReceiveMessage(socket);
+                    Socket socket = tcpListener.AcceptSocket();
+                    Thread T = new Thread(new ParameterizedThreadStart(ReceiveMessage));
+                    T.Start(socket);
                 }
 
             }
