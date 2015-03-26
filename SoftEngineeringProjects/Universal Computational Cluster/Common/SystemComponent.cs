@@ -56,6 +56,7 @@ namespace Common
         {
             IsWorking = true;
             Initialize();
+            //AutoRegister?
         }
 
         /// <summary>
