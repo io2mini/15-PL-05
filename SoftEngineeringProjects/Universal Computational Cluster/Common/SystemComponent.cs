@@ -29,27 +29,56 @@ namespace Common
 
     public abstract class SystemComponent
     {
-
+        #region Constants
+        const String RegisterResponse = "RegisterResponse", NoOperation = "NoOperation", Error = "Error";
+        const uint MilisecondsMultiplier = 1000;
+        public const string Path = ""; //?????????????
+        #endregion
         protected CommunicationInfo communicationInfo;
         protected NoOperationBackupCommunicationServersBackupCommunicationServer BackupServer;
         protected TcpClient tcpClient;
+        #region MessageReactionFields
         protected Dictionary<string, string> Schemas;
         protected Dictionary<string, Type> MessageTypes;
         protected List<string> DictionaryKeys;
+        protected Timer StatusReporter;
+        #endregion
+        #region MessageQueueFields
         protected Queue<Tuple<String, Socket>> MessageQueue;
         protected AutoResetEvent MessageQueueMutex;
-        protected ulong Id { get; set; }
-        const String RegisterResponse = "RegisterResponse", NoOperation = "NoOperation";
-        const uint MilisecondsMultiplier = 1000;
+        #endregion
 
-        public const string Path = "";
+        protected ulong Id { get; set; }
+
         public bool IsWorking { get; set; }
-        protected Timer StatusReporter;
 
         public SystemComponent()
         {
             IsWorking = true;
             Initialize();
+        }
+
+        /// <summary>
+        /// Metoda inicjalizujące słowniki do analizy wiadomości
+        /// </summary>
+        protected virtual void Initialize()
+        {
+            //Inicjalizacja
+            DictionaryKeys = new List<string>();
+            Schemas = new Dictionary<string, string>();
+            MessageTypes = new Dictionary<string, Type>();
+            //RegsterResponse
+            DictionaryKeys.Add(RegisterResponse);
+            Schemas.Add(RegisterResponse, Resources.RegisterResponse);
+            MessageTypes.Add(RegisterResponse, typeof(RegisterResponse));
+            //NoOperation
+            DictionaryKeys.Add(NoOperation);
+            Schemas.Add(NoOperation, Resources.NoOperation);
+            MessageTypes.Add(NoOperation, typeof(NoOperation));
+            //Error
+            DictionaryKeys.Add(Error);
+            Schemas.Add(Error, Resources.Error);
+            MessageTypes.Add(NoOperation, typeof(Error));
         }
 
         /// <summary>
@@ -120,6 +149,15 @@ namespace Common
         }
 
         /// <summary>
+        /// Metoda pośrednia do obsługi nasłuchu.
+        /// </summary>
+        /// <param name="socket">sochet, na którym nasłuchujemy.</param>
+        private void ReceiveMessage(Object socket)
+        {
+            ReceiveMessage((Socket)socket);
+        }
+
+        /// <summary>
         /// Metoda obsługująca nasłuchiwanie komunikatów od konkretnego komponentu.
         /// </summary>
         /// <param name="socket">Socket na którym odbywa się nasłuchiwanie.</param>
@@ -135,18 +173,10 @@ namespace Common
                 MessageQueueMutex.Reset();
             }
         }
-        
+
         /// <summary>
-        /// Metoda pośrednia do obsługi nasłuchu.
+        /// ???????????????????????
         /// </summary>
-        /// <param name="socket">sochet, na którym nasłuchujemy.</param>
-        private void ReceiveMessage(Object socket)
-        {
-            ReceiveMessage((Socket)socket);
-        }
-
-
-
         protected void HandShake()
         {
 
@@ -158,37 +188,12 @@ namespace Common
             set { communicationInfo = value; }
         }
 
+        #region MessageGenerationAndHandling
         /// <summary>
-        /// Metoda generująca Status Report komponentu do wysłania do serwera
+        /// Abstrakcyjna metoda generująca Status Report komponentu w zależności od komponentu
         /// </summary>
         /// <returns>Status - Status Report komponentu</returns>
-        protected Status GenerateStatusReport()
-        {
-            //TODO: Faktycznie wypełnić raport
-            return new Status();
-        }
-
-        /// <summary>
-        /// Metoda reaguje na register response, tworząc  wątek, który regularnie co Timeout wysyła wiadomość
-        /// typu Status Report do serwera
-        /// </summary>
-        /// <param name="message"> Message typu Register Response na który reagujemy</param>
-        protected virtual void RegisterResponseHandler(RegisterResponse message)
-        {
-            communicationInfo.Time = message.Timeout;
-            Id = message.Id;
-            StatusReporter = new Timer((o) => { SendMessage(GenerateStatusReport()); }, null, 0, 
-                (int)message.Timeout * MilisecondsMultiplier);
-        }
-
-        /// <summary>
-        /// Metoda reaguje na NoOperation, aktualizując dane o Backup Serwerze
-        /// </summary>
-        /// <param name="message"> Message typu NoOperation na który reagujemy</param>
-        protected virtual void NoOperationHandler(NoOperation message)
-        {
-            BackupServer = message.BackupCommunicationServers.BackupCommunicationServer;
-        }
+        protected abstract Status GenerateStatusReport();
 
         /// <summary>
         /// Ogólna metoda wywołująca odpowiedni handler dla otrzymanej wiadomości
@@ -201,28 +206,43 @@ namespace Common
             switch (key)
             {
                 case RegisterResponse:
-                    RegisterResponseHandler((RegisterResponse)message);
+                    MsgHandler_RegisterResponse((RegisterResponse)message);
                     return;
                 case NoOperation:
-                    NoOperationHandler((NoOperation)message);
+                    MsgHandler_NoOperation((NoOperation)message);
+                    return;
+                case Error:
+                    MsgHandler_Error((Error)message);
                     return;
             }
         }
 
         /// <summary>
-        /// Metoda inicjalizujące słowniki do analizy wiadomości
+        /// Abstrakcyjna klasa do obsługi komunikatu o błędzie, obsługa zależna od odbiorcy.
         /// </summary>
-        protected virtual void Initialize()
+        /// <param name="error"></param>
+        protected abstract void MsgHandler_Error(Messages.Error message);
+
+        /// <summary>
+        /// Metoda reaguje na register response, tworząc  wątek, który regularnie co Timeout wysyła wiadomość
+        /// typu Status Report do serwera
+        /// </summary>
+        /// <param name="message"> Message typu Register Response na który reagujemy</param>
+        protected virtual void MsgHandler_RegisterResponse(RegisterResponse message)
         {
-            DictionaryKeys = new List<string>();
-            Schemas = new Dictionary<string, string>();
-            MessageTypes = new Dictionary<string, Type>();
-            DictionaryKeys.Add(RegisterResponse);
-            DictionaryKeys.Add(NoOperation);
-            Schemas.Add(RegisterResponse, Resources.RegisterResponse);
-            Schemas.Add(NoOperation, Resources.NoOperation);
-            MessageTypes.Add(RegisterResponse, typeof(RegisterResponse));
-            MessageTypes.Add(NoOperation, typeof(NoOperation));
+            communicationInfo.Time = message.Timeout;
+            Id = message.Id;
+            StatusReporter = new Timer((o) => { SendMessage(GenerateStatusReport()); }, null, 0,
+                (int)message.Timeout * MilisecondsMultiplier);
+        }
+
+        /// <summary>
+        /// Metoda reaguje na NoOperation, aktualizując dane o Backup Serwerze
+        /// </summary>
+        /// <param name="message"> Message typu NoOperation na który reagujemy</param>
+        protected virtual void MsgHandler_NoOperation(NoOperation message)
+        {
+            BackupServer = message.BackupCommunicationServers.BackupCommunicationServer;
         }
 
         /// <summary>
@@ -236,16 +256,18 @@ namespace Common
             foreach (String Key in DictionaryKeys)
             {
                 XmlSchemaSet schemas = new XmlSchemaSet();
-                schemas.Add("", XmlReader.Create(new StringReader(Schemas[Key])));
-                bool error = false;
-                message.Validate(schemas, (o, e) => { error = true; });
-                if (!error)
+                schemas.Add(null, XmlReader.Create(new StringReader(Schemas[Key])));
+                bool errorOccured = false;
+                message.Validate(schemas, (o, e) => { errorOccured = true; });
+                if (!errorOccured)
                 {
                     HandleMessage(Message.ParseXML(MessageTypes[Key], XML), Key, socket);
                 }
             }
         }
+        #endregion
 
+        #region ConfigFilesHandling
         /// <summary>
         /// Metoda serializująca informacje komunikacyjne do pliku
         /// </summary>
@@ -272,11 +294,13 @@ namespace Common
                 throw new ArgumentException("Config file not found", e);
             }
         }
+        #endregion
 
+        #region ConnectionHandling
         /// <summary>
         /// Metoda inicjalizująca połączenie do serwera
         /// </summary>
-        protected void InicializeConnection()
+        protected void InitializeConnection()
         {
             try
             {
@@ -315,5 +339,6 @@ namespace Common
                 throw new MessageNotSentException(message, e);
             }
         }
+        #endregion
     }
 }
