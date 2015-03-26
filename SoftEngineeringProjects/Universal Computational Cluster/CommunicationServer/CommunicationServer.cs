@@ -12,22 +12,43 @@ namespace Common.Components
 {
     public class CommunicationServer : SystemComponent
     {
+        bool isPrimary;
+        #region Constants
         const int TimeoutModifier = 3;
         const String Register = "Register", Status = "Status";
+        #endregion
+        #region ComunicationData
         Dictionary<ulong, bool> TimerStoppers;
         Dictionary<ulong, Timer> Timers;
         Dictionary<ulong, Socket> Sockets;
+        #endregion
         ulong FirstFreeID;
 
-
-        public CommunicationServer()
+        public CommunicationServer(bool primary=true)
             : base()
         {
+            isPrimary = primary;
             FirstFreeID = 0;
             Timers = new Dictionary<ulong, Timer>();
             TimerStoppers = new Dictionary<ulong, bool>();
             Sockets = new Dictionary<ulong, Socket>();
+        }
 
+        /// <summary>
+        /// Inicjalizacja słowników typami wiadomościami unikalnymi dla CS.
+        /// </summary>
+        protected override void Initialize()
+        {
+            //Inicjalizacja
+            base.Initialize();
+            //Register
+            DictionaryKeys.Add(Register);
+            Schemas.Add(Register, Resources.Register);
+            MessageTypes.Add(Register, typeof(Register));
+            //Status
+            DictionaryKeys.Add(Status);
+            Schemas.Add(Status, Resources.Status);
+            MessageTypes.Add(Status, typeof(Status));
         }
 
         /// <summary>
@@ -36,55 +57,6 @@ namespace Common.Components
         public override void Start()
         {
             InitializeMessageQueue();
-        }
-
-        /// <summary>
-        /// Inicjalizacja słowników typami wiadomościami unikalnymi dla CS.
-        /// </summary>
-        protected override void Initialize()
-        {
-            base.Initialize();
-            DictionaryKeys.Add(Register);
-            DictionaryKeys.Add(Status);
-            Schemas.Add(Register, Resources.Register);
-            Schemas.Add(Status, Resources.Status);
-            MessageTypes.Add(Status, typeof(Status));
-            MessageTypes.Add(Register, typeof(Register));
-        }
-
-
-        /// <summary>
-        /// Override metody z SystemComponentu, do obsługi wiadomości, rozszerzona o wiadomości unikalne dla tego komponentu.
-        /// </summary>
-        /// <param name="message">Otrzymana wiadomość.</param>
-        /// <param name="key">Nazwa schemy której otrzymujemy.</param>
-        /// <param name="socket">Socket z którego przyszła wiadomość.</param>
-        protected override void HandleMessage(Messages.Message message, string key, Socket socket)
-        {
-            switch (key)
-            {
-                case Register:
-                    RegisterHandler((Register)message, socket);
-                    return;
-                case Status:
-                    StatusHandler((Status)message);
-                    return;
-                default:
-                    base.HandleMessage(message, key, socket);
-                    return;
-            }
-        }
-
-        /// <summary>
-        /// Metoda generująca nooperation message do odesłania do komponentu.
-        /// </summary>
-        /// <returns>NoOperation message zawierający dane o backupach.</returns>
-        private NoOperation GenerateNoOperationMessage()
-        {
-            NoOperation Noop = new NoOperation();
-            Noop.BackupCommunicationServers = new NoOperationBackupCommunicationServers();
-            Noop.BackupCommunicationServers.BackupCommunicationServer = BackupServer;
-            return Noop;
         }
 
         /// <summary>
@@ -108,59 +80,60 @@ namespace Common.Components
             }
         }
 
+        #region MessageGenerationAndHandling
+
         /// <summary>
-        /// Metoda wysyłająca wiadomość do komponentu.
+        /// Override metody z SystemComponentu, do obsługi wiadomości, rozszerzona o wiadomości unikalne dla tego komponentu.
         /// </summary>
-        /// <param name="Id">Komponent do którego wysyłamy wiadomość.</param>
-        /// <param name="message">Wiadomość do wysłaniu.</param>
-        protected void SendMessageToComponent(ulong Id, Message message)
+        /// <param name="message">Otrzymana wiadomość.</param>
+        /// <param name="key">Nazwa schemy której otrzymujemy.</param>
+        /// <param name="socket">Socket z którego przyszła wiadomość.</param>
+        protected override void HandleMessage(Messages.Message message, string key, Socket socket)
         {
-            try
+            switch (key)
             {
-                var socket = Sockets[Id]; // Jeśli Id jest nieznane patrz Error Message
-                byte[] byteData = Encoding.ASCII.GetBytes(message.toString());
-                socket.BeginSend(byteData, 0, byteData.Length, 0,
-                    new AsyncCallback(SendCallback), socket);
+                case Register:
+                    MsgHandler_Register((Register)message, socket);
+                    return;
+                case Status:
+                    MsgHandler_Status((Status)message);
+                    return;
+                default:
+                    base.HandleMessage(message, key, socket);
+                    return;
             }
-            catch (Exception e)
+        }
+
+        /// <summary>
+        /// Obsługa otrzymanego komunikatu o błędzie
+        /// </summary>
+        /// <param name="message">Otrzymany komunikat o błędzie</param>
+        protected override void MsgHandler_Error(Error message)
+        {
+            if (!isPrimary)
             {
-                String exceptionMessage = "Unable to send message";
-                throw new MessageNotSentException(exceptionMessage, e);
+                base.MsgHandler_Error(message);
+                return;
             }
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Metoda obsługująca otrzymaną wiadomość typu status.
         /// </summary>
         /// <param name="status">Otrzymany status.</param>
-        private void StatusHandler(Status status)
+        private void MsgHandler_Status(Status status)
         {
             TimerStoppers[status.Id] = true;
             SendMessageToComponent(status.Id, GenerateNoOperationMessage());
         }
-
-        /// <summary>
-        /// Metoda usuwająca komponent i zrywająca z nim połączenie.
-        /// </summary>
-        /// <param name="Id">ID komponentu do derejestracji.</param>
-        /// <returns></returns>
-        private bool Deregister(ulong Id)
-        {
-            if (!Sockets.ContainsKey(Id)) return false;
-            Sockets[Id].Close();
-            Sockets.Remove(Id);
-            TimerStoppers.Remove(Id);
-            Timers.Remove(Id);
-            return true;
-        }
-
         
         /// <summary>
         /// Metoda obsługująca otrzymaną Register message.
         /// </summary>
         /// <param name="register">Otrzymana wiadomość.</param>
         /// <param name="socket">Socket na którym ją otrzymaliśmy.</param>
-        private void RegisterHandler(Register register, Socket socket)
+        private void MsgHandler_Register(Register register, Socket socket)
         {
             if (register.DeregisterSpecified)
             {
@@ -170,6 +143,7 @@ namespace Common.Components
                     return;
                 }
             }
+            //TODO: sprawdzenie, czy już nie jest zarejestrowany
 
             ulong id = FirstFreeID++;
             Sockets.Add(id, socket);
@@ -194,6 +168,63 @@ namespace Common.Components
             SendMessageToComponent(id, response);
         }
 
-       
+        /// <summary>
+        /// Metoda usuwająca komponent i zrywająca z nim połączenie.
+        /// </summary>
+        /// <param name="Id">ID komponentu do derejestracji.</param>
+        /// <returns></returns>
+        private bool Deregister(ulong Id)
+        {
+            if (!Sockets.ContainsKey(Id)) return false;
+            Sockets[Id].Close();
+            Sockets.Remove(Id);
+            TimerStoppers.Remove(Id);
+            Timers.Remove(Id);
+            return true;
+        }
+
+        /// <summary>
+        /// Używane tylko w BCS, generuje status report do wysłania do CS
+        /// </summary>
+        /// <returns>Raport do wysłania</returns>
+        protected override Status GenerateStatusReport()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Metoda generująca nooperation message do odesłania do komponentu.
+        /// </summary>
+        /// <returns>NoOperation message zawierający dane o backupach.</returns>
+        private NoOperation GenerateNoOperationMessage()
+        {
+            NoOperation Noop = new NoOperation();
+            Noop.BackupCommunicationServers = new NoOperationBackupCommunicationServers();
+            Noop.BackupCommunicationServers.BackupCommunicationServer = BackupServer;
+            return Noop;
+        }
+        #endregion
+        #region ConnectionHandling
+        /// <summary>
+        /// Metoda wysyłająca wiadomość do komponentu.
+        /// </summary>
+        /// <param name="Id">Komponent do którego wysyłamy wiadomość.</param>
+        /// <param name="message">Wiadomość do wysłaniu.</param>
+        protected void SendMessageToComponent(ulong Id, Message message)
+        {
+            try
+            {
+                var socket = Sockets[Id]; // Jeśli Id jest nieznane patrz Error Message
+                byte[] byteData = Encoding.ASCII.GetBytes(message.toString());
+                socket.BeginSend(byteData, 0, byteData.Length, 0,
+                    new AsyncCallback(SendCallback), socket);
+            }
+            catch (Exception e)
+            {
+                String exceptionMessage = "Unable to send message";
+                throw new MessageNotSentException(exceptionMessage, e);
+            }
+        }
+        #endregion
     }
 }

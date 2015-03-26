@@ -87,7 +87,7 @@ namespace Common
         /// </summary>
         public virtual void Start()
         {
-            InitializeMessageQueue();
+            InitializeMessageQueue(); //MessageQueue nie powinno być tylko w CS?
             throw new NotImplementedException();
         }
 
@@ -221,7 +221,10 @@ namespace Common
         /// Abstrakcyjna klasa do obsługi komunikatu o błędzie, obsługa zależna od odbiorcy.
         /// </summary>
         /// <param name="error"></param>
-        protected abstract void MsgHandler_Error(Messages.Error message);
+        protected virtual void MsgHandler_Error(Messages.Error message)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Metoda reaguje na register response, tworząc  wątek, który regularnie co Timeout wysyła wiadomość
