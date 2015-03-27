@@ -42,13 +42,9 @@ namespace Common.Components
             //Inicjalizacja
             base.Initialize();
             //Register
-            DictionaryKeys.Add(Register);
-            Schemas.Add(Register, Resources.Register);
-            MessageTypes.Add(Register, typeof(Register));
+            SchemaTypes.Add(Register, new Tuple<string, Type>(Resources.Register, typeof(Register)));
             //Status
-            DictionaryKeys.Add(Status);
-            Schemas.Add(Status, Resources.Status);
-            MessageTypes.Add(Status, typeof(Status));
+            SchemaTypes.Add(Status, new Tuple<string, Type>(Resources.Status, typeof(Status)));
         }
 
         /// <summary>
@@ -181,15 +177,6 @@ namespace Common.Components
             TimerStoppers.Remove(Id);
             Timers.Remove(Id);
             return true;
-        }
-
-        /// <summary>
-        /// Używane tylko w BCS, generuje status report do wysłania do CS
-        /// </summary>
-        /// <returns>Raport do wysłania</returns>
-        protected override Status GenerateStatusReport()
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>

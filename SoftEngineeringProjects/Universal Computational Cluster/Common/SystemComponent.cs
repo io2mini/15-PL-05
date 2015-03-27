@@ -32,15 +32,17 @@ namespace Common
         #region Constants
         const String RegisterResponse = "RegisterResponse", NoOperation = "NoOperation", Error = "Error";
         const uint MilisecondsMultiplier = 1000;
-        public const string Path = ""; //?????????????
+        public const string Path = ""; //Scieżka do pliku konfiguracyjnego
         #endregion
         protected CommunicationInfo communicationInfo;
         protected NoOperationBackupCommunicationServersBackupCommunicationServer BackupServer;
         protected TcpClient tcpClient;
         #region MessageReactionFields
-        protected Dictionary<string, string> Schemas;
-        protected Dictionary<string, Type> MessageTypes;
-        protected List<string> DictionaryKeys;
+        /// <summary>
+        /// Słownik przyporzadkowujący nazwę komunikatu do pary odpowiadającej
+        /// treści XML Schema'y tego typu komunikatu oraz typowi obiektu odpowiadającego temu typowi komunikatu.
+        /// </summary>
+        protected Dictionary<string, Tuple<string, Type>> SchemaTypes;
         protected Timer StatusReporter;
         #endregion
         #region MessageQueueFields
@@ -56,7 +58,6 @@ namespace Common
         {
             IsWorking = true;
             Initialize();
-            //AutoRegister?
         }
 
         /// <summary>
@@ -65,21 +66,13 @@ namespace Common
         protected virtual void Initialize()
         {
             //Inicjalizacja
-            DictionaryKeys = new List<string>();
-            Schemas = new Dictionary<string, string>();
-            MessageTypes = new Dictionary<string, Type>();
+            SchemaTypes = new Dictionary<string, Tuple<string, Type>>();
             //RegsterResponse
-            DictionaryKeys.Add(RegisterResponse);
-            Schemas.Add(RegisterResponse, Resources.RegisterResponse);
-            MessageTypes.Add(RegisterResponse, typeof(RegisterResponse));
+            SchemaTypes.Add(RegisterResponse,new Tuple<string, Type>(Resources.RegisterResponse, typeof(RegisterResponse)));
             //NoOperation
-            DictionaryKeys.Add(NoOperation);
-            Schemas.Add(NoOperation, Resources.NoOperation);
-            MessageTypes.Add(NoOperation, typeof(NoOperation));
+            SchemaTypes.Add(NoOperation, new Tuple<string, Type>(Resources.NoOperation, typeof(NoOperation)));
             //Error
-            DictionaryKeys.Add(Error);
-            Schemas.Add(Error, Resources.Error);
-            MessageTypes.Add(NoOperation, typeof(Error));
+            SchemaTypes.Add(Error, new Tuple<string, Type>(Resources.Error, typeof(Error)));
         }
 
         /// <summary>
@@ -90,6 +83,7 @@ namespace Common
         {
             InitializeMessageQueue(); //MessageQueue nie powinno być tylko w CS?
             throw new NotImplementedException();
+            //TODO: send register msg
         }
 
         /// <summary>
@@ -194,7 +188,13 @@ namespace Common
         /// Abstrakcyjna metoda generująca Status Report komponentu w zależności od komponentu
         /// </summary>
         /// <returns>Status - Status Report komponentu</returns>
-        protected abstract Status GenerateStatusReport();
+        protected virtual Status GenerateStatusReport()
+        {
+            if (this.Id <= 0) throw new InvalidOperationException(); //TODO: stworzyć własny wyjątek
+            var result = new Status();
+            result.Id = this.Id;
+            return result;
+        }
 
         /// <summary>
         /// Ogólna metoda wywołująca odpowiedni handler dla otrzymanej wiadomości
@@ -257,15 +257,15 @@ namespace Common
         protected virtual void Validate(string XML, Socket socket)
         {
             XDocument message = XDocument.Parse(XML);
-            foreach (String Key in DictionaryKeys)
+            foreach (String Key in this.SchemaTypes.Keys)
             {
                 XmlSchemaSet schemas = new XmlSchemaSet();
-                schemas.Add(null, XmlReader.Create(new StringReader(Schemas[Key])));
+                schemas.Add(null, XmlReader.Create(new StringReader(SchemaTypes[Key].Item1)));
                 bool errorOccured = false;
                 message.Validate(schemas, (o, e) => { errorOccured = true; });
                 if (!errorOccured)
                 {
-                    HandleMessage(Message.ParseXML(MessageTypes[Key], XML), Key, socket);
+                    HandleMessage(Message.ParseXML(SchemaTypes[Key].Item2, XML), Key, socket);
                 }
             }
         }
