@@ -7,6 +7,7 @@ using System.IO;
 using Common.Exceptions;
 using System.Text;
 using System.Threading;
+
 using System.Net;
 namespace Common.Components
 {
@@ -19,7 +20,7 @@ namespace Common.Components
         #endregion
         #region ComunicationData
         Dictionary<ulong, bool> TimerStoppers;
-        Dictionary<ulong, Timer> Timers;
+        Dictionary<ulong, System.Timers.Timer> Timers;
         Dictionary<ulong, Socket> Sockets;
         #endregion
         ulong FirstFreeID;
@@ -29,7 +30,7 @@ namespace Common.Components
         {
             isPrimary = primary;
             FirstFreeID = 0;
-            Timers = new Dictionary<ulong, Timer>();
+            Timers = new Dictionary<ulong, System.Timers.Timer>();
             TimerStoppers = new Dictionary<ulong, bool>();
             Sockets = new Dictionary<ulong, Socket>();
 
@@ -56,9 +57,12 @@ namespace Common.Components
         /// </summary>
         public override void Start()
         {
-            InitializeMessageQueue();
+            InitializeMessageQueue((int)communicationInfo.CommunicationServerPort);
         }
+        private void OnTimedEvent(int k)
+        {
 
+        }
         /// <summary>
         /// Metoda stworzona na potrzeby testów, służąca do raportowania przesłanych bajtów.
         /// </summary>
@@ -148,23 +152,32 @@ namespace Common.Components
             ulong id = FirstFreeID++;
             Sockets.Add(id, socket);
             TimerStoppers.Add(id, true);
-            Timers.Add(id, new Timer((u) =>
+            var Timer = new System.Timers.Timer();
+            Timer.Elapsed += (u,t) =>
             {
-                if (!TimerStoppers[(ulong)u]) TimerStoppers.Remove((ulong)u);
-                else TimerStoppers[(ulong)u] = false;
-            }, id, 0, (int)CommunicationInfo.Time));
+                if (!TimerStoppers[(ulong)id]) Deregister((ulong)id);
+                else TimerStoppers[(ulong)id] = false;
+            };
+            Timer.Interval = TimeoutModifier * (uint)CommunicationInfo.Time;
+            Timer.Enabled = true;
+            Timer.AutoReset = true;
+            Timers.Add(Id, Timer);
+           // Timer.Start();
             RegisterResponse response = new RegisterResponse();
             response.Id = id;
             response.Timeout = TimeoutModifier * (uint)CommunicationInfo.Time;
             response.BackupCommunicationServers = new RegisterResponseBackupCommunicationServers();
             response.BackupCommunicationServers.BackupCommunicationServer =
                 new RegisterResponseBackupCommunicationServersBackupCommunicationServer();
-            response.BackupCommunicationServers.BackupCommunicationServer.address =
-                BackupServer.address;
-            response.BackupCommunicationServers.BackupCommunicationServer.port =
-                BackupServer.port;
-            response.BackupCommunicationServers.BackupCommunicationServer.portSpecified =
-                BackupServer.portSpecified;
+            if (BackupServer != null)
+            {
+                response.BackupCommunicationServers.BackupCommunicationServer.address =
+                    BackupServer.address;
+                response.BackupCommunicationServers.BackupCommunicationServer.port =
+                    BackupServer.port;
+                response.BackupCommunicationServers.BackupCommunicationServer.portSpecified =
+                    BackupServer.portSpecified;
+            }
             SendMessageToComponent(id, response);
         }
 
@@ -176,10 +189,13 @@ namespace Common.Components
         private bool Deregister(ulong Id)
         {
             if (!Sockets.ContainsKey(Id)) return false;
+            
             Sockets[Id].Close();
             Sockets.Remove(Id);
-            TimerStoppers.Remove(Id);
+            Timers[Id].Enabled = false;
             Timers.Remove(Id);
+            TimerStoppers.Remove(Id);
+          
             return true;
         }
 

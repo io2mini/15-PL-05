@@ -25,6 +25,10 @@ namespace Common.UserInterface
             }
 
             taskManager.Start();
+            while (taskManager.IsWorking)
+            {
+
+            }
         }
     }
 }

@@ -88,7 +88,20 @@ namespace Common
         /// </summary>
         public virtual void Start()
         {
-            InitializeMessageQueue();
+            Random random = new Random();
+            while (true)
+            {
+                try
+                {
+                    InitializeMessageQueue(random.Next(100, 10000));
+                    break;
+                }
+                catch (SocketException e)
+                {
+                    continue;
+                }
+            }
+            InitializeConnection();
             SendRegisterMessage();
         }
 
@@ -106,16 +119,16 @@ namespace Common
         /// <summary>
         /// Metoda inicializująca kolejkę wiadomości do odbioru
         /// </summary>
-        protected void InitializeMessageQueue()
+        protected void InitializeMessageQueue(int port)
         {
             MessageQueueMutex = new AutoResetEvent(true);
             MessageQueue = new Queue<Tuple<String, Socket>>();
             Thread thread = new Thread(MessageQueueWork);
             thread.IsBackground = true;
             thread.Start();
-            Thread listener = new Thread(StartListening);
+            Thread listener = new Thread(new ParameterizedThreadStart(StartListening));
             listener.IsBackground = true;
-            listener.Start();
+            listener.Start((object)port);
         }
 
         /// <summary>
@@ -126,23 +139,27 @@ namespace Common
             while(true)
             {
                 MessageQueueMutex.WaitOne();
+                MessageQueueMutex.Reset();
                 while(MessageQueue.Count > 0)
                 {
                     var Message = MessageQueue.Dequeue();
+                    Console.WriteLine(Message.Item1);
                     Validate(Message.Item1, Message.Item2);
                 }
             }
         }
 
+
         /// <summary>
         /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
         /// </summary>
-        public void StartListening()
+        public void StartListening(object Port)
         {
+            int port = (int)Port;
             byte[] bytes = new Byte[1024];
             IPAddress ipAddress = IPAddress.Parse(communicationInfo.CommunicationServerAddress.Host);
-            TcpListener tcpListener = new TcpListener(ipAddress, (int)communicationInfo.CommunicationServerPort);
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, (int)communicationInfo.CommunicationServerPort);
+            TcpListener tcpListener = new TcpListener(ipAddress, port);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
             try
             {
                 tcpListener.Start();
@@ -178,14 +195,32 @@ namespace Common
         /// <param name="socket">Socket na którym odbywa się nasłuchiwanie.</param>
         private void ReceiveMessage(Socket socket)
         {
-            while (socket.IsBound)
+            try
             {
-                byte[] byteArray = new Byte[1024];
-                //TODO: try catch?
-                socket.Receive(byteArray);
-                String message = System.Text.Encoding.UTF8.GetString(byteArray);
-                MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
-                MessageQueueMutex.Reset();
+                while (socket.IsBound)
+                {
+                    byte[] byteArray = new Byte[1024];
+                    //TODO: try catch?
+                    socket.Receive(byteArray);
+                    String message = System.Text.Encoding.UTF8.GetString(byteArray);
+                    string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+                    if (message.StartsWith(_byteOrderMarkUtf8))
+                    {
+                        message = message.Remove(0, _byteOrderMarkUtf8.Length);
+                    }
+                    message = message.Replace("\0", string.Empty);
+                    MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
+                    MessageQueueMutex.Set();
+
+                }
+            }
+            catch (SocketException e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+            catch (ObjectDisposedException e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
             }
         }
 
@@ -262,7 +297,7 @@ namespace Common
         /// <param name="socket">Socket z którego otrzymano</param>
         protected virtual void Validate(string XML, Socket socket)
         {
-            XDocument message = XDocument.Parse(XML);
+            XDocument message = XDocument.Parse(XML,LoadOptions.PreserveWhitespace);
             foreach (String Key in this.SchemaTypes.Keys)
             {
                 XmlSchemaSet schemas = new XmlSchemaSet();
@@ -315,7 +350,7 @@ namespace Common
             try
             {
                 tcpClient = new TcpClient(communicationInfo.CommunicationServerAddress.Host,
-                (int)communicationInfo.CommunicationServerPort);
+                (int)communicationInfo.CommunicationServerPort );
             }
             catch (SocketException e)
             {
@@ -335,10 +370,10 @@ namespace Common
             try
             {
                 String message = m.toString();
+                Console.WriteLine(message);
                 NetworkStream stream = tcpClient.GetStream();
                 StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
                 writer.AutoFlush = false;
-                writer.Write(Encoding.UTF8.GetBytes(message).Length);
                 writer.Write(message);
                 writer.Flush();
             }

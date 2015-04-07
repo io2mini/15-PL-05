@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-
+using Common;
 namespace Common.Messages
 {
     [System.SerializableAttribute()]
@@ -20,7 +20,7 @@ namespace Common.Messages
         public String toString()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(this.GetType());
-            StringWriter writer = new StringWriter();
+            StringWriter writer = new UTF8StringWriter();
             xmlSerializer.Serialize(writer, this);
             return writer.ToString();
         }
