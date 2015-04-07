@@ -10,6 +10,7 @@ namespace Common.Communication
     public class ParametersParser
     {
         private static char[] WHITESPACES = new char[] { ' ', '\t', '\n' };
+        private static char[] POINTS = new char[] {'.'}; 
         private const string TIME_PARAMETER = "-t";
         private const string BACKUP_PARAMETER = "-backup";
         private const string PORT_PARAMETER = "-port";
@@ -80,7 +81,11 @@ namespace Common.Communication
             {
                 try
                 {
-                    cInfo.CommunicationServerAddress = new Uri(parameters[++i]);
+                    if ((parameters[++i].Split(POINTS)).Length == 4)
+                    {
+                        parameters[i] = "http://"+parameters[i]+"/";
+                    }
+                    cInfo.CommunicationServerAddress = new Uri(parameters[i]);
                 }
                 catch (UriFormatException e)
                 {
