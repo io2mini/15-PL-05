@@ -43,17 +43,18 @@
     <Compile Include="Exceptions\ParsingArgumentException.cs" />
     <Compile Include="Exceptions\ConnectionException.cs" />
     <Compile Include="Exceptions\MessageNotSentException.cs" />
-    <Compile Include="Messages\DivideProblem.cs" />
-    <Compile Include="Messages\Error.cs" />
-    <Compile Include="Messages\Message.cs" />
-    <Compile Include="Messages\NoOperation.cs" />
-    <Compile Include="Messages\PartialProblems.cs" />
-    <Compile Include="Messages\Register.cs" />
-    <Compile Include="Messages\RegisterResponse.cs" />
-    <Compile Include="Messages\Solution.cs" />
-    <Compile Include="Messages\SolveRequest.cs" />
-    <Compile Include="Messages\SolveRequestResponse.cs" />
-    <Compile Include="Messages\Status.cs" />
+    <Compile Include="Messages\Generators\RegisterGenerator.cs" />
+    <Compile Include="Messages\Instances\DivideProblem.cs" />
+    <Compile Include="Messages\Instances\Error.cs" />
+    <Compile Include="Messages\Instances\Message.cs" />
+    <Compile Include="Messages\Instances\NoOperation.cs" />
+    <Compile Include="Messages\Instances\PartialProblems.cs" />
+    <Compile Include="Messages\Instances\Register.cs" />
+    <Compile Include="Messages\Instances\RegisterResponse.cs" />
+    <Compile Include="Messages\Instances\Solution.cs" />
+    <Compile Include="Messages\Instances\SolveRequest.cs" />
+    <Compile Include="Messages\Instances\SolveRequestResponse.cs" />
+    <Compile Include="Messages\Instances\Status.cs" />
     <Compile Include="Communication\ParametersParser.cs" />
     <Compile Include="Problem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -105,6 +106,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

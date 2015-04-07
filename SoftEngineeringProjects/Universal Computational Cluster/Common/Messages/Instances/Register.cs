@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Xml.Serialization;
 
 
 namespace Common.Messages
@@ -11,8 +12,7 @@ namespace Common.Messages
     [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.mini.pw.edu.pl/ucc/", IsNullable = false)]
     public partial class Register : Message
     {
-
-        private RegisterType typeField;
+        private String typeField;
 
         private string[] solvableProblemsField;
 
@@ -26,7 +26,7 @@ namespace Common.Messages
 
         private bool idFieldSpecified;
 
-        public RegisterType Type
+        public String Type
         {
             get
             {
@@ -112,15 +112,5 @@ namespace Common.Messages
                 this.idFieldSpecified = value;
             }
         }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.18020")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    public enum RegisterType
-    {
-        TaskManager,
-        ComputationalNode,
-        CommunicationServer,
     }
 }

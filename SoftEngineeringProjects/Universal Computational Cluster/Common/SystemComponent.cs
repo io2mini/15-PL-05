@@ -12,6 +12,7 @@ using System.Xml.Serialization;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml;
+using Common.Messages.Generators;
 using Common.Properties;
 using System.Threading;
 using System.Net;
@@ -50,6 +51,12 @@ namespace Common
         protected AutoResetEvent MessageQueueMutex;
         #endregion
 
+        private SystemComponentType deviceType;
+        private string[] solvableProblems;
+        private byte pararellThreads;
+
+
+
         protected ulong Id { get; set; }
 
         public bool IsWorking { get; set; }
@@ -84,6 +91,19 @@ namespace Common
             InitializeMessageQueue(); //MessageQueue nie powinno być tylko w CS?
             throw new NotImplementedException();
             //TODO: send register msg
+            // Wyślij register message w zależności od komponentu 
+            
+        }
+
+        /// <summary>
+        /// Metoda mająca na celu wysłanie odpowiedniego komnuniktatu w zalezności od urządzenia,
+        /// na którym jest wywoływana.
+        /// </summary>
+        /// <param name="deviceType">Typ urządzenia rejestującego się.</param>
+        private void SendRegisterMessage()
+        {
+            Message msg = RegisterGenerator.Generate(deviceType, solvableProblems, pararellThreads, false, null);
+
         }
 
         /// <summary>
