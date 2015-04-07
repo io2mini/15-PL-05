@@ -15,12 +15,16 @@ namespace Common.UserInterface
             TaskManager taskManager = new TaskManager();
             Console.WriteLine("Task Manager started successfully");
             String newLine;
-
-            while (taskManager.IsWorking)
+            bool hasReadData = false;
+            while (taskManager.IsWorking && !hasReadData)
             {
                 newLine = Console.ReadLine();
                 taskManager.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.TaskManager);
+                //taskManager.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.1/");
+                hasReadData = true;
             }
+
+            taskManager.Start();
         }
     }
 }

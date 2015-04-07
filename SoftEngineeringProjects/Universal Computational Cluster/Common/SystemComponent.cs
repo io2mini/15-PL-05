@@ -51,15 +51,19 @@ namespace Common
         protected AutoResetEvent MessageQueueMutex;
         #endregion
 
-        private SystemComponentType deviceType;
-        private string[] solvableProblems;
-        private byte pararellThreads;
-
-
+        protected SystemComponentType deviceType;
+        protected string[] solvableProblems;
+        protected byte pararellThreads;
 
         protected ulong Id { get; set; }
 
         public bool IsWorking { get; set; }
+
+        public CommunicationInfo CommunicationInfo
+        {
+            get { return communicationInfo; }
+            set { communicationInfo = value; }
+        }
 
         public SystemComponent()
         {
@@ -72,13 +76,9 @@ namespace Common
         /// </summary>
         protected virtual void Initialize()
         {
-            //Inicjalizacja
             SchemaTypes = new Dictionary<string, Tuple<string, Type>>();
-            //RegsterResponse
             SchemaTypes.Add(RegisterResponse,new Tuple<string, Type>(Resources.RegisterResponse, typeof(RegisterResponse)));
-            //NoOperation
             SchemaTypes.Add(NoOperation, new Tuple<string, Type>(Resources.NoOperation, typeof(NoOperation)));
-            //Error
             SchemaTypes.Add(Error, new Tuple<string, Type>(Resources.Error, typeof(Error)));
         }
 
@@ -88,11 +88,8 @@ namespace Common
         /// </summary>
         public virtual void Start()
         {
-            InitializeMessageQueue(); //MessageQueue nie powinno być tylko w CS?
-            throw new NotImplementedException();
-            //TODO: send register msg
-            // Wyślij register message w zależności od komponentu 
-            
+            InitializeMessageQueue();
+            SendRegisterMessage();
         }
 
         /// <summary>
@@ -102,12 +99,12 @@ namespace Common
         /// <param name="deviceType">Typ urządzenia rejestującego się.</param>
         private void SendRegisterMessage()
         {
-            Message msg = RegisterGenerator.Generate(deviceType, solvableProblems, pararellThreads, false, null);
-
+            Register msg = RegisterGenerator.Generate(deviceType, solvableProblems, pararellThreads, false, null);
+            SendMessage(msg);
         }
 
         /// <summary>
-        /// Metoda inicializująca kolejkę wiadomości
+        /// Metoda inicializująca kolejkę wiadomości do odbioru
         /// </summary>
         protected void InitializeMessageQueue()
         {
@@ -122,7 +119,7 @@ namespace Common
         }
 
         /// <summary>
-        /// Metoda obsługi kolejki wiadomości
+        /// Metoda obsługi kolejki wiadomości odbierającej komunikaty
         /// </summary>
         private void MessageQueueWork()
         {
@@ -143,14 +140,17 @@ namespace Common
         public void StartListening()
         {
             byte[] bytes = new Byte[1024];
-            IPAddress ipAddress = IPAddress.Parse(communicationInfo.CommunicationServerAddress.AbsolutePath);
+            IPAddress ipAddress = IPAddress.Parse(communicationInfo.CommunicationServerAddress.Host);
             TcpListener tcpListener = new TcpListener(ipAddress, (int)communicationInfo.CommunicationServerPort);
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, (int)communicationInfo.CommunicationServerPort);
             try
             {
+                tcpListener.Start();
                 while (IsWorking)
                 {
+                    Console.WriteLine("Po dekalracji");
                     Socket socket = tcpListener.AcceptSocket();
+                    Console.WriteLine("Po accept");
                     Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
                     thread.IsBackground = true;
                     thread.Start(socket);
@@ -187,20 +187,6 @@ namespace Common
                 MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
                 MessageQueueMutex.Reset();
             }
-        }
-
-        /// <summary>
-        /// ???????????????????????
-        /// </summary>
-        protected void HandShake()
-        {
-
-        }
-
-        public CommunicationInfo CommunicationInfo
-        {
-            get { return communicationInfo; }
-            set { communicationInfo = value; }
         }
 
         #region MessageGenerationAndHandling
@@ -328,13 +314,13 @@ namespace Common
         {
             try
             {
-                tcpClient = new TcpClient(communicationInfo.CommunicationServerAddress.AbsolutePath,
+                tcpClient = new TcpClient(communicationInfo.CommunicationServerAddress.Host,
                 (int)communicationInfo.CommunicationServerPort);
             }
             catch (SocketException e)
             {
                 String message = String.Format("Problems with connecting to Communication Server host: {0} ; port: {1}",
-                    communicationInfo.CommunicationServerAddress.AbsolutePath, communicationInfo.CommunicationServerPort);
+                    communicationInfo.CommunicationServerAddress.Host, communicationInfo.CommunicationServerPort);
                 throw new ConnectionException(message, e);
             }
 
@@ -346,7 +332,6 @@ namespace Common
         /// <param name="m">Message do wysłania</param>
         protected void SendMessage(Message m)
         {
-            //TO DO BCS Handling
             try
             {
                 String message = m.toString();

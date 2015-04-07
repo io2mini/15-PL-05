@@ -32,6 +32,10 @@ namespace Common.Components
             Timers = new Dictionary<ulong, Timer>();
             TimerStoppers = new Dictionary<ulong, bool>();
             Sockets = new Dictionary<ulong, Socket>();
+
+            deviceType = SystemComponentType.CommunicationServer;
+            solvableProblems = new string[] {"DVRP"};
+            pararellThreads = 1;
         }
 
         /// <summary>

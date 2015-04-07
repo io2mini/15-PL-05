@@ -8,6 +8,11 @@ namespace Common.Components
 {
     public class TaskManager : SystemComponent
     {
-        public TaskManager() : base() { }
+        public TaskManager() : base() 
+        {
+            deviceType = SystemComponentType.TaskManager;
+            solvableProblems = new string[] { "DVRP" };
+            pararellThreads = 1;
+        }
     }
 }

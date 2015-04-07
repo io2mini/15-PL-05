@@ -20,6 +20,7 @@ namespace Common.UserInterface
                 newLine = Console.ReadLine();
                 computationalNode.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalNode);
             }
+            computationalNode.Start();
         }
     }
 }
