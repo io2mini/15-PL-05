@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Common.Communication
@@ -10,12 +11,11 @@ namespace Common.Communication
     public class ParametersParser
     {
         private static char[] WHITESPACES = new char[] { ' ', '\t', '\n' };
-        private static char[] POINTS = new char[] {'.'}; 
         private const string TIME_PARAMETER = "-t";
         private const string BACKUP_PARAMETER = "-backup";
         private const string PORT_PARAMETER = "-port";
         private const string ADDRESS_PARAMTER = "-address";
-
+        private static readonly string ipRegex = @"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
         static public CommunicationInfo ReadParameters(string s, SystemComponentType type)
         {
             if (s == null) return null;
@@ -81,7 +81,7 @@ namespace Common.Communication
             {
                 try
                 {
-                    if ((parameters[++i].Split(POINTS)).Length == 4)
+                    if (Regex.IsMatch(parameters[++i], ipRegex))
                     {
                         parameters[i] = "http://"+parameters[i]+"/";
                     }
