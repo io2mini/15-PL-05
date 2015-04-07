@@ -37,6 +37,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="UCCTaskSolver, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>TaskSolver\UCCTaskSolver.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Communication\CommunicationInfo.cs" />
@@ -44,6 +48,8 @@
     <Compile Include="Exceptions\ConnectionException.cs" />
     <Compile Include="Exceptions\MessageNotSentException.cs" />
     <Compile Include="Messages\Generators\RegisterGenerator.cs" />
+    <Compile Include="Messages\Generators\RegisterResponseGenerator.cs" />
+    <Compile Include="Messages\Generators\SolveRequestGenerator.cs" />
     <Compile Include="Messages\Instances\DivideProblem.cs" />
     <Compile Include="Messages\Instances\Error.cs" />
     <Compile Include="Messages\Instances\Message.cs" />
@@ -64,7 +70,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="SystemComponent.cs" />
-    <Compile Include="Utf8StringWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -108,6 +113,9 @@
     </None>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Content Include="TaskSolver\UCCTaskSolver.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
