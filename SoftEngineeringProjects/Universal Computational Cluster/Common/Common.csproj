@@ -44,6 +44,7 @@
     <Compile Include="Exceptions\ConnectionException.cs" />
     <Compile Include="Exceptions\MessageNotSentException.cs" />
     <Compile Include="Messages\Generators\RegisterGenerator.cs" />
+    <Compile Include="Messages\Generators\SolveRequestGenerator.cs" />
     <Compile Include="Messages\Instances\DivideProblem.cs" />
     <Compile Include="Messages\Instances\Error.cs" />
     <Compile Include="Messages\Instances\Message.cs" />
@@ -107,6 +108,9 @@
     </None>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Content Include="TaskSolver\UCCTaskSolver.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
