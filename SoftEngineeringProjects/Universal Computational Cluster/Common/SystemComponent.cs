@@ -101,8 +101,10 @@ namespace Common
                     continue;
                 }
             }
+
             InitializeConnection();
             SendRegisterMessage();
+            ReceiveResponse();
         }
 
         /// <summary>
@@ -114,6 +116,7 @@ namespace Common
         {
             Register msg = RegisterGenerator.Generate(deviceType, solvableProblems, pararellThreads, false, null);
             SendMessage(msg);
+            
         }
 
         /// <summary>
@@ -148,8 +151,32 @@ namespace Common
                 }
             }
         }
-
-
+        //TODO: Move to message
+        /// <summary>
+        /// Converts byteArray to string and removes unnecessary characters.
+        /// </summary>
+        /// <param name="byteArray">Message in byte form</param>
+        /// <returns>Message in string form</returns>
+        public string Sanitize(byte[] byteArray)
+        {
+          var message=  System.Text.Encoding.UTF8.GetString(byteArray);
+            string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+            if (message.StartsWith(_byteOrderMarkUtf8))
+            {
+                message = message.Replace(_byteOrderMarkUtf8, "");
+            }
+            message = message.Replace("\0", string.Empty);
+            return message;
+        }
+        public void ReceiveResponse()
+        {
+           var stream= tcpClient.GetStream();
+           byte[] byteArray = new byte[1024];
+            stream.Read(byteArray, 0, 1024);
+            String message = Sanitize(byteArray);
+            Console.WriteLine(message);
+            Validate(message, null); //Uważać z nullem w klasach dziedziczących
+        }
         /// <summary>
         /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
         /// </summary>
@@ -201,14 +228,13 @@ namespace Common
                 {
                     byte[] byteArray = new Byte[1024];
                     //TODO: try catch?
+                    Thread.Sleep(1000);
+                    int offset = 0;
+                    int readamount;
                     socket.Receive(byteArray);
-                    String message = System.Text.Encoding.UTF8.GetString(byteArray);
-                    string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
-                    if (message.StartsWith(_byteOrderMarkUtf8))
-                    {
-                        message = message.Remove(0, _byteOrderMarkUtf8.Length);
-                    }
-                    message = message.Replace("\0", string.Empty);
+                    
+                      
+                    String message = Sanitize(byteArray);
                     MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
                     MessageQueueMutex.Set();
 
@@ -231,7 +257,7 @@ namespace Common
         /// <returns>Status - Status Report komponentu</returns>
         protected virtual Status GenerateStatusReport()
         {
-            if (this.Id <= 0) throw new InvalidOperationException(); //TODO: stworzyć własny wyjątek
+            if (this.Id < 0) throw new InvalidOperationException(); //TODO: stworzyć własny wyjątek
             var result = new Status();
             result.Id = this.Id;
             return result;
@@ -277,7 +303,7 @@ namespace Common
         {
             communicationInfo.Time = message.Timeout;
             Id = message.Id;
-            StatusReporter = new Timer((o) => { SendMessage(GenerateStatusReport()); }, null, 0,
+            StatusReporter = new Timer((o) => { SendMessage(GenerateStatusReport()); ReceiveResponse(); }, null, 0,
                 (int)message.Timeout * MilisecondsMultiplier);
         }
 
@@ -307,6 +333,7 @@ namespace Common
                 if (!errorOccured)
                 {
                     HandleMessage(Message.ParseXML(SchemaTypes[Key].Item2, XML), Key, socket);
+                    break;
                 }
             }
         }
@@ -351,6 +378,7 @@ namespace Common
             {
                 tcpClient = new TcpClient(communicationInfo.CommunicationServerAddress.Host,
                 (int)communicationInfo.CommunicationServerPort );
+               
             }
             catch (SocketException e)
             {
@@ -358,7 +386,7 @@ namespace Common
                     communicationInfo.CommunicationServerAddress.Host, communicationInfo.CommunicationServerPort);
                 throw new ConnectionException(message, e);
             }
-
+            
         }
 
         /// <summary>

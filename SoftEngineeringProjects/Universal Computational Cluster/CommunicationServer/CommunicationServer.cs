@@ -151,6 +151,7 @@ namespace Common.Components
 
             ulong id = FirstFreeID++;
             Sockets.Add(id, socket);
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             TimerStoppers.Add(id, true);
             var Timer = new System.Timers.Timer();
             Timer.Elapsed += (u,t) =>
@@ -159,8 +160,8 @@ namespace Common.Components
                 else TimerStoppers[(ulong)id] = false;
             };
             Timer.Interval = TimeoutModifier * (uint)CommunicationInfo.Time;
-            Timer.Enabled = true;
-            Timer.AutoReset = true;
+  //          Timer.Enabled = true;
+    //        Timer.AutoReset = true;
             Timers.Add(Id, Timer);
            // Timer.Start();
             RegisterResponse response = new RegisterResponse();
@@ -188,6 +189,7 @@ namespace Common.Components
         /// <returns></returns>
         private bool Deregister(ulong Id)
         {
+            return false;
             if (!Sockets.ContainsKey(Id)) return false;
             
             Sockets[Id].Close();
