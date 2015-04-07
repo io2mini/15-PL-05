@@ -12,9 +12,10 @@ namespace Common.Components
     {
         public ComputationalClient() : base() { }
 
-        public void SendSolveRequestMessage()
+        public void SendSolveRequestMessage(Problem problem)
         {
-            SolveRequest msg = SolveRequestGenerator.Generate();
+            SolveRequest msg = SolveRequestGenerator.Generate(problem.ProblemType, problem.SerializedProblem, 
+                problem.SolvingTimeOut, problem.ProblemInstanceId);
             // TODO: Wywołaj odpowiednią metodę do wysyłania wiadomości do serwera.
         }
     }
