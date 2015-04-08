@@ -75,8 +75,7 @@ namespace Common.Components
                 int bytesSent = handler.EndSend(ar);
                 // na potrzeby testów
                 Console.WriteLine("Sent {0} bytes to client.", bytesSent);
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
+                
             }
             catch (Exception e)
             {
@@ -94,6 +93,7 @@ namespace Common.Components
         /// <param name="socket">Socket z którego przyszła wiadomość.</param>
         protected override void HandleMessage(Messages.Message message, string key, Socket socket)
         {
+            
             switch (key)
             {
                 case Register:
@@ -106,6 +106,7 @@ namespace Common.Components
                     base.HandleMessage(message, key, socket);
                     return;
             }
+
         }
 
         /// <summary>
@@ -224,6 +225,7 @@ namespace Common.Components
             try
             {
                 var socket = Sockets[Id]; // Jeśli Id jest nieznane patrz Error Message
+                
                 byte[] byteData = Encoding.ASCII.GetBytes(message.toString());
                 socket.BeginSend(byteData, 0, byteData.Length, 0,
                     new AsyncCallback(SendCallback), socket);
