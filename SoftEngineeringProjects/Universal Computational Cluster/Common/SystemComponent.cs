@@ -198,7 +198,7 @@ namespace Common
             {
                 StatusReporter = new Timer((o) =>
                 {
-                    SendMessage(StatusReportGenerator.Generate(this.Id)); ReceiveResponse();
+                    SendMessage(StatusReportGenerator.Generate(this.Id)); Thread thread = new Thread(ReceiveResponse); thread.IsBackground = true;thread.Start() ;
                 }, null, 0, (int)message.Timeout * MilisecondsMultiplier);
             }
             catch(NegativeIdException)
