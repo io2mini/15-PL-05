@@ -130,7 +130,15 @@ namespace Common
             if (!tcpClient.Connected) tcpClient.Connect(communicationInfo.CommunicationServerAddress.Host, (int)communicationInfo.CommunicationServerPort);
             var stream= tcpClient.GetStream();
             byte[] byteArray = new byte[1024];
-            stream.Read(byteArray, 0, 1024);
+            try
+            {
+                stream.Read(byteArray, 0, 1024);
+            }
+            catch(Exception)
+            {
+                Console.WriteLine("Connection was killed by host");
+                return;
+            }
             String message = Sanitize(byteArray);
             Console.WriteLine(message);
             Validate(message, null); //Uważać z nullem w klasach dziedziczących
