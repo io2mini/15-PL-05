@@ -112,22 +112,7 @@ namespace Common
         }
 
        
-        /// <summary>
-        /// Converts byteArray to string and removes unnecessary characters.
-        /// </summary>
-        /// <param name="byteArray">Message in byte form</param>
-        /// <returns>Message in string form</returns>
-        protected string Sanitize(byte[] byteArray)
-        {
-            var message=  System.Text.Encoding.UTF8.GetString(byteArray);
-            string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
-            if (message.StartsWith(_byteOrderMarkUtf8))
-            {
-                message = message.Replace(_byteOrderMarkUtf8, "");
-            }
-            message = message.Replace("\0", string.Empty);
-            return message;
-        }
+        
 
         /// <summary>
         /// Metoda używana do otrzymywania wiadomści, wyświetla na konsolę otrzymany message 
@@ -146,7 +131,7 @@ namespace Common
                 Console.WriteLine("Connection was killed by host");
                 return;
             }
-            String message = Sanitize(byteArray);
+            String message = Message.Sanitize(byteArray);
             Console.WriteLine(message);
             Validate(message, null); //Uważać z nullem w klasach dziedziczących
         }

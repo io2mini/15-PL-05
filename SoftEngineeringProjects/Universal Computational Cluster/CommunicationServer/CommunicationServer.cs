@@ -158,7 +158,7 @@ namespace Common.Components
                     //TODO: try catch?
                     Thread.Sleep(1000);
                     socket.Receive(byteArray);
-                    String message = Sanitize(byteArray);
+                    String message = Message.Sanitize(byteArray);
                     MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
                     MessageQueueMutex.Set();
 
