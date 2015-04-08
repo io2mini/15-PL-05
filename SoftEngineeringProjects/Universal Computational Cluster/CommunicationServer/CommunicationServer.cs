@@ -16,7 +16,7 @@ namespace Common.Components
     {
         bool isPrimary;
         #region Constants
-        const int TimeoutModifier = 3;
+        const int TimeoutModifier = 3000;
         const String Register = "Register", Status = "Status";
         #endregion
         #region ComunicationData
@@ -209,14 +209,13 @@ namespace Common.Components
         /// <param name="socket">Socket z którego przyszła wiadomość.</param>
         protected override void HandleMessage(Messages.Message message, string key, Socket socket)
         {
-            
             switch (key)
             {
                 case Register:
                     MsgHandler_Register((Register)message, socket);
                     return;
                 case Status:
-                    MsgHandler_Status((Status)message);
+                    MsgHandler_Status((Status)message, socket);
                     return;
                 default:
                     base.HandleMessage(message, key, socket);
@@ -243,8 +242,15 @@ namespace Common.Components
         /// Metoda obsługująca otrzymaną wiadomość typu status.
         /// </summary>
         /// <param name="status">Otrzymany status.</param>
-        private void MsgHandler_Status(Status status)
+        private void MsgHandler_Status(Status status, Socket sender)
         {
+            if (!Sockets.ContainsKey(status.Id))
+            {
+                var err = new Error();
+                err.ErrorType = ErrorErrorType.UnknownSender;
+                SendMessageToComponent(sender, err);
+                return;
+            }
             TimerStoppers[status.Id] = true;
             SendMessageToComponent(status.Id, GenerateNoOperationMessage());
         }
@@ -277,10 +283,7 @@ namespace Common.Components
                 else TimerStoppers[(ulong)id] = false;
             };
             Timer.Interval = TimeoutModifier * (uint)CommunicationInfo.Time;
-  //          Timer.Enabled = true;
-    //        Timer.AutoReset = true;
             Timers.Add(Id, Timer);
-           // Timer.Start();
             RegisterResponse response = new RegisterResponse();
             response.Id = id;
             response.Timeout = TimeoutModifier * (uint)CommunicationInfo.Time;
@@ -297,6 +300,9 @@ namespace Common.Components
                     BackupServer.portSpecified;
             }
             SendMessageToComponent(id, response);
+            Timer.Enabled = true;
+            //Timer.Start();
+            Timer.AutoReset = true;
         }
 
         /// <summary>
@@ -306,15 +312,16 @@ namespace Common.Components
         /// <returns></returns>
         private bool Deregister(ulong Id)
         {
-            return false;
+            //return false;
             if (!Sockets.ContainsKey(Id)) return false;
             
             Sockets[Id].Close();
             Sockets.Remove(Id);
             Timers[Id].Enabled = false;
+            Timers[Id].Close();
             Timers.Remove(Id);
             TimerStoppers.Remove(Id);
-          
+            Console.WriteLine("\nKomponent o id = {0} wyrejestrowano\n", Id);
             return true;
         }
 
@@ -338,13 +345,16 @@ namespace Common.Components
         /// <param name="message">Wiadomość do wysłaniu.</param>
         protected void SendMessageToComponent(ulong Id, Message message)
         {
+            SendMessageToComponent(Sockets[Id], message);
+        }
+        protected void SendMessageToComponent(Socket receiver, Message message)
+        {
             try
             {
-                var socket = Sockets[Id]; // Jeśli Id jest nieznane patrz Error Message
                 Console.WriteLine(message.GetType().ToString());
                 byte[] byteData = Encoding.ASCII.GetBytes(message.toString());
-                socket.BeginSend(byteData, 0, byteData.Length, 0,
-                    new AsyncCallback(SendCallback), socket);
+                receiver.BeginSend(byteData, 0, byteData.Length, 0,
+                    new AsyncCallback(SendCallback), receiver);
             }
             catch (Exception e)
             {
@@ -352,6 +362,7 @@ namespace Common.Components
                 throw new MessageNotSentException(exceptionMessage, e);
             }
         }
+
         #endregion
 
         public void InitializeIPList()

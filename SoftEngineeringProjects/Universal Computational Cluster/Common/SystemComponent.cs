@@ -169,7 +169,20 @@ namespace Common
         /// <param name="error"></param>
         protected virtual void MsgHandler_Error(Messages.Error message)
         {
-            throw new NotImplementedException();
+            switch (message.ErrorType)
+            {
+                case ErrorErrorType.UnknownSender:
+                    {
+                        StatusReporter.Dispose();
+                        SendRegisterMessage();
+                        break;
+                    }
+                case ErrorErrorType.InvalidOperation:
+                    {
+                        //TODO:switch to idle/partially idle state
+                        break;
+                    }
+            }
         }
 
         /// <summary>
