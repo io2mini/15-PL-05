@@ -159,12 +159,13 @@ namespace Common
         }
         public void ReceiveResponse()
         {
-           var stream= tcpClient.GetStream();
-           byte[] byteArray = new byte[1024];
-           stream.Read(byteArray, 0, 1024);
-           String message = Sanitize(byteArray);
-           Console.WriteLine(message);
-           Validate(message, null); //Uważać z nullem w klasach dziedziczących
+            if (!tcpClient.Connected) tcpClient.Connect(communicationInfo.CommunicationServerAddress.Host, (int)communicationInfo.CommunicationServerPort);
+            var stream= tcpClient.GetStream();
+            byte[] byteArray = new byte[1024];
+            stream.Read(byteArray, 0, 1024);
+            String message = Sanitize(byteArray);
+            Console.WriteLine(message);
+            Validate(message, null); //Uważać z nullem w klasach dziedziczących
         }
         /// <summary>
         /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
@@ -311,7 +312,16 @@ namespace Common
         /// <param name="socket">Socket z którego otrzymano</param>
         protected virtual void Validate(string XML, Socket socket)
         {
-            XDocument message = XDocument.Parse(XML,LoadOptions.PreserveWhitespace);
+            XDocument message;
+            try
+            {
+                message = XDocument.Parse(XML, LoadOptions.PreserveWhitespace);
+            }
+            catch (XmlException e)
+            {
+                Console.WriteLine("Wrong msg\n" + e.Message + "\n" + XML + "\n");
+                return;
+            }
             foreach (String Key in this.SchemaTypes.Keys)
             {
                 XmlSchemaSet schemas = new XmlSchemaSet();
