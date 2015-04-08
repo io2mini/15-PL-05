@@ -286,7 +286,7 @@ namespace Common.Components
             Timers.Add(Id, Timer);
             RegisterResponse response = new RegisterResponse();
             response.Id = id;
-            response.Timeout = TimeoutModifier * (uint)CommunicationInfo.Time;
+            response.Timeout =(uint)CommunicationInfo.Time;
             response.BackupCommunicationServers = new RegisterResponseBackupCommunicationServers();
             response.BackupCommunicationServers.BackupCommunicationServer =
                 new RegisterResponseBackupCommunicationServersBackupCommunicationServer();
@@ -304,7 +304,11 @@ namespace Common.Components
             //Timer.Start();
             Timer.AutoReset = true;
         }
-
+        private void CloseSocket(object socket)
+        {
+            Thread.Sleep(new TimeSpan(0, 0, 15, 0));
+            if(socket is Socket) (socket as Socket).Close();
+        }
         /// <summary>
         /// Metoda usuwająca komponent i zrywająca z nim połączenie.
         /// </summary>
@@ -314,8 +318,11 @@ namespace Common.Components
         {
             //return false;
             if (!Sockets.ContainsKey(Id)) return false;
-            
-            Sockets[Id].Close();
+
+            Thread SocketCloser = new Thread(new ParameterizedThreadStart(CloseSocket));
+            SocketCloser.IsBackground = true;
+            SocketCloser.Start(Sockets[Id]);
+
             Sockets.Remove(Id);
             Timers[Id].Enabled = false;
             Timers[Id].Close();
