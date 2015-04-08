@@ -109,10 +109,7 @@ namespace Common
             {
                 Console.WriteLine("Register Message Not Send");
             }
-        }
-
-       
-        
+        }    
 
         /// <summary>
         /// Metoda używana do otrzymywania wiadomści, wyświetla na konsolę otrzymany message 
@@ -136,7 +133,6 @@ namespace Common
             Validate(message, null); //Uważać z nullem w klasach dziedziczących
         }
         
-    
         #region MessageGenerationAndHandling
         
         /// <summary>
