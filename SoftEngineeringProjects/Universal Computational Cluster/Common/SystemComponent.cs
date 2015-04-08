@@ -101,7 +101,14 @@ namespace Common
         private void SendRegisterMessage()
         {
             Register msg = RegisterGenerator.Generate(deviceType, solvableProblems, pararellThreads, false, null);
-            SendMessage(msg);
+            try
+            {
+                SendMessage(msg);
+            }
+            catch(MessageNotSentException)
+            {
+                Console.WriteLine("Register Message Not Send");
+            }
         }
 
        
