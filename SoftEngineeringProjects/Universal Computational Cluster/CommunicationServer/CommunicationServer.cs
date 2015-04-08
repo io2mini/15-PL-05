@@ -225,7 +225,7 @@ namespace Common.Components
             try
             {
                 var socket = Sockets[Id]; // Jeśli Id jest nieznane patrz Error Message
-                
+                Console.WriteLine(message.GetType().ToString());
                 byte[] byteData = Encoding.ASCII.GetBytes(message.toString());
                 socket.BeginSend(byteData, 0, byteData.Length, 0,
                     new AsyncCallback(SendCallback), socket);
