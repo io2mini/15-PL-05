@@ -19,6 +19,7 @@ namespace Common.UserInterface
             Console.WriteLine("Communication Server started successfully");
             string newLine;
             bool hasBeenRead = false;
+            
             while (communicationServer.IsWorking && !hasBeenRead)
             {
                 newLine = Console.ReadLine();
@@ -33,8 +34,9 @@ namespace Common.UserInterface
                 }
                 try
                 {
+
                     communicationServer.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.CommunicationServer);
-                    communicationServer.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.1/");
+                    communicationServer.InitializeIPList();
                     hasBeenRead = true;
                 }
                 catch (ParsingArgumentException)

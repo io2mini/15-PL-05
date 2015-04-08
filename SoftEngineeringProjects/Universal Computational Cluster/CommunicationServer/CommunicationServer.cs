@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 
 using System.Net;
+using Common.Communication;
 namespace Common.Components
 {
     public class CommunicationServer : SystemComponent
@@ -24,12 +25,13 @@ namespace Common.Components
         Dictionary<ulong, Socket> Sockets;
         #endregion
         ulong FirstFreeID;
-
+         public List<CommunicationInfo> CommunicationInfos;
         public CommunicationServer(bool primary=true)
             : base()
         {
             isPrimary = primary;
             FirstFreeID = 0;
+            CommunicationInfos = new List<Communication.CommunicationInfo>();
             Timers = new Dictionary<ulong, System.Timers.Timer>();
             TimerStoppers = new Dictionary<ulong, bool>();
             Sockets = new Dictionary<ulong, Socket>();
@@ -53,6 +55,49 @@ namespace Common.Components
         }
 
         /// <summary>
+        /// Metoda inicializująca kolejkę wiadomości do odbioru
+        /// </summary>
+        protected void InitializeMessageQueue(int port)
+        {
+            MessageQueueMutex = new AutoResetEvent(true);
+            MessageQueue = new Queue<Tuple<String, Socket>>();
+            Thread thread = new Thread(MessageQueueWork);
+            thread.IsBackground = true;
+            thread.Start();
+            foreach (var CI in CommunicationInfos)
+            {
+
+                Thread listener = new Thread(new ParameterizedThreadStart(StartListening));
+                listener.IsBackground = true;
+                listener.Start((object)CI);
+            }
+        }
+
+        /// <summary>
+        /// Metoda obsługi kolejki wiadomości odbierającej komunikaty
+        /// </summary>
+        private void MessageQueueWork()
+        {
+            while (true)
+            {
+                MessageQueueMutex.WaitOne();
+                MessageQueueMutex.Reset();
+                while (MessageQueue.Count > 0)
+                {
+                    var Message = MessageQueue.Dequeue();
+                    Console.WriteLine(Message.Item1);
+                    Validate(Message.Item1, Message.Item2);
+                }
+            }
+        }
+        //TODO: Move to message
+        /// <summary>
+        /// Converts byteArray to string and removes unnecessary characters.
+        /// </summary>
+        /// <param name="byteArray">Message in byte form</param>
+        /// <returns>Message in string form</returns>
+
+        /// <summary>
         /// Override metody komponentu rozpoczynająca nasłuchiwania serwera
         /// </summary>
         public override void Start()
@@ -63,6 +108,77 @@ namespace Common.Components
         {
 
         }
+
+
+        /// <summary>
+        /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
+        /// </summary>
+        public void StartListening(object communicationInfo)
+        {
+            var CommInfo = (CommunicationInfo)communicationInfo;
+            byte[] bytes = new Byte[1024];
+            IPAddress ipAddress = IPAddress.Parse(CommInfo.CommunicationServerAddress.Host);
+            TcpListener tcpListener = new TcpListener(ipAddress, (int)CommInfo.CommunicationServerPort);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, (int)CommInfo.CommunicationServerPort);
+            try
+            {
+                tcpListener.Start();
+                while (IsWorking)
+                {
+                    Console.WriteLine("Po dekalracji");
+                    Socket socket = tcpListener.AcceptSocket();
+                    Console.WriteLine("Po accept");
+                    Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
+                    thread.IsBackground = true;
+                    thread.Start(socket);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Metoda pośrednia do obsługi nasłuchu.
+        /// </summary>
+        /// <param name="socket">sochet, na którym nasłuchujemy.</param>
+        private void ReceiveMessage(Object socket)
+        {
+            ReceiveMessage((Socket)socket);
+        }
+
+        /// <summary>
+        /// Metoda obsługująca nasłuchiwanie komunikatów od konkretnego komponentu.
+        /// </summary>
+        /// <param name="socket">Socket na którym odbywa się nasłuchiwanie.</param>
+        private void ReceiveMessage(Socket socket)
+        {
+            try
+            {
+                while (socket.IsBound)
+                {
+                    byte[] byteArray = new Byte[1024];
+                    //TODO: try catch?
+                    Thread.Sleep(1000);
+                    socket.Receive(byteArray);
+                    String message = Sanitize(byteArray);
+                    MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
+                    MessageQueueMutex.Set();
+
+                }
+            }
+            catch (SocketException e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+            catch (ObjectDisposedException e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+        }
+        
         /// <summary>
         /// Metoda stworzona na potrzeby testów, służąca do raportowania przesłanych bajtów.
         /// </summary>
@@ -237,5 +353,27 @@ namespace Common.Components
             }
         }
         #endregion
+
+        public void InitializeIPList()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.IsIPv6LinkLocal) continue;
+                var localIP = ip.ToString();
+                    if (ip.AddressFamily == AddressFamily.InterNetworkV6)
+                    {
+                        localIP = "[" + localIP + "]";
+                    }
+                   localIP = "http://" + localIP + "/";
+                    var C = new CommunicationInfo();
+                    C.CommunicationServerPort = CommunicationInfo.CommunicationServerPort;
+                    C.CommunicationServerAddress = new Uri(localIP);
+                    CommunicationInfos.Add(C);
+                    
+                
+            }
+            
+        }
     }
 }

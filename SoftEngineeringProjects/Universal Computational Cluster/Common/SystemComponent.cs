@@ -108,38 +108,7 @@ namespace Common
             
         }
 
-        /// <summary>
-        /// Metoda inicializująca kolejkę wiadomości do odbioru
-        /// </summary>
-        protected void InitializeMessageQueue(int port)
-        {
-            MessageQueueMutex = new AutoResetEvent(true);
-            MessageQueue = new Queue<Tuple<String, Socket>>();
-            Thread thread = new Thread(MessageQueueWork);
-            thread.IsBackground = true;
-            thread.Start();
-            Thread listener = new Thread(new ParameterizedThreadStart(StartListening));
-            listener.IsBackground = true;
-            listener.Start((object)port);
-        }
-
-        /// <summary>
-        /// Metoda obsługi kolejki wiadomości odbierającej komunikaty
-        /// </summary>
-        private void MessageQueueWork()
-        {
-            while(true)
-            {
-                MessageQueueMutex.WaitOne();
-                MessageQueueMutex.Reset();
-                while(MessageQueue.Count > 0)
-                {
-                    var Message = MessageQueue.Dequeue();
-                    Console.WriteLine(Message.Item1);
-                    Validate(Message.Item1, Message.Item2);
-                }
-            }
-        }
+       
         //TODO: Move to message
         /// <summary>
         /// Converts byteArray to string and removes unnecessary characters.
@@ -167,74 +136,8 @@ namespace Common
             Console.WriteLine(message);
             Validate(message, null); //Uważać z nullem w klasach dziedziczących
         }
-        /// <summary>
-        /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
-        /// </summary>
-        public void StartListening(object Port)
-        {
-            int port = (int)Port;
-            byte[] bytes = new Byte[1024];
-            IPAddress ipAddress = IPAddress.Parse(communicationInfo.CommunicationServerAddress.Host);
-            TcpListener tcpListener = new TcpListener(ipAddress, port);
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
-            try
-            {
-                tcpListener.Start();
-                while (IsWorking)
-                {
-                    Console.WriteLine("Po dekalracji");
-                    Socket socket = tcpListener.AcceptSocket();
-                    Console.WriteLine("Po accept");
-                    Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
-                    thread.IsBackground = true;
-                    thread.Start(socket);
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
-        /// <summary>
-        /// Metoda pośrednia do obsługi nasłuchu.
-        /// </summary>
-        /// <param name="socket">sochet, na którym nasłuchujemy.</param>
-        private void ReceiveMessage(Object socket)
-        {
-            ReceiveMessage((Socket)socket);
-        }
-
-        /// <summary>
-        /// Metoda obsługująca nasłuchiwanie komunikatów od konkretnego komponentu.
-        /// </summary>
-        /// <param name="socket">Socket na którym odbywa się nasłuchiwanie.</param>
-        private void ReceiveMessage(Socket socket)
-        {
-            try
-            {
-                while (socket.IsBound)
-                {
-                    byte[] byteArray = new Byte[1024];
-                    //TODO: try catch?
-                    Thread.Sleep(1000);
-                    socket.Receive(byteArray);
-                    String message = Sanitize(byteArray);
-                    MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
-                    MessageQueueMutex.Set();
-
-                }
-            }
-            catch (SocketException e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-            }
-            catch (ObjectDisposedException e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-            }
-        }
+        
+    
 
         #region MessageGenerationAndHandling
         
