@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Common.Exceptions
 {
+    /// <summary>
+    /// Klasa do reprezentacji wyjątku rzucanego podczas złego sparsowania argumentów
+    /// wejściowych dla każdego komponentu
+    /// </summary>
     public class ParsingArgumentException : Exception
     {
         public ParsingArgumentException() : base() { }

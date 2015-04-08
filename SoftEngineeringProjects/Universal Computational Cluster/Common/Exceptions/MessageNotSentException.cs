@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Common.Exceptions
 {
+    /// <summary>
+    /// Klasa do reprezentacji wyjątu rzucanego podczas niepowodzenia w wysłaniu 
+    /// wiadomości każdego typu
+    /// </summary>
     public class MessageNotSentException : Exception
     {
         public MessageNotSentException() : base() { }

@@ -1,5 +1,6 @@
 ﻿using Common.Communication;
 using Common.Components;
+using Common.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +16,25 @@ namespace Common.UserInterface
             ComputationalNode computationalNode = new ComputationalNode();
             Console.WriteLine("Computational Node started successfully");
             String newLine;
-            while (computationalNode.IsWorking)
+            bool hasData = false;
+            while (computationalNode.IsWorking && !hasData)
             {
                 newLine = Console.ReadLine();
-                computationalNode.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalNode);
+                try
+                {
+                    computationalNode.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalNode);
+                    hasData = true;
+                }
+                catch (ParsingArgumentException)
+                {
+                    Console.WriteLine("Wrong Arguments");
+                    continue;
+                }
+               
             }
             computationalNode.Start();
+            while (computationalNode.IsWorking) { }
+            Console.WriteLine("Computational Node ended successfully");
         }
     }
 }

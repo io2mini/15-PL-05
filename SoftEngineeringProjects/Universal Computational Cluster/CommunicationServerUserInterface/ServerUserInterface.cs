@@ -1,5 +1,6 @@
 ﻿using Common.Communication;
 using Common.Components;
+using Common.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,19 +27,29 @@ namespace Common.UserInterface
                     if (!hasBeenRead)
                     {
                         communicationServer.LoadConfig(SystemComponent.Path);
+                        hasBeenRead = true;
                     }
                     break;
                 }
-                communicationServer.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.CommunicationServer);
-                communicationServer.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.1/");
-                hasBeenRead = true;
+                try
+                {
+                    communicationServer.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.CommunicationServer);
+                    communicationServer.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.1/");
+                    hasBeenRead = true;
+                }
+                catch (ParsingArgumentException)
+                {
+                    Console.WriteLine("Wrong Arguments");
+                    continue;
+                }
+                
             }
             communicationServer.Start();
 
             // Osbluga komendy zakonczenia programu
             while (communicationServer.IsWorking)
             {
-                int m = 0;
+
             }
         }
     }

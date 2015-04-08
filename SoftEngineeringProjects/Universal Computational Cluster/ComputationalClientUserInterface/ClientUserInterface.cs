@@ -21,7 +21,6 @@ namespace Common.UserInterface
                 computationalClient.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalClient);
             }
 
-            // Rozpocznij pobieranie informacje o plikach do wczytania
             while (computationalClient.IsWorking)
             {
                 Console.WriteLine("Insert path file of problem instance:");
@@ -30,6 +29,7 @@ namespace Common.UserInterface
                 // TODO: W kolejnych wersjach programu otwórz plik, przetwóż go i rozpocznij wysyłanie,
                 // TODO: odbieranie problemu
             }
+            Console.WriteLine("Computational Client ended successfully");
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Common.Communication
         private const string PORT_PARAMETER = "-port";
         private const string ADDRESS_PARAMTER = "-address";
         private static readonly string ipRegex = @"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+        
         static public CommunicationInfo ReadParameters(string s, SystemComponentType type)
         {
             if (s == null) return null;

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Common.Communication;
 using Common.Components;
+using Common.Exceptions;
 
 namespace Common.UserInterface
 {
@@ -19,9 +20,17 @@ namespace Common.UserInterface
             while (taskManager.IsWorking && !hasReadData)
             {
                 newLine = Console.ReadLine();
-                taskManager.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.TaskManager);
-                //taskManager.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.1/");
-                hasReadData = true;
+                try
+                {
+                    taskManager.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.TaskManager);
+                    hasReadData = true;
+                }
+                catch(ParsingArgumentException)
+                {
+                    Console.WriteLine("Wrong Arguments");
+                    continue;
+                }
+                
             }
 
             taskManager.Start();
@@ -29,6 +38,7 @@ namespace Common.UserInterface
             {
 
             }
+            Console.WriteLine("Task Manager ended successfully");
         }
     }
 }
