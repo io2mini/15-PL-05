@@ -104,11 +104,6 @@ namespace Common.Components
         {
             InitializeMessageQueue((int)communicationInfo.CommunicationServerPort);
         }
-        private void OnTimedEvent(int k)
-        {
-
-        }
-
 
         /// <summary>
         /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
@@ -392,8 +387,6 @@ namespace Common.Components
                     C.CommunicationServerPort = CommunicationInfo.CommunicationServerPort;
                     C.CommunicationServerAddress = new Uri(localIP);
                     CommunicationInfos.Add(C);
-                    
-                
             }
             
         }

@@ -88,9 +88,6 @@ namespace Common
         /// </summary>
         public virtual void Start()
         {
-            Random random = new Random();
-            
-
             InitializeConnection();
             SendRegisterMessage();
             ReceiveResponse();
@@ -105,19 +102,17 @@ namespace Common
         {
             Register msg = RegisterGenerator.Generate(deviceType, solvableProblems, pararellThreads, false, null);
             SendMessage(msg);
-            
         }
 
        
-        //TODO: Move to message
         /// <summary>
         /// Converts byteArray to string and removes unnecessary characters.
         /// </summary>
         /// <param name="byteArray">Message in byte form</param>
         /// <returns>Message in string form</returns>
-        public string Sanitize(byte[] byteArray)
+        protected string Sanitize(byte[] byteArray)
         {
-          var message=  System.Text.Encoding.UTF8.GetString(byteArray);
+            var message=  System.Text.Encoding.UTF8.GetString(byteArray);
             string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
             if (message.StartsWith(_byteOrderMarkUtf8))
             {
@@ -126,7 +121,11 @@ namespace Common
             message = message.Replace("\0", string.Empty);
             return message;
         }
-        public void ReceiveResponse()
+
+        /// <summary>
+        /// Metoda używana do otrzymywania wiadomści, wyświetla na konsolę otrzymany message 
+        /// </summary>
+        private void ReceiveResponse()
         {
             if (!tcpClient.Connected) tcpClient.Connect(communicationInfo.CommunicationServerAddress.Host, (int)communicationInfo.CommunicationServerPort);
             var stream= tcpClient.GetStream();
@@ -138,7 +137,6 @@ namespace Common
         }
         
     
-
         #region MessageGenerationAndHandling
         
         /// <summary>

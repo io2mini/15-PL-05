@@ -29,5 +29,17 @@ namespace ComputationalNodeTest
             Assert.AreEqual(computationalNode.CommunicationInfo.CommunicationServerPort, 8080);
             Assert.AreEqual(computationalNode.CommunicationInfo.CommunicationServerAddress, new Uri("http://127.0.0.1"));
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ConnectionException))]
+        public void StartTestExpectintConnectionException()
+        {
+            ComputationalNode computationalNode = new ComputationalNode();
+            computationalNode.IsWorking = true;
+            computationalNode.CommunicationInfo = new CommunicationInfo();
+            computationalNode.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.1");
+            computationalNode.CommunicationInfo.CommunicationServerPort = 8080;
+            computationalNode.Start();
+        }
     }
 }
