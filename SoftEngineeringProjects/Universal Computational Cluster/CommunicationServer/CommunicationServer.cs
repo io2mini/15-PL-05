@@ -108,7 +108,7 @@ namespace Common.Components
         /// <summary>
         /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
         /// </summary>
-        public void StartListening(object communicationInfo)
+        private void StartListening(object communicationInfo)
         {
             var CommInfo = (CommunicationInfo)communicationInfo;
             byte[] bytes = new Byte[1024];
@@ -299,11 +299,17 @@ namespace Common.Components
             //Timer.Start();
             Timer.AutoReset = true;
         }
+
+        /// <summary>
+        /// Metoda zamykający juz nie uzywany soket
+        /// </summary>
+        /// <param name="socket">soket, który nalezy zamknąć</param>
         private void CloseSocket(object socket)
         {
             Thread.Sleep(new TimeSpan(0, 0, 15, 0));
             if(socket is Socket) (socket as Socket).Close();
         }
+
         /// <summary>
         /// Metoda usuwająca komponent i zrywająca z nim połączenie.
         /// </summary>

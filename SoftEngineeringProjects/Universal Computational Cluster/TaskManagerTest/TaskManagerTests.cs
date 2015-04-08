@@ -37,7 +37,7 @@ namespace TaskManagerTest
             TaskManager taskManager = new TaskManager();
             taskManager.IsWorking = true;
             taskManager.CommunicationInfo = new CommunicationInfo();
-            taskManager.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.1");
+            taskManager.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.2");
             taskManager.CommunicationInfo.CommunicationServerPort = 8080;
             taskManager.Start();
         }

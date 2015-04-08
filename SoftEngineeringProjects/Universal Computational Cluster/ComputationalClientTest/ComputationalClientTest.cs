@@ -37,7 +37,7 @@ namespace ComputationalClientTest
             ComputationalClient computationalClient = new ComputationalClient();
             computationalClient.IsWorking = true;
             computationalClient.CommunicationInfo = new CommunicationInfo();
-            computationalClient.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.1");
+            computationalClient.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.2");
             computationalClient.CommunicationInfo.CommunicationServerPort = 8080;
             computationalClient.Start();
         }

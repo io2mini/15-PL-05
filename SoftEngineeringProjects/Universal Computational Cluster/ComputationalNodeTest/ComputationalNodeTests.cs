@@ -37,7 +37,7 @@ namespace ComputationalNodeTest
             ComputationalNode computationalNode = new ComputationalNode();
             computationalNode.IsWorking = true;
             computationalNode.CommunicationInfo = new CommunicationInfo();
-            computationalNode.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.1");
+            computationalNode.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.2");
             computationalNode.CommunicationInfo.CommunicationServerPort = 8080;
             computationalNode.Start();
         }

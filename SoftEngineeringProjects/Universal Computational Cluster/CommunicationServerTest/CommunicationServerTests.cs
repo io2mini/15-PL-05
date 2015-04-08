@@ -29,5 +29,16 @@ namespace CommunicationServerTest
             Assert.AreEqual(communicationServer.CommunicationInfo.CommunicationServerPort, 8080);
             Assert.AreEqual(communicationServer.CommunicationInfo.Time, (ulong)2);
         }
+
+        [TestMethod]
+        public void InicializeTestExpectiongNoException()
+        {
+            CommunicationServer communicationServer = new CommunicationServer();
+            String parametersLine = "-port 8080 -t 2";
+            communicationServer.CommunicationInfo = ParametersParser.ReadParameters(parametersLine, SystemComponentType.CommunicationServer);
+            communicationServer.IsWorking = true;
+            communicationServer.InitializeIPList();
+            communicationServer.Start();
+        }
     }
 }
