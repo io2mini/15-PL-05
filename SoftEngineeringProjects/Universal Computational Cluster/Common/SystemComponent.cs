@@ -132,7 +132,7 @@ namespace Common
                 return;
             }
             String message = Message.Sanitize(byteArray);
-            Console.WriteLine(message);
+            //Console.WriteLine(message);
             Validate(message, null); //Uważać z nullem w klasach dziedziczących
         }
         
@@ -167,6 +167,7 @@ namespace Common
         /// <param name="error"></param>
         protected virtual void MsgHandler_Error(Messages.Error message)
         {
+            Console.WriteLine("Error Message");
             switch (message.ErrorType)
             {
                 case ErrorErrorType.UnknownSender:
@@ -190,14 +191,20 @@ namespace Common
         /// <param name="message"> Message typu Register Response na który reagujemy</param>
         protected virtual void MsgHandler_RegisterResponse(RegisterResponse message)
         {
+            Console.WriteLine("RegisterResponse Message id={0}", message.Id);
             communicationInfo.Time = message.Timeout;
             Id = message.Id;
             try
             {
-                StatusReporter = new Timer((o) =>
-                {
-                    SendMessage(StatusReportGenerator.Generate(this.Id)); Thread thread = new Thread(ReceiveResponse); thread.IsBackground = true;thread.Start() ;
-                }, null, 0, (int)message.Timeout * MilisecondsMultiplier);
+                StatusReporter = new Timer(
+                    (o) =>
+                    {
+                        Console.WriteLine("Sending Status");
+                    SendMessage(StatusReportGenerator.Generate(this.Id));
+                    Thread thread = new Thread(ReceiveResponse);
+                    thread.IsBackground = true;
+                    thread.Start() ;
+                    },null, 0, (int)message.Timeout * MilisecondsMultiplier);
             }
             catch(NegativeIdException)
             {
@@ -216,6 +223,7 @@ namespace Common
         /// <param name="message"> Message typu NoOperation na który reagujemy</param>
         protected virtual void MsgHandler_NoOperation(NoOperation message)
         {
+            Console.WriteLine("NoOperation Message");
             BackupServer = message.BackupCommunicationServers.BackupCommunicationServer;
         }
 
@@ -233,7 +241,7 @@ namespace Common
             }
             catch (XmlException e)
             {
-                Console.WriteLine("Wrong msg\n" + e.Message + "\n" + XML + "\n");
+                //Console.WriteLine("Wrong msg\n" + e.Message + "\n" + XML + "\n");
                 return;
             }
             foreach (String Key in this.SchemaTypes.Keys)
@@ -310,7 +318,7 @@ namespace Common
             try
             {
                 String message = m.toString();
-                Console.WriteLine(message);
+                //Console.WriteLine(message);
                 if (!tcpClient.Connected)
                 {
                     tcpClient.Connect(communicationInfo.CommunicationServerAddress.Host, (int)communicationInfo.CommunicationServerPort);
