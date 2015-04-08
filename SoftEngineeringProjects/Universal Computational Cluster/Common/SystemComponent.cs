@@ -89,18 +89,7 @@ namespace Common
         public virtual void Start()
         {
             Random random = new Random();
-            while (true)
-            {
-                try
-                {
-                    InitializeMessageQueue(random.Next(100, 10000));
-                    break;
-                }
-                catch (SocketException e)
-                {
-                    continue;
-                }
-            }
+            
 
             InitializeConnection();
             SendRegisterMessage();
@@ -398,6 +387,10 @@ namespace Common
             {
                 String message = m.toString();
                 Console.WriteLine(message);
+                if (!tcpClient.Connected)
+                {
+                    tcpClient.Connect(communicationInfo.CommunicationServerAddress.Host, (int)communicationInfo.CommunicationServerPort);
+                }
                 NetworkStream stream = tcpClient.GetStream();
                 StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
                 writer.AutoFlush = false;

@@ -34,7 +34,7 @@ namespace Common.UserInterface
                 try
                 {
                     communicationServer.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.CommunicationServer);
-                    communicationServer.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.1/");
+                    communicationServer.CommunicationInfo.CommunicationServerAddress = new Uri("http://25.150.46.216/");
                     hasBeenRead = true;
                 }
                 catch (ParsingArgumentException)
