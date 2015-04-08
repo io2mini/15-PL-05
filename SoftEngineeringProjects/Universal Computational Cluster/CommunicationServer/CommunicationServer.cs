@@ -278,7 +278,7 @@ namespace Common.Components
                 else TimerStoppers[(ulong)id] = false;
             };
             Timer.Interval = TimeoutModifier * (uint)CommunicationInfo.Time;
-            Timers.Add(Id, Timer);
+            Timers.Add(id, Timer);
             RegisterResponse response = new RegisterResponse();
             response.Id = id;
             response.Timeout =(uint)CommunicationInfo.Time;
