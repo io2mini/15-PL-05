@@ -172,10 +172,10 @@ namespace Common
         {
            var stream= tcpClient.GetStream();
            byte[] byteArray = new byte[1024];
-            stream.Read(byteArray, 0, 1024);
-            String message = Sanitize(byteArray);
-            Console.WriteLine(message);
-            Validate(message, null); //Uważać z nullem w klasach dziedziczących
+           stream.Read(byteArray, 0, 1024);
+           String message = Sanitize(byteArray);
+           Console.WriteLine(message);
+           Validate(message, null); //Uważać z nullem w klasach dziedziczących
         }
         /// <summary>
         /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
@@ -229,11 +229,7 @@ namespace Common
                     byte[] byteArray = new Byte[1024];
                     //TODO: try catch?
                     Thread.Sleep(1000);
-                    int offset = 0;
-                    int readamount;
                     socket.Receive(byteArray);
-                    
-                      
                     String message = Sanitize(byteArray);
                     MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
                     MessageQueueMutex.Set();
@@ -251,18 +247,7 @@ namespace Common
         }
 
         #region MessageGenerationAndHandling
-        /// <summary>
-        /// Abstrakcyjna metoda generująca Status Report komponentu w zależności od komponentu
-        /// </summary>
-        /// <returns>Status - Status Report komponentu</returns>
-        protected virtual Status GenerateStatusReport()
-        {
-            if (this.Id < 0) throw new InvalidOperationException(); //TODO: stworzyć własny wyjątek
-            var result = new Status();
-            result.Id = this.Id;
-            return result;
-        }
-
+        
         /// <summary>
         /// Ogólna metoda wywołująca odpowiedni handler dla otrzymanej wiadomości
         /// </summary>
@@ -303,8 +288,22 @@ namespace Common
         {
             communicationInfo.Time = message.Timeout;
             Id = message.Id;
-            StatusReporter = new Timer((o) => { SendMessage(GenerateStatusReport()); ReceiveResponse(); }, null, 0,
-                (int)message.Timeout * MilisecondsMultiplier);
+            try
+            {
+                StatusReporter = new Timer((o) =>
+                {
+                    SendMessage(StatusReportGenerator.Generate(this.Id)); ReceiveResponse();
+                }, null, 0, (int)message.Timeout * MilisecondsMultiplier);
+            }
+            catch(NegativeIdException)
+            {
+                Console.WriteLine("Negative Id for component");
+            }
+            catch(MessageNotSentException)
+            {
+                Console.WriteLine("Message Not send for component type {0} with id {1}", deviceType.ToString(), this.Id);
+            }
+            
         }
 
         /// <summary>

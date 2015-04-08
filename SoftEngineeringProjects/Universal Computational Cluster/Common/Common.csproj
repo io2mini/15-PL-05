@@ -44,12 +44,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Communication\CommunicationInfo.cs" />
+    <Compile Include="Exceptions\NegativeIdException.cs" />
     <Compile Include="Exceptions\ParsingArgumentException.cs" />
     <Compile Include="Exceptions\ConnectionException.cs" />
     <Compile Include="Exceptions\MessageNotSentException.cs" />
     <Compile Include="Messages\Generators\RegisterGenerator.cs" />
     <Compile Include="Messages\Generators\RegisterResponseGenerator.cs" />
     <Compile Include="Messages\Generators\SolveRequestGenerator.cs" />
+    <Compile Include="Messages\Generators\StatusReportGenerator.cs" />
     <Compile Include="Messages\Instances\DivideProblem.cs" />
     <Compile Include="Messages\Instances\Error.cs" />
     <Compile Include="Messages\Instances\Message.cs" />
