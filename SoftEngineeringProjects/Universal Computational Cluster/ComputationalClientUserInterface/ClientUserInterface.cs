@@ -1,4 +1,5 @@
-﻿using Common.Communication;
+﻿using System.IO;
+using Common.Communication;
 using Common.Components;
 using System;
 using System.Collections.Generic;
@@ -15,20 +16,48 @@ namespace Common.UserInterface
             ComputationalClient computationalClient = new ComputationalClient();
             Console.WriteLine("Computational Client started successfully");
             String newLine;
-            while (computationalClient.IsWorking)
+            bool hasBeenRead = false;
+            while (computationalClient.IsWorking && !hasBeenRead)
             {
                 newLine = Console.ReadLine();
                 computationalClient.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalClient);
+                hasBeenRead = true;
             }
 
+            // Rozpocznij pobieranie informacje o plikach do wczytania
             while (computationalClient.IsWorking)
             {
-                Console.WriteLine("Insert path file of problem instance:");
+                Console.Error.WriteLine("Not implemented:");
+
+                // Utwórz nowy problem
+                Problem newProblem = new Problem();
+
+                // Podaj problem type
+                Console.WriteLine("Type problem type name:");
                 newLine = Console.ReadLine();
-                
-                // TODO: W kolejnych wersjach programu otwórz plik, przetwóż go i rozpocznij wysyłanie,
-                // TODO: odbieranie problemu
+                newProblem.ProblemType = newLine.Trim();
+
+                Console.WriteLine("Type path file of problem instance:");
+                newLine = Console.ReadLine();
+                // Szybki pars
+                if (newLine == null || newLine.Trim().Length == 0)
+                    continue;
+                // Utwórz nowe uri
+                Uri problemFileUri = new Uri(newLine);
+                newProblem.SerializedProblem = File.ReadAllBytes(problemFileUri.AbsolutePath);
+                Console.WriteLine("OK. Problem instance is ready.");
+
+                // Pobierz czas oczekiwania na rozwiazanie
+                Console.WriteLine("OPTIONAL: Time restriction for solving the problem (in ms) or N:");
+                newLine = Console.ReadLine();
+                if (newLine.Trim() != null && !(newLine.Trim().Equals("N") || newLine.Trim().Equals("n")))
+                {
+                    newProblem.SolvingTimeOut = ulong.Parse(newLine.Trim());
+                }
+
+                computationalClient.SendSolveRequestMessage(newProblem);
             }
+
             Console.WriteLine("Computational Client ended successfully");
         }
     }
