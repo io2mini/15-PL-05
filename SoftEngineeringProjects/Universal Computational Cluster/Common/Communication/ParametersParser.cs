@@ -14,9 +14,9 @@ namespace Common.Communication
         private const string TIME_PARAMETER = "-t";
         private const string BACKUP_PARAMETER = "-backup";
         private const string PORT_PARAMETER = "-port";
-        private const string ADDRESS_PARAMTER = "-address";
+        private const string ADDRESS_PARAMETER = "-address";
         private static readonly string ipRegex = @"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
-        
+
         static public CommunicationInfo ReadParameters(string s, SystemComponentType type)
         {
             if (s == null) return null;
@@ -78,7 +78,7 @@ namespace Common.Communication
 
         private static void ParseArgumentsForComputation(string[] parameters, ref int i, ref CommunicationInfo cInfo)
         {
-            if (parameters[i] == ADDRESS_PARAMTER && i < parameters.Length - 1)
+            if (parameters[i] == ADDRESS_PARAMETER && i < parameters.Length - 1)
             {
                 try
                 {
@@ -167,7 +167,7 @@ namespace Common.Communication
                 }
 
             }
-            else if (parameters[i] == ADDRESS_PARAMTER && i < parameters.Length - 1)
+            else if (parameters[i] == ADDRESS_PARAMETER && i < parameters.Length - 1)
             {
                 try
                 {

@@ -357,6 +357,10 @@ namespace Common.Components
         public void InitializeIPList()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
+            var local = new CommunicationInfo();
+            local.CommunicationServerAddress = new Uri("http://127.0.0.1/");
+            local.CommunicationServerPort = communicationInfo.CommunicationServerPort;
+            CommunicationInfos.Add(local);
             foreach (IPAddress ip in host.AddressList)
             {
                 if (ip.IsIPv6LinkLocal) continue;
