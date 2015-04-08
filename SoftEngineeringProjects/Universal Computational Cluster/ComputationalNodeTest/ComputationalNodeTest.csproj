@@ -50,18 +50,17 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ComputationalNodeInterfaceTests.cs" />
     <Compile Include="ComputationalNodeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{ac1302e2-f903-44d2-a0b9-eb65263dd10a}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Computational Node\Computational Node.csproj">
       <Project>{f4a624a5-aa57-4bd1-8023-fd9106ee71d4}</Project>
       <Name>Computational Node</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ComputationalNodeUserInterface\ComputationalNodeUserInterface.csproj">
-      <Project>{c2654458-a300-449a-9a81-559fb8e2e4a7}</Project>
-      <Name>ComputationalNodeUserInterface</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

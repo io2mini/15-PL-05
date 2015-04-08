@@ -50,14 +50,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ComputationalClientInterfaceTests.cs" />
     <Compile Include="ComputationalClientTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ComputationalClientUserInterface\ComputationalClientUserInterface.csproj">
-      <Project>{44f112a9-3ca1-45e0-b2f7-eb45ee268ce0}</Project>
-      <Name>ComputationalClientUserInterface</Name>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{ac1302e2-f903-44d2-a0b9-eb65263dd10a}</Project>
+      <Name>Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\ComputationalClient\ComputationalClient.csproj">
       <Project>{7b733aa3-d074-497d-b2c8-ad4690084fc2}</Project>

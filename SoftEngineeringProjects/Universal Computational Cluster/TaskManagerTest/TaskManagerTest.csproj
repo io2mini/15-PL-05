@@ -50,18 +50,17 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="TaskManagerInterfaceTests.cs" />
     <Compile Include="TaskManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{ac1302e2-f903-44d2-a0b9-eb65263dd10a}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Task Manager\Task Manager.csproj">
       <Project>{40beaa1f-12c4-4f6f-b9c9-e19e8633a164}</Project>
       <Name>Task Manager</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TaskManagerUserInterface\TaskManagerUserInterface.csproj">
-      <Project>{50a24b1c-83b9-464a-8c1d-8bd8759ed6b1}</Project>
-      <Name>TaskManagerUserInterface</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

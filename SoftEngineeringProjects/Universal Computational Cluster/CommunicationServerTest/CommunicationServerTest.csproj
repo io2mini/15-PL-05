@@ -50,14 +50,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="CommunicationServerInterfaceTests.cs" />
     <Compile Include="CommunicationServerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommunicationServerUserInterface\CommunicationServerUserInterface.csproj">
-      <Project>{b5142333-9eb3-489f-9469-50e9bff60b20}</Project>
-      <Name>CommunicationServerUserInterface</Name>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{ac1302e2-f903-44d2-a0b9-eb65263dd10a}</Project>
+      <Name>Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\CommunicationServer\CommunicationServer.csproj">
       <Project>{20ef763b-27ec-4e8b-95f3-d059e153172a}</Project>
