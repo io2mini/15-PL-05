@@ -85,7 +85,7 @@ namespace Common.Components
                 while (MessageQueue.Count > 0)
                 {
                     var Message = MessageQueue.Dequeue();
-                    Console.WriteLine(Message.Item1);
+                    //Console.WriteLine(Message.Item1);
                     Validate(Message.Item1, Message.Item2);
                 }
             }
@@ -120,7 +120,7 @@ namespace Common.Components
                 tcpListener.Start();
                 while (IsWorking)
                 {
-                    Console.WriteLine("Po dekalracji");
+                    Console.WriteLine("Po deklaracji");
                     Socket socket = tcpListener.AcceptSocket();
                     Console.WriteLine("Po accept");
                     Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
@@ -239,6 +239,7 @@ namespace Common.Components
         /// <param name="status">Otrzymany status.</param>
         private void MsgHandler_Status(Status status, Socket sender)
         {
+            Console.WriteLine("Status Message id={0}, sending NoOperation", status.Id);
             if (!Sockets.ContainsKey(status.Id))
             {
                 var err = new Error();
@@ -268,6 +269,7 @@ namespace Common.Components
             //TODO: sprawdzenie, czy już nie jest zarejestrowany
 
             ulong id = FirstFreeID++;
+            Console.WriteLine("Register Message, Sending Register Response id={0}", id);
             Sockets.Add(id, socket);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             TimerStoppers.Add(id, true);
@@ -329,7 +331,7 @@ namespace Common.Components
             Timers[Id].Close();
             Timers.Remove(Id);
             TimerStoppers.Remove(Id);
-            Console.WriteLine("\nKomponent o id = {0} wyrejestrowano\n", Id);
+            Console.WriteLine("Deregistering id={0}", Id);
             return true;
         }
 
