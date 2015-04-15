@@ -16,7 +16,7 @@ namespace Common.Components
         {
             SolveRequest msg = SolveRequestGenerator.Generate(problem.ProblemType, problem.SerializedProblem, 
                 problem.SolvingTimeOut, problem.ProblemInstanceId);
-            // TODO: Wywołaj odpowiednią metodę do wysyłania wiadomości do serwera.
+            SendMessage(msg);
         }
     }
 }

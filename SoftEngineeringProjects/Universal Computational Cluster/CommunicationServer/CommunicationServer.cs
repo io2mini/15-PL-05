@@ -17,12 +17,13 @@ namespace Common.Components
         bool isPrimary;
         #region Constants
         const int TimeoutModifier = 3000;
-        const String Register = "Register", Status = "Status";
+        const String Register = "Register", Status = "Status", SolveRequest = "SolveRequest";
         #endregion
         #region ComunicationData
         Dictionary<ulong, bool> TimerStoppers;
         Dictionary<ulong, System.Timers.Timer> Timers;
         Dictionary<ulong, Socket> Sockets;
+        Dictionary<Socket, ulong> SocketToId;
         #endregion
         ulong FirstFreeID;
          public List<CommunicationInfo> CommunicationInfos;
@@ -35,7 +36,7 @@ namespace Common.Components
             Timers = new Dictionary<ulong, System.Timers.Timer>();
             TimerStoppers = new Dictionary<ulong, bool>();
             Sockets = new Dictionary<ulong, Socket>();
-
+            SocketToId = new Dictionary<Socket, ulong>();
             deviceType = SystemComponentType.CommunicationServer;
             solvableProblems = new string[] {"DVRP"};
             pararellThreads = 1;
@@ -52,6 +53,8 @@ namespace Common.Components
             SchemaTypes.Add(Register, new Tuple<string, Type>(Resources.Register, typeof(Register)));
             //Status
             SchemaTypes.Add(Status, new Tuple<string, Type>(Resources.Status, typeof(Status)));
+            //SolveRequest
+            SchemaTypes.Add(SolveRequest, new Tuple<string, Type>(Resources.SolveRequest, typeof(SolveRequest)));
         }
 
         /// <summary>
@@ -212,11 +215,24 @@ namespace Common.Components
                 case Status:
                     MsgHandler_Status((Status)message, socket);
                     return;
+                case SolveRequest:
+                    MsgHandler_SolveRequest((SolveRequest)message, socket);
+                    return;
                 default:
                     base.HandleMessage(message, key, socket);
                     return;
             }
 
+        }
+
+        /// <summary>
+        /// Obsługa otrzymanego żadania rozwiązania
+        /// </summary>
+        /// <param name="solveRequest">Otrzymana wiadomość</param>
+        /// <param name="socket">Skąd otrzymana</param>
+        private void MsgHandler_SolveRequest(Messages.SolveRequest solveRequest, Socket socket)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -271,6 +287,7 @@ namespace Common.Components
             ulong id = FirstFreeID++;
             Console.WriteLine("Register Message, Sending Register Response id={0}", id);
             Sockets.Add(id, socket);
+            SocketToId.Add(socket, id);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             TimerStoppers.Add(id, true);
             var Timer = new System.Timers.Timer();
@@ -326,6 +343,7 @@ namespace Common.Components
             SocketCloser.IsBackground = true;
             SocketCloser.Start(Sockets[Id]);
 
+            SocketToId.Remove(Sockets[Id]);
             Sockets.Remove(Id);
             Timers[Id].Enabled = false;
             Timers[Id].Close();
