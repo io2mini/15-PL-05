@@ -22,20 +22,21 @@ namespace Common.Components
         #region ComunicationData
         Dictionary<ulong, bool> TimerStoppers;
         Dictionary<ulong, System.Timers.Timer> Timers;
-        Dictionary<ulong, Socket> Sockets;
+        Dictionary<ulong, Socket> IdToSocket;
         Dictionary<Socket, ulong> SocketToId;
         #endregion
-        ulong FirstFreeID;
-         public List<CommunicationInfo> CommunicationInfos;
+        ulong FirstFreeComponentID;
+        ulong FirstFreeProblemID;
+        public List<CommunicationInfo> CommunicationInfos;
         public CommunicationServer(bool primary=true)
             : base()
         {
             isPrimary = primary;
-            FirstFreeID = 0;
+            FirstFreeProblemID = FirstFreeComponentID = 0;
             CommunicationInfos = new List<Communication.CommunicationInfo>();
             Timers = new Dictionary<ulong, System.Timers.Timer>();
             TimerStoppers = new Dictionary<ulong, bool>();
-            Sockets = new Dictionary<ulong, Socket>();
+            IdToSocket = new Dictionary<ulong, Socket>();
             SocketToId = new Dictionary<Socket, ulong>();
             deviceType = SystemComponentType.CommunicationServer;
             solvableProblems = new string[] {"DVRP"};
@@ -232,7 +233,12 @@ namespace Common.Components
         /// <param name="socket">Skąd otrzymana</param>
         private void MsgHandler_SolveRequest(Messages.SolveRequest solveRequest, Socket socket)
         {
+            var problemId = FirstFreeProblemID++;
             throw new NotImplementedException();
+            //TODO:SaveProblem, send it for division;
+            var msg = new SolveRequestResponse();
+            msg.Id = problemId;
+            SendMessageToComponent(socket, msg);
         }
 
         /// <summary>
@@ -256,7 +262,7 @@ namespace Common.Components
         private void MsgHandler_Status(Status status, Socket sender)
         {
             Console.WriteLine("Status Message id={0}, sending NoOperation", status.Id);
-            if (!Sockets.ContainsKey(status.Id))
+            if (!IdToSocket.ContainsKey(status.Id))
             {
                 var err = new Error();
                 err.ErrorType = ErrorErrorType.UnknownSender;
@@ -284,20 +290,9 @@ namespace Common.Components
             }
             //TODO: sprawdzenie, czy już nie jest zarejestrowany
 
-            ulong id = FirstFreeID++;
+            ulong id = FirstFreeComponentID++;
             Console.WriteLine("Register Message, Sending Register Response id={0}", id);
-            Sockets.Add(id, socket);
-            SocketToId.Add(socket, id);
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-            TimerStoppers.Add(id, true);
-            var Timer = new System.Timers.Timer();
-            Timer.Elapsed += (u,t) =>
-            {
-                if (!TimerStoppers[(ulong)id]) Deregister((ulong)id);
-                else TimerStoppers[(ulong)id] = false;
-            };
-            Timer.Interval = TimeoutModifier * (uint)CommunicationInfo.Time;
-            Timers.Add(id, Timer);
+            var Timer = RegisterComponent(socket, id);
             RegisterResponse response = new RegisterResponse();
             response.Id = id;
             response.Timeout =(uint)CommunicationInfo.Time;
@@ -319,6 +314,23 @@ namespace Common.Components
             Timer.AutoReset = true;
         }
 
+        private System.Timers.Timer RegisterComponent(Socket socket, ulong id)
+        {
+            IdToSocket.Add(id, socket);
+            SocketToId.Add(socket, id);
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            TimerStoppers.Add(id, true);
+            var Timer = new System.Timers.Timer();
+            Timer.Elapsed += (u, t) =>
+            {
+                if (!TimerStoppers[(ulong)id]) Deregister((ulong)id);
+                else TimerStoppers[(ulong)id] = false;
+            };
+            Timer.Interval = TimeoutModifier * (uint)CommunicationInfo.Time;
+            Timers.Add(id, Timer);
+            return Timer;
+        }
+
         /// <summary>
         /// Metoda zamykający juz nie uzywany soket
         /// </summary>
@@ -332,19 +344,29 @@ namespace Common.Components
         /// <summary>
         /// Metoda usuwająca komponent i zrywająca z nim połączenie.
         /// </summary>
+        /// <param name="s">Socket komponentu do derejestracji</param>
+        /// <returns></returns>
+        private bool Deregister(Socket s)
+        {
+            return Deregister(SocketToId[s]);
+        }
+
+        /// <summary>
+        /// Metoda usuwająca komponent i zrywająca z nim połączenie.
+        /// </summary>
         /// <param name="Id">ID komponentu do derejestracji.</param>
         /// <returns></returns>
         private bool Deregister(ulong Id)
         {
             //return false;
-            if (!Sockets.ContainsKey(Id)) return false;
+            if (!IdToSocket.ContainsKey(Id)) return false;
 
             Thread SocketCloser = new Thread(new ParameterizedThreadStart(CloseSocket));
             SocketCloser.IsBackground = true;
-            SocketCloser.Start(Sockets[Id]);
+            SocketCloser.Start(IdToSocket[Id]);
 
-            SocketToId.Remove(Sockets[Id]);
-            Sockets.Remove(Id);
+            SocketToId.Remove(IdToSocket[Id]);
+            IdToSocket.Remove(Id);
             Timers[Id].Enabled = false;
             Timers[Id].Close();
             Timers.Remove(Id);
@@ -370,11 +392,16 @@ namespace Common.Components
         /// Metoda wysyłająca wiadomość do komponentu.
         /// </summary>
         /// <param name="Id">Komponent do którego wysyłamy wiadomość.</param>
-        /// <param name="message">Wiadomość do wysłaniu.</param>
+        /// <param name="message">Wiadomość do wysłania.</param>
         protected void SendMessageToComponent(ulong Id, Message message)
         {
-            SendMessageToComponent(Sockets[Id], message);
+            SendMessageToComponent(IdToSocket[Id], message);
         }
+        /// <summary>
+        /// Metoda wysyłająca wiadomość do komponentu.
+        /// </summary>
+        /// <param name="receiver">Komponent do którego wysyłamy wiadomość.</param>
+        /// <param name="message">Wiadomość do wysłania.</param>
         protected void SendMessageToComponent(Socket receiver, Message message)
         {
             try

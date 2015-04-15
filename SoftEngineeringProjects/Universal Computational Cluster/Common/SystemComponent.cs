@@ -228,7 +228,7 @@ namespace Common
         /// </summary>
         /// <param name="XML">wiadomość w postaci łańcucha znaków</param>
         /// <param name="socket">Socket z którego otrzymano</param>
-        protected virtual void Validate(string XML, Socket socket)
+        protected void Validate(string XML, Socket socket)
         {
             XDocument message;
             try
