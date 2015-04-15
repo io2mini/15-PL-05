@@ -28,6 +28,7 @@ namespace Common.UserInterface
                     if (!hasBeenRead)
                     {
                         communicationServer.LoadConfig(SystemComponent.Path);
+                        communicationServer.InitializeIPList();
                         hasBeenRead = true;
                     }
                     break;

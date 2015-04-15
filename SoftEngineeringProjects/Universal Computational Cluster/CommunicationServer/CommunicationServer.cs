@@ -123,9 +123,9 @@ namespace Common.Components
                 tcpListener.Start();
                 while (IsWorking)
                 {
-                    Console.WriteLine("Po deklaracji");
+                    Console.WriteLine("Started listening on: {0}", CommInfo.CommunicationServerAddress);
                     Socket socket = tcpListener.AcceptSocket();
-                    Console.WriteLine("Po accept");
+                    Console.WriteLine("Accepted connection from {0}",socket.RemoteEndPoint);
                     Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
                     thread.IsBackground = true;
                     thread.Start(socket);
