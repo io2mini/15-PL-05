@@ -17,7 +17,7 @@ namespace Common.Components
         bool isPrimary;
         #region Constants
         const int TimeoutModifier = 3000;
-        const String Register = "Register", Status = "Status", SolveRequest = "SolveRequest";
+        const String Register = "Register", Status = "Status", SolveRequest = "SolveRequest", PartialProblems = "PartialProblems", SolutionRequest = "SolutionRequest";
         #endregion
         #region ComunicationData
         Dictionary<ulong, bool> TimerStoppers;
@@ -56,6 +56,11 @@ namespace Common.Components
             SchemaTypes.Add(Status, new Tuple<string, Type>(Resources.Status, typeof(Status)));
             //SolveRequest
             SchemaTypes.Add(SolveRequest, new Tuple<string, Type>(Resources.SolveRequest, typeof(SolveRequest)));
+            //PartialProblems
+            SchemaTypes.Add(PartialProblems, new Tuple<string, Type>(Resources.PartialProblems, typeof(SolvePartialProblems)));
+            //SolutionRequest
+            //TODO:Add missing schema
+            //SchemaTypes.Add(SolutionRequest, new Tuple<string, Type>(Resources.SolutionRequest, typeof(SolutionRequest)));
         }
 
         /// <summary>
@@ -219,11 +224,48 @@ namespace Common.Components
                 case SolveRequest:
                     MsgHandler_SolveRequest((SolveRequest)message, socket);
                     return;
+                case PartialProblems:
+                    MsgHandler_PartialProblems((SolvePartialProblems)message, socket);
+                    return;
+                case SolutionRequest:
+                    //TODO: add missing schema, generate missing type
+                    //MsgHandler_SolutionRequest((SolutionRequest)message, socket);
+                    return;
                 default:
                     base.HandleMessage(message, key, socket);
                     return;
             }
 
+        }
+        /// <summary>
+        /// Obsługa otrzymanego żądania rozwiązania
+        /// </summary>
+        /// <param name="solutionRequest"></param>
+        /// <param name="socket"></param>
+        /*
+         * TODO: add missing schema, generate missing type
+         * private void MsgHandler_SolutionRequest(SolutionRequest solutionRequest, Socket socket)
+        {
+            throw new NotImplementedException();
+        }*/
+
+        /// <summary>
+        /// Obsługa otrzymanego komunikatu na temat rozwiązań
+        /// </summary>
+        /// <param name="solutions"></param>
+        protected override void MsgHandler_Solution(Solutions solutions)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Obsługa otrzymanego podzielonego problemu
+        /// </summary>
+        /// <param name="solvePartialProblems"></param>
+        /// <param name="socket"></param>
+        protected void MsgHandler_PartialProblems(SolvePartialProblems solvePartialProblems, Socket socket)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -231,7 +273,7 @@ namespace Common.Components
         /// </summary>
         /// <param name="solveRequest">Otrzymana wiadomość</param>
         /// <param name="socket">Skąd otrzymana</param>
-        private void MsgHandler_SolveRequest(Messages.SolveRequest solveRequest, Socket socket)
+        protected void MsgHandler_SolveRequest(Messages.SolveRequest solveRequest, Socket socket)
         {
             var problemId = FirstFreeProblemID++;
             throw new NotImplementedException();
@@ -247,11 +289,12 @@ namespace Common.Components
         /// <param name="message">Otrzymany komunikat o błędzie</param>
         protected override void MsgHandler_Error(Error message)
         {
-            if (!isPrimary)
+            if (!isPrimary || message.ErrorType != ErrorErrorType.ExceptionOccured)
             {
                 base.MsgHandler_Error(message);
                 return;
             }
+            //TODO: Handle Exception
             throw new NotImplementedException();
         }
 
@@ -259,7 +302,7 @@ namespace Common.Components
         /// Metoda obsługująca otrzymaną wiadomość typu status.
         /// </summary>
         /// <param name="status">Otrzymany status.</param>
-        private void MsgHandler_Status(Status status, Socket sender)
+        protected void MsgHandler_Status(Status status, Socket sender)
         {
             Console.WriteLine("Status Message id={0}, sending NoOperation", status.Id);
             if (!IdToSocket.ContainsKey(status.Id))
@@ -278,7 +321,7 @@ namespace Common.Components
         /// </summary>
         /// <param name="register">Otrzymana wiadomość.</param>
         /// <param name="socket">Socket na którym ją otrzymaliśmy.</param>
-        private void MsgHandler_Register(Register register, Socket socket)
+        protected void MsgHandler_Register(Register register, Socket socket)
         {
             if (register.DeregisterSpecified)
             {
@@ -314,7 +357,7 @@ namespace Common.Components
             Timer.AutoReset = true;
         }
 
-        private System.Timers.Timer RegisterComponent(Socket socket, ulong id)
+        protected System.Timers.Timer RegisterComponent(Socket socket, ulong id)
         {
             IdToSocket.Add(id, socket);
             SocketToId.Add(socket, id);
@@ -335,7 +378,7 @@ namespace Common.Components
         /// Metoda zamykający juz nie uzywany soket
         /// </summary>
         /// <param name="socket">soket, który nalezy zamknąć</param>
-        private void CloseSocket(object socket)
+        protected void CloseSocket(object socket)
         {
             Thread.Sleep(new TimeSpan(0, 0, 15, 0));
             if(socket is Socket) (socket as Socket).Close();
@@ -346,7 +389,7 @@ namespace Common.Components
         /// </summary>
         /// <param name="s">Socket komponentu do derejestracji</param>
         /// <returns></returns>
-        private bool Deregister(Socket s)
+        protected bool Deregister(Socket s)
         {
             return Deregister(SocketToId[s]);
         }
@@ -356,7 +399,7 @@ namespace Common.Components
         /// </summary>
         /// <param name="Id">ID komponentu do derejestracji.</param>
         /// <returns></returns>
-        private bool Deregister(ulong Id)
+        protected bool Deregister(ulong Id)
         {
             //return false;
             if (!IdToSocket.ContainsKey(Id)) return false;
@@ -387,6 +430,7 @@ namespace Common.Components
             return Noop;
         }
         #endregion
+
         #region ConnectionHandling
         /// <summary>
         /// Metoda wysyłająca wiadomość do komponentu.
@@ -418,8 +462,9 @@ namespace Common.Components
             }
         }
 
-        #endregion
-
+        /// <summary>
+        /// Inicjalizuje listę adresów do nasłuchiwania
+        /// </summary>
         public void InitializeIPList()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -441,7 +486,10 @@ namespace Common.Components
                     C.CommunicationServerAddress = new Uri(localIP);
                     CommunicationInfos.Add(C);
             }
-            
+
         }
+
+        #endregion
+
     }
 }

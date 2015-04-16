@@ -43,8 +43,19 @@ namespace Common.Components
 
         }
 
-        private void MsgHandler_SolveRequestResponse(Messages.SolveRequestResponse solveRequestResponse, Socket socket)
+        protected void MsgHandler_SolveRequestResponse(Messages.SolveRequestResponse solveRequestResponse, Socket socket)
         {
+            throw new NotImplementedException();
+        }
+
+        protected override void MsgHandler_Error(Error message)
+        {
+            if (message.ErrorType != ErrorErrorType.ExceptionOccured)
+            {
+                base.MsgHandler_Error(message);
+                return;
+            }
+            //TODO: handle received exception
             throw new NotImplementedException();
         }
     }

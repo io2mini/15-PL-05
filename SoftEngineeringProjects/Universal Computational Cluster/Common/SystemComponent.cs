@@ -31,7 +31,7 @@ namespace Common
     public abstract class SystemComponent
     {
         #region Constants
-        const String RegisterResponse = "RegisterResponse", NoOperation = "NoOperation", Error = "Error";
+        const String RegisterResponse = "RegisterResponse", NoOperation = "NoOperation", Error = "Error", Solution = "Solution";
         const uint MilisecondsMultiplier = 1000;
         public const string Path = ""; //Scieżka do pliku konfiguracyjnego
         #endregion
@@ -77,9 +77,14 @@ namespace Common
         protected virtual void Initialize()
         {
             SchemaTypes = new Dictionary<string, Tuple<string, Type>>();
+            //RegisterResponse
             SchemaTypes.Add(RegisterResponse,new Tuple<string, Type>(Resources.RegisterResponse, typeof(RegisterResponse)));
+            //NoOperation
             SchemaTypes.Add(NoOperation, new Tuple<string, Type>(Resources.NoOperation, typeof(NoOperation)));
+            //Error
             SchemaTypes.Add(Error, new Tuple<string, Type>(Resources.Error, typeof(Error)));
+            //Solution
+            SchemaTypes.Add(Solution, new Tuple<string, Type>(Resources.Solution, typeof(Solutions)));
         }
 
         /// <summary>
@@ -154,7 +159,16 @@ namespace Common
                 case Error:
                     MsgHandler_Error((Error)message);
                     return;
+                case Solution:
+                    MsgHandler_Solution((Solutions)message);
+                    return;
+                default: throw new InvalidOperationException("Unknown msg key"); //TODO: własny wyjątek;
             }
+        }
+
+        protected virtual void MsgHandler_Solution(Solutions solutions)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -175,6 +189,7 @@ namespace Common
                 case ErrorErrorType.InvalidOperation:
                     {
                         //TODO:switch to idle/partially idle state
+                        throw new NotImplementedException();
                         break;
                     }
             }
@@ -185,7 +200,7 @@ namespace Common
         /// typu Status Report do serwera
         /// </summary>
         /// <param name="message"> Message typu Register Response na który reagujemy</param>
-        protected virtual void MsgHandler_RegisterResponse(RegisterResponse message)
+        protected void MsgHandler_RegisterResponse(RegisterResponse message)
         {
             Console.WriteLine("RegisterResponse Message id={0}", message.Id);
             communicationInfo.Time = message.Timeout;
@@ -217,7 +232,7 @@ namespace Common
         /// Metoda reaguje na NoOperation, aktualizując dane o Backup Serwerze
         /// </summary>
         /// <param name="message"> Message typu NoOperation na który reagujemy</param>
-        protected virtual void MsgHandler_NoOperation(NoOperation message)
+        protected void MsgHandler_NoOperation(NoOperation message)
         {
             Console.WriteLine("NoOperation Message");
             BackupServer = message.BackupCommunicationServers.BackupCommunicationServer;
