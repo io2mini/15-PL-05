@@ -265,6 +265,12 @@ namespace Common.Components
         /// <param name="socket"></param>
         protected void MsgHandler_PartialProblems(SolvePartialProblems solvePartialProblems, Socket socket)
         {
+            /*
+             * TODO:
+             * 1. Save partial problems
+             * 2. Find nodes that can solve partial problems
+             * 3. Send them "smaller" partial problems message (with subproblems to compute)
+             */
             throw new NotImplementedException();
         }
 
@@ -277,7 +283,13 @@ namespace Common.Components
         {
             var problemId = FirstFreeProblemID++;
             throw new NotImplementedException();
-            //TODO:SaveProblem, send it for division;
+            /*
+             * TODO:
+             * 1. Save problem data.
+             * 2. Send Problem ID via SolveRequestResponse to client.
+             * 3. Send Problem data for division to TM.
+             * 4. If specified, handle solve timeout.
+             */
             var msg = new SolveRequestResponse();
             msg.Id = problemId;
             SendMessageToComponent(socket, msg);

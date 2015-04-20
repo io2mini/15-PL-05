@@ -20,6 +20,10 @@ namespace Common.Components
             SolveRequest msg = SolveRequestGenerator.Generate(problem.ProblemType, problem.SerializedProblem, 
                 problem.SolvingTimeOut, problem.ProblemInstanceId);
             SendMessage(msg);
+            /* 
+             * TODO:
+             * 1. Wait for SolveRequestResponse
+             */
         }
 
         protected override void Initialize()
@@ -45,6 +49,11 @@ namespace Common.Components
 
         protected void MsgHandler_SolveRequestResponse(Messages.SolveRequestResponse solveRequestResponse, Socket socket)
         {
+            /*
+             * TODO:
+             * 1. Save problem ID for solutionRequests sake.
+             * 2. Handle sending SolutionRequests.
+             */
             throw new NotImplementedException();
         }
 

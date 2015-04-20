@@ -41,6 +41,11 @@ namespace Common.Components
 
         private void MsgHandler_DivideProblem(Messages.DivideProblem divideProblem, Socket socket)
         {
+            /*
+             * TODO:
+             * 1. Divide Problem
+             * 2. Send divided problem data to CS
+             */
             throw new NotImplementedException();
         }
     }
