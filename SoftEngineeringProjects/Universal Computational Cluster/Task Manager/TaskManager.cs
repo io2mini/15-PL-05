@@ -43,6 +43,7 @@ namespace Common.Components
         {
             /*
              * TODO:
+             * 0. If not Idle throw exception
              * 1. Divide Problem
              * 2. Send divided problem data to CS
              */

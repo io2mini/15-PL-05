@@ -2,8 +2,10 @@
 using System;
 using Common.Properties;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Sockets;
 using System.IO;
+using System.Linq;
 using Common.Exceptions;
 using System.Text;
 using System.Threading;
@@ -20,18 +22,19 @@ namespace Common.Components
         const String Register = "Register", Status = "Status", SolveRequest = "SolveRequest", PartialProblems = "PartialProblems", SolutionRequest = "SolutionRequest";
         #endregion
         #region ComunicationData
+
+        Dictionary<ulong, StatusThread[]> ThreadStates;
         Dictionary<ulong, bool> TimerStoppers;
         Dictionary<ulong, System.Timers.Timer> Timers;
         Dictionary<ulong, Socket> IdToSocket;
         Dictionary<Socket, ulong> SocketToId;
         Dictionary<ulong, byte[]> Problems;
-        Dictionary<ulong, SolvePartialProblems> SavedPartialProblems; 
-
+        Dictionary<ulong, SolvePartialProblems> SavedPartialProblems;
+        Dictionary<ulong, SystemComponentType> ComponentTypes;
+        Dictionary<ulong, List<String>> SolvableProblemTypes;
         #endregion
         ulong FirstFreeComponentID;
         ulong FirstFreeProblemID;
-        Dictionary<ulong, SystemComponentType> ComponentTypes;
-        Dictionary<ulong, List<String>> SolvableProblemTypes;
         public List<CommunicationInfo> CommunicationInfos;
 
         public CommunicationServer(bool primary=true)
@@ -45,6 +48,7 @@ namespace Common.Components
             IdToSocket = new Dictionary<ulong, Socket>();
             SocketToId = new Dictionary<Socket, ulong>();
             Problems = new Dictionary<ulong, byte[]>();
+            ThreadStates = new Dictionary<ulong, StatusThread[]>();
             SavedPartialProblems = new Dictionary<ulong, SolvePartialProblems>();
             deviceType = SystemComponentType.CommunicationServer;
             solvableProblems = new string[] {"DVRP"};
@@ -121,18 +125,35 @@ namespace Common.Components
         /// </summary>
         /// <param name="p">Żądany rodzaj problemu.</param>
         /// <returns>Id znalezionego TM.</returns>
-        private ulong GetTM(string p)
+        private ulong GetTM(string problemType)
         {
-            throw new NotImplementedException();
+            foreach (ulong key in ThreadStates.Keys)
+            {
+                if (ComponentTypes[key] == SystemComponentType.TaskManager && SolvableProblemTypes[key].Contains(problemType))
+                    if (ThreadStates[key].Any(thread => thread.State == StatusThreadState.Idle))
+                    {
+                        return key;
+                    }
+            }
+            throw new Exception("TM not found"); //TODO: create new exception
         }
 
         /// <summary>
         /// Funkcja obliczająca ilość dostępnych threadów.
         /// </summary>
         /// <returns>Ilość dostępnych threadów.</returns>
-        private ulong GetAvailableThreads()
+        private ulong GetAvailableThreads(String problemType)
         {
-            throw new NotImplementedException();
+            ulong i = 0;
+            foreach (ulong key in ThreadStates.Keys)
+            {
+                if(ComponentTypes[key] == SystemComponentType.ComputationalNode && SolvableProblemTypes[key].Contains(problemType))
+                foreach (var thread in ThreadStates[key])
+                {
+                    if (thread.State == StatusThreadState.Idle) i++;
+                }
+            }
+            return i;
         }
         #endregion
 
@@ -214,7 +235,6 @@ namespace Common.Components
             ulong problemId = FirstFreeProblemID++;
             /*
              * TODO:
-             * 3. Send Problem data for division to TM.
              * 4. If specified, handle solve timeout.
              */
             Problems.Add(problemId, solveRequest.Data);
@@ -227,7 +247,7 @@ namespace Common.Components
             msg.Data = solveRequest.Data;
             msg.Id = problemId;
             msg.ProblemType = solveRequest.ProblemType;
-            msg.ComputationalNodes = GetAvailableThreads();
+            msg.ComputationalNodes = GetAvailableThreads(solveRequest.ProblemType);
             ulong tmId = GetTM(solveRequest.ProblemType);
             msg.NodeID = tmId;
 
@@ -267,6 +287,7 @@ namespace Common.Components
                 return;
             }
             TimerStoppers[status.Id] = true;
+            ThreadStates[status.Id] = status.Threads;
             SendMessageToComponent(status.Id, GenerateNoOperationMessage());
         }
         
@@ -289,7 +310,7 @@ namespace Common.Components
             
             ulong id = FirstFreeComponentID++;
             Console.WriteLine("Register Message, Sending Register Response id={0}", id);
-            var Timer = RegisterComponent(socket, id,ParseType(register.Type));
+            var Timer = RegisterComponent(socket, id, ParseType(register.Type), register.SolvableProblems);
             RegisterResponse response = new RegisterResponse();
             response.Id = id;
             response.Timeout =(uint)CommunicationInfo.Time;
@@ -307,21 +328,27 @@ namespace Common.Components
             }
             SendMessageToComponent(id, response);
             Timer.Enabled = true;
-            //Timer.Start();
+            Timer.Start();
             Timer.AutoReset = true;
         }
 
-        protected System.Timers.Timer RegisterComponent(Socket socket, ulong id,SystemComponentType type)
+        protected System.Timers.Timer RegisterComponent(Socket socket, ulong id, SystemComponentType type, String[] solvableProbs)
         {
             IdToSocket.Add(id, socket);
             SocketToId.Add(socket, id);
+            ComponentTypes.Add(id, type);
+            ThreadStates.Add(id, null);
+            if (solvableProblems.Any())
+            {
+                SolvableProblemTypes.Add(id, solvableProbs.ToList());
+            }
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             TimerStoppers.Add(id, true);
             var Timer = new System.Timers.Timer();
             Timer.Elapsed += (u, t) =>
             {
-                if (!TimerStoppers[(ulong)id]) Deregister((ulong)id);
-                else TimerStoppers[(ulong)id] = false;
+                if (!TimerStoppers[id]) Deregister((ulong)id);
+                else TimerStoppers[id] = false;
             };
             Timer.Interval = TimeoutModifier * (uint)CommunicationInfo.Time;
             Timers.Add(id, Timer);
@@ -365,6 +392,10 @@ namespace Common.Components
 
             SocketToId.Remove(IdToSocket[Id]);
             IdToSocket.Remove(Id);
+            ComponentTypes.Remove(Id);
+            ThreadStates.Remove(Id);
+            SolvableProblemTypes.Remove(Id);
+
             Timers[Id].Enabled = false;
             Timers[Id].Close();
             Timers.Remove(Id);
