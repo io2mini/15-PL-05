@@ -119,7 +119,7 @@ namespace Common
         /// <summary>
         /// Metoda używana do otrzymywania wiadomści, wyświetla na konsolę otrzymany message 
         /// </summary>
-        private void ReceiveResponse()
+        protected void ReceiveResponse()
         {
             if (!tcpClient.Connected) tcpClient.Connect(communicationInfo.CommunicationServerAddress.Host, (int)communicationInfo.CommunicationServerPort);
             var stream= tcpClient.GetStream();

@@ -98,7 +98,7 @@ namespace Common.Components
                 }
             }
         }
-        //TODO: Move to message
+        
         /// <summary>
         /// Converts byteArray to string and removes unnecessary characters.
         /// </summary>
@@ -163,7 +163,7 @@ namespace Common.Components
                 while (socket.IsBound)
                 {
                     byte[] byteArray = new Byte[1024];
-                    //TODO: try catch?
+                   
                     Thread.Sleep(1000);
                     socket.Receive(byteArray);
                     String message = Message.Sanitize(byteArray);
@@ -340,7 +340,7 @@ namespace Common.Components
                 }
             }
             //TODO: sprawdzenie, czy już nie jest zarejestrowany
-
+            
             ulong id = FirstFreeComponentID++;
             Console.WriteLine("Register Message, Sending Register Response id={0}", id);
             var Timer = RegisterComponent(socket, id);

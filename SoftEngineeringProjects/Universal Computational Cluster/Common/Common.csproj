@@ -50,6 +50,7 @@
     <Compile Include="Exceptions\MessageNotSentException.cs" />
     <Compile Include="Messages\Generators\RegisterGenerator.cs" />
     <Compile Include="Messages\Generators\RegisterResponseGenerator.cs" />
+    <Compile Include="Messages\Generators\SolutionRequestGenerator.cs" />
     <Compile Include="Messages\Generators\SolveRequestGenerator.cs" />
     <Compile Include="Messages\Generators\StatusReportGenerator.cs" />
     <Compile Include="Messages\Instances\DivideProblem.cs" />
