@@ -24,6 +24,8 @@ namespace Common.Components
         Dictionary<ulong, System.Timers.Timer> Timers;
         Dictionary<ulong, Socket> IdToSocket;
         Dictionary<Socket, ulong> SocketToId;
+        Dictionary<ulong, byte[]> Problems;
+        Dictionary<ulong, SolvePartialProblems> SavedPartialProblems; 
         #endregion
         ulong FirstFreeComponentID;
         ulong FirstFreeProblemID;
@@ -33,11 +35,13 @@ namespace Common.Components
         {
             isPrimary = primary;
             FirstFreeProblemID = FirstFreeComponentID = 0;
-            CommunicationInfos = new List<Communication.CommunicationInfo>();
+            CommunicationInfos = new List<CommunicationInfo>();
             Timers = new Dictionary<ulong, System.Timers.Timer>();
             TimerStoppers = new Dictionary<ulong, bool>();
             IdToSocket = new Dictionary<ulong, Socket>();
             SocketToId = new Dictionary<Socket, ulong>();
+            Problems = new Dictionary<ulong, byte[]>();
+            SavedPartialProblems = new Dictionary<ulong, SolvePartialProblems>();
             deviceType = SystemComponentType.CommunicationServer;
             solvableProblems = new string[] {"DVRP"};
             pararellThreads = 1;
@@ -80,6 +84,22 @@ namespace Common.Components
                 listener.Start((object)CI);
             }
         }
+        
+        /// <summary>
+        /// Converts byteArray to string and removes unnecessary characters.
+        /// </summary>
+        /// <param name="byteArray">Message in byte form</param>
+        /// <returns>Message in string form</returns>
+
+        /// <summary>
+        /// Override metody komponentu rozpoczynająca nasłuchiwania serwera
+        /// </summary>
+        public override void Start()
+        {
+            InitializeMessageQueue((int)communicationInfo.CommunicationServerPort);
+        }
+
+        #region InnerDataFunctions
 
         /// <summary>
         /// Metoda obsługi kolejki wiadomości odbierającej komunikaty
@@ -98,109 +118,25 @@ namespace Common.Components
                 }
             }
         }
-        
         /// <summary>
-        /// Converts byteArray to string and removes unnecessary characters.
+        /// Funkcja wyszukująca TM.
         /// </summary>
-        /// <param name="byteArray">Message in byte form</param>
-        /// <returns>Message in string form</returns>
-
-        /// <summary>
-        /// Override metody komponentu rozpoczynająca nasłuchiwania serwera
-        /// </summary>
-        public override void Start()
+        /// <param name="p">Żądany rodzaj problemu.</param>
+        /// <returns>Id znalezionego TM.</returns>
+        private ulong GetTM(string p)
         {
-            InitializeMessageQueue((int)communicationInfo.CommunicationServerPort);
+            throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
+        /// Funkcja obliczająca ilość dostępnych threadów.
         /// </summary>
-        private void StartListening(object communicationInfo)
+        /// <returns>Ilość dostępnych threadów.</returns>
+        private ulong GetAvailableThreads()
         {
-            var CommInfo = (CommunicationInfo)communicationInfo;
-            byte[] bytes = new Byte[1024];
-            IPAddress ipAddress = IPAddress.Parse(CommInfo.CommunicationServerAddress.Host);
-            TcpListener tcpListener = new TcpListener(ipAddress, (int)CommInfo.CommunicationServerPort);
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, (int)CommInfo.CommunicationServerPort);
-            try
-            {
-                tcpListener.Start();
-                while (IsWorking)
-                {
-                    Console.WriteLine("Started listening on: {0}", CommInfo.CommunicationServerAddress);
-                    Socket socket = tcpListener.AcceptSocket();
-                    Console.WriteLine("Accepted connection from {0}",socket.RemoteEndPoint);
-                    Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
-                    thread.IsBackground = true;
-                    thread.Start(socket);
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
+            throw new NotImplementedException();
         }
-
-        /// <summary>
-        /// Metoda pośrednia do obsługi nasłuchu.
-        /// </summary>
-        /// <param name="socket">sochet, na którym nasłuchujemy.</param>
-        private void ReceiveMessage(Object socket)
-        {
-            ReceiveMessage((Socket)socket);
-        }
-
-        /// <summary>
-        /// Metoda obsługująca nasłuchiwanie komunikatów od konkretnego komponentu.
-        /// </summary>
-        /// <param name="socket">Socket na którym odbywa się nasłuchiwanie.</param>
-        private void ReceiveMessage(Socket socket)
-        {
-            try
-            {
-                while (socket.IsBound)
-                {
-                    byte[] byteArray = new Byte[1024];
-                   
-                    Thread.Sleep(1000);
-                    socket.Receive(byteArray);
-                    String message = Message.Sanitize(byteArray);
-                    MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
-                    MessageQueueMutex.Set();
-
-                }
-            }
-            catch (SocketException e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-            }
-            catch (ObjectDisposedException e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-            }
-        }
-        
-        /// <summary>
-        /// Metoda stworzona na potrzeby testów, służąca do raportowania przesłanych bajtów.
-        /// </summary>
-        /// <param name="ar">Parametr Callbacku, z którego uzyskujemy socket.</param>
-        private static void SendCallback(IAsyncResult ar)
-        {
-            try
-            {
-                Socket handler = (Socket)ar.AsyncState;
-                int bytesSent = handler.EndSend(ar);
-                // na potrzeby testów
-                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
-                
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
+        #endregion
 
         #region MessageGenerationAndHandling
 
@@ -210,7 +146,7 @@ namespace Common.Components
         /// <param name="message">Otrzymana wiadomość.</param>
         /// <param name="key">Nazwa schemy której otrzymujemy.</param>
         /// <param name="socket">Socket z którego przyszła wiadomość.</param>
-        protected override void HandleMessage(Messages.Message message, string key, Socket socket)
+        protected override void HandleMessage(Message message, string key, Socket socket)
         {
             switch (key)
             {
@@ -263,10 +199,10 @@ namespace Common.Components
         {
             /*
              * TODO:
-             * 1. Save partial problems
              * 2. Find nodes that can solve partial problems
              * 3. Send them "smaller" partial problems message (with subproblems to compute)
              */
+            SavedPartialProblems.Add(solvePartialProblems.Id, solvePartialProblems);
             throw new NotImplementedException();
         }
 
@@ -275,20 +211,30 @@ namespace Common.Components
         /// </summary>
         /// <param name="solveRequest">Otrzymana wiadomość</param>
         /// <param name="socket">Skąd otrzymana</param>
-        protected void MsgHandler_SolveRequest(Messages.SolveRequest solveRequest, Socket socket)
+        protected void MsgHandler_SolveRequest(SolveRequest solveRequest, Socket socket)
         {
-            var problemId = FirstFreeProblemID++;
-            throw new NotImplementedException();
+            ulong problemId = FirstFreeProblemID++;
             /*
              * TODO:
-             * 1. Save problem data.
-             * 2. Send Problem ID via SolveRequestResponse to client.
-             * 3. Send Problem data for division to TM.
              * 4. If specified, handle solve timeout.
              */
-            var msg = new SolveRequestResponse();
+            Problems.Add(problemId, solveRequest.Data);
+
+            var response = new SolveRequestResponse();
+            response.Id = problemId;
+            SendMessageToComponent(socket, response);
+
+            var msg = new DivideProblem();
+            msg.Data = solveRequest.Data;
             msg.Id = problemId;
-            SendMessageToComponent(socket, msg);
+            msg.ProblemType = solveRequest.ProblemType;
+            msg.ComputationalNodes = GetAvailableThreads();
+            ulong tmId = GetTM(solveRequest.ProblemType);
+            msg.NodeID = tmId;
+
+            SendMessageToComponent(tmId, msg);
+
+            //TODO:Handle timeout if specified
         }
 
         /// <summary>
@@ -498,6 +444,94 @@ namespace Common.Components
 
         }
 
+        /// <summary>
+        /// Metoda nawiązująca połączenie z nadającym wiadomości komponentem.
+        /// </summary>
+        private void StartListening(object communicationInfo)
+        {
+            var CommInfo = (CommunicationInfo)communicationInfo;
+            byte[] bytes = new Byte[1024];
+            IPAddress ipAddress = IPAddress.Parse(CommInfo.CommunicationServerAddress.Host);
+            TcpListener tcpListener = new TcpListener(ipAddress, (int)CommInfo.CommunicationServerPort);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, (int)CommInfo.CommunicationServerPort);
+            try
+            {
+                tcpListener.Start();
+                while (IsWorking)
+                {
+                    Console.WriteLine("Started listening on: {0}", CommInfo.CommunicationServerAddress);
+                    Socket socket = tcpListener.AcceptSocket();
+                    Console.WriteLine("Accepted connection from {0}", socket.RemoteEndPoint);
+                    Thread thread = new Thread(new ParameterizedThreadStart(ReceiveMessage));
+                    thread.IsBackground = true;
+                    thread.Start(socket);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Metoda pośrednia do obsługi nasłuchu.
+        /// </summary>
+        /// <param name="socket">sochet, na którym nasłuchujemy.</param>
+        private void ReceiveMessage(Object socket)
+        {
+            ReceiveMessage((Socket)socket);
+        }
+
+        /// <summary>
+        /// Metoda obsługująca nasłuchiwanie komunikatów od konkretnego komponentu.
+        /// </summary>
+        /// <param name="socket">Socket na którym odbywa się nasłuchiwanie.</param>
+        private void ReceiveMessage(Socket socket)
+        {
+            try
+            {
+                while (socket.IsBound)
+                {
+                    byte[] byteArray = new Byte[1024];
+
+                    Thread.Sleep(1000);
+                    socket.Receive(byteArray);
+                    String message = Message.Sanitize(byteArray);
+                    MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
+                    MessageQueueMutex.Set();
+
+                }
+            }
+            catch (SocketException e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+            catch (ObjectDisposedException e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Metoda stworzona na potrzeby testów, służąca do raportowania przesłanych bajtów.
+        /// </summary>
+        /// <param name="ar">Parametr Callbacku, z którego uzyskujemy socket.</param>
+        private static void SendCallback(IAsyncResult ar)
+        {
+            try
+            {
+                Socket handler = (Socket)ar.AsyncState;
+                int bytesSent = handler.EndSend(ar);
+                // na potrzeby testów
+                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
         #endregion
 
     }
