@@ -310,6 +310,7 @@ namespace Common.Components
         /// Metoda obsługująca otrzymaną wiadomość typu status.
         /// </summary>
         /// <param name="status">Otrzymany status.</param>
+        /// <param name="sender">Socket na którym go otrzymaliśmy.</param>
         protected void MsgHandler_Status(Status status, Socket sender)
         {
             Console.WriteLine("Status Message id={0}, sending NoOperation", status.Id);
