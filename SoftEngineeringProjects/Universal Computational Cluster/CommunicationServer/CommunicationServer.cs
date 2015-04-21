@@ -59,8 +59,7 @@ namespace Common.Components
             //PartialProblems
             SchemaTypes.Add(PartialProblems, new Tuple<string, Type>(Resources.PartialProblems, typeof(SolvePartialProblems)));
             //SolutionRequest
-            //TODO:Add missing schema
-            //SchemaTypes.Add(SolutionRequest, new Tuple<string, Type>(Resources.SolutionRequest, typeof(SolutionRequest)));
+            SchemaTypes.Add(SolutionRequest, new Tuple<string, Type>(Resources.SolutionRequest, typeof(SolutionRequest)));
         }
 
         /// <summary>
@@ -228,8 +227,7 @@ namespace Common.Components
                     MsgHandler_PartialProblems((SolvePartialProblems)message, socket);
                     return;
                 case SolutionRequest:
-                    //TODO: add missing schema, generate missing type
-                    //MsgHandler_SolutionRequest((SolutionRequest)message, socket);
+                    MsgHandler_SolutionRequest((SolutionRequest)message, socket);
                     return;
                 default:
                     base.HandleMessage(message, key, socket);
@@ -242,12 +240,10 @@ namespace Common.Components
         /// </summary>
         /// <param name="solutionRequest"></param>
         /// <param name="socket"></param>
-        /*
-         * TODO: add missing schema, generate missing type
-         * private void MsgHandler_SolutionRequest(SolutionRequest solutionRequest, Socket socket)
+        private void MsgHandler_SolutionRequest(SolutionRequest solutionRequest, Socket socket)
         {
             throw new NotImplementedException();
-        }*/
+        }
 
         /// <summary>
         /// Obsługa otrzymanego komunikatu na temat rozwiązań

@@ -60,6 +60,7 @@
     <Compile Include="Messages\Instances\Register.cs" />
     <Compile Include="Messages\Instances\RegisterResponse.cs" />
     <Compile Include="Messages\Instances\Solution.cs" />
+    <Compile Include="Messages\Instances\SolutionRequest.cs" />
     <Compile Include="Messages\Instances\SolveRequest.cs" />
     <Compile Include="Messages\Instances\SolveRequestResponse.cs" />
     <Compile Include="Messages\Instances\Status.cs" />
