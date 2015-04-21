@@ -47,6 +47,10 @@
       <Project>{ac1302e2-f903-44d2-a0b9-eb65263dd10a}</Project>
       <Name>Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DVRP\DVRP.csproj">
+      <Project>{30acef69-2e2b-4e38-9256-8e4d458db15e}</Project>
+      <Name>DVRP</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

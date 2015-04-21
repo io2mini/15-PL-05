@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using DVRP;
 
 namespace Common.Components
 {
@@ -43,13 +44,31 @@ namespace Common.Components
         {
             /*
              * TODO:
-             * 0. If not Idle throw exception
-             * 1. Divide Problem
-             * 2. Send divided problem data to CS
+             * 0. If not Idle throw exception and send error
+             * 1. Handle multiple threads if this TM has more than one available
              */
 
+            var ts = new TaskSolver(divideProblem.Data);
+            var dataParts = ts.DivideProblem((int)divideProblem.ComputationalNodes);
+            ulong freeTaskId = 0;
 
-            throw new NotImplementedException();
+            var parts = new SolvePartialProblems();
+            parts.Id = divideProblem.Id;
+            parts.ProblemType = divideProblem.ProblemType;
+            parts.CommonData = dataParts[0];
+            //TODO: solving timeout?
+            var l = new List<SolvePartialProblemsPartialProblem>((int)divideProblem.ComputationalNodes);
+            for (int i = 1; i < dataParts.Count(); i++)
+            {
+                var spp = new SolvePartialProblemsPartialProblem();
+                spp.Data = dataParts[i];
+                spp.TaskId = freeTaskId++;
+                spp.NodeID = this.Id;
+                l.Add(spp);
+            }
+            parts.PartialProblems = l.ToArray();
+            //TODO: implement state changes
+            SendMessage(parts);
         }
     }
 }

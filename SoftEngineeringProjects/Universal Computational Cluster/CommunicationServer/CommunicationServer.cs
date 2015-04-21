@@ -197,6 +197,8 @@ namespace Common.Components
         /// <param name="socket"></param>
         private void MsgHandler_SolutionRequest(SolutionRequest solutionRequest, Socket socket)
         {
+            //TODO: send solutionMessage
+            Problem p = new Problem();
             throw new NotImplementedException();
         }
 
@@ -206,6 +208,7 @@ namespace Common.Components
         /// <param name="solutions"></param>
         protected override void MsgHandler_Solution(Solutions solutions)
         {
+            //TODO: save solution
             throw new NotImplementedException();
         }
 
