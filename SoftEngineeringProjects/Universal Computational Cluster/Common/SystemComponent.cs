@@ -98,11 +98,31 @@ namespace Common
             ReceiveResponse();
         }
 
+        protected SystemComponentType ParseType(string s)
+        {
+            switch(s)
+            {
+                case "CommunicationServer":
+                    return SystemComponentType.CommunicationServer;
+                case "BackupCommunicationServer":
+                    return SystemComponentType.BackupCommunicationServer;
+                case "ComputationalClient":
+                    return SystemComponentType.ComputationalClient;
+                case "ComputationalNode":
+                    return SystemComponentType.ComputationalNode;
+                case "TaskManager":
+                    return SystemComponentType.TaskManager;
+                default:
+                    throw new ArgumentException("Enum type not recognized");
+            }
+        }
+
         /// <summary>
         /// Metoda mająca na celu wysłanie odpowiedniego komnuniktatu w zalezności od urządzenia,
         /// na którym jest wywoływana.
         /// </summary>
         /// <param name="deviceType">Typ urządzenia rejestującego się.</param>
+
         private void SendRegisterMessage()
         {
             Register msg = RegisterGenerator.Generate(deviceType, solvableProblems, pararellThreads, false, null);

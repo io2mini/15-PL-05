@@ -26,10 +26,14 @@ namespace Common.Components
         Dictionary<Socket, ulong> SocketToId;
         Dictionary<ulong, byte[]> Problems;
         Dictionary<ulong, SolvePartialProblems> SavedPartialProblems; 
+
         #endregion
         ulong FirstFreeComponentID;
         ulong FirstFreeProblemID;
+        Dictionary<ulong, SystemComponentType> ComponentTypes;
+        Dictionary<ulong, List<String>> SolvableProblemTypes;
         public List<CommunicationInfo> CommunicationInfos;
+
         public CommunicationServer(bool primary=true)
             : base()
         {
@@ -216,6 +220,7 @@ namespace Common.Components
             ulong problemId = FirstFreeProblemID++;
             /*
              * TODO:
+             * 3. Send Problem data for division to TM.
              * 4. If specified, handle solve timeout.
              */
             Problems.Add(problemId, solveRequest.Data);
@@ -290,7 +295,7 @@ namespace Common.Components
             
             ulong id = FirstFreeComponentID++;
             Console.WriteLine("Register Message, Sending Register Response id={0}", id);
-            var Timer = RegisterComponent(socket, id);
+            var Timer = RegisterComponent(socket, id,ParseType(register.Type));
             RegisterResponse response = new RegisterResponse();
             response.Id = id;
             response.Timeout =(uint)CommunicationInfo.Time;
@@ -312,7 +317,7 @@ namespace Common.Components
             Timer.AutoReset = true;
         }
 
-        protected System.Timers.Timer RegisterComponent(Socket socket, ulong id)
+        protected System.Timers.Timer RegisterComponent(Socket socket, ulong id,SystemComponentType type)
         {
             IdToSocket.Add(id, socket);
             SocketToId.Add(socket, id);
@@ -326,6 +331,7 @@ namespace Common.Components
             };
             Timer.Interval = TimeoutModifier * (uint)CommunicationInfo.Time;
             Timers.Add(id, Timer);
+            ComponentTypes.Add(id, type);
             return Timer;
         }
 
@@ -369,6 +375,7 @@ namespace Common.Components
             Timers[Id].Close();
             Timers.Remove(Id);
             TimerStoppers.Remove(Id);
+            ComponentTypes.Remove(Id);
             Console.WriteLine("Deregistering id={0}", Id);
             return true;
         }
