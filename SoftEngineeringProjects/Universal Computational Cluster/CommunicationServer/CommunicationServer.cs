@@ -88,12 +88,6 @@ namespace Common.Components
                 listener.Start((object)CI);
             }
         }
-        
-        /// <summary>
-        /// Converts byteArray to string and removes unnecessary characters.
-        /// </summary>
-        /// <param name="byteArray">Message in byte form</param>
-        /// <returns>Message in string form</returns>
 
         /// <summary>
         /// Override metody komponentu rozpoczynająca nasłuchiwania serwera
