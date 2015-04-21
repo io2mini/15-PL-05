@@ -25,12 +25,14 @@ namespace Common.UserInterface
             }
 
             // Rozpocznij pobieranie informacje o plikach do wczytania
-            while (computationalClient.IsWorking)
+            bool existingProblem = computationalClient.ProblemExists();
+            Problem newProblem = new Problem();
+            if (computationalClient.IsWorking &&!existingProblem)
             {
                 Console.Error.WriteLine("Not implemented:");
 
                 // Utwórz nowy problem
-                Problem newProblem = new Problem();
+                
 
                 // Podaj problem type
                 Console.WriteLine("Type problem type name:");
@@ -40,8 +42,7 @@ namespace Common.UserInterface
                 Console.WriteLine("Type path file of problem instance:");
                 newLine = Console.ReadLine();
                 // Szybki pars
-                if (newLine == null || newLine.Trim().Length == 0)
-                    continue;
+              
                 // Utwórz nowe uri
                 Uri problemFileUri = new Uri(newLine);
                 newProblem.SerializedProblem = File.ReadAllBytes(problemFileUri.AbsolutePath);
@@ -55,9 +56,9 @@ namespace Common.UserInterface
                     newProblem.SolvingTimeOut = ulong.Parse(newLine.Trim());
                 }
 
-                computationalClient.SendSolveRequestMessage(newProblem);
+                
             }
-
+            computationalClient.Start(newProblem, existingProblem);
             Console.WriteLine("Computational Client ended successfully");
         }
     }
