@@ -10,7 +10,7 @@ namespace DVRPTest
         [TestMethod]
         public void PermutationTest()
         {
-            Permuter.GeneratePermutations(4,4);
+            Permuter.GeneratePermutations(4);
         }
     }
 }
