@@ -267,7 +267,6 @@ namespace Common.Components
                 msg.PartialProblems[0] = solvePartialProblems.PartialProblems[i];
                 SendMessageToComponent(nodes[i], msg);
             }
-            throw new NotImplementedException();
         }
 
         /// <summary>
