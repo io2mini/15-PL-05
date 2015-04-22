@@ -155,6 +155,36 @@ namespace Common.Components
             }
             return i;
         }
+
+        /// <summary>
+        /// Zwraca listę wolnych CNów mogących zająć się zadanym rodzajem problemu
+        /// </summary>
+        /// <param name="problemType"></param>
+        /// <param name="neededNodes"></param>
+        /// <returns></returns>
+        private ulong[] GetComputationNodes(string problemType, int neededNodes)
+        {
+            var l = new List<ulong>();
+            int i = 0;
+            foreach (ulong key in ThreadStates.Keys)
+            {
+                if (ComponentTypes[key] == SystemComponentType.ComputationalNode && SolvableProblemTypes[key].Contains(problemType))
+                    foreach (var thread in ThreadStates[key])
+                    {
+                        if (thread.State == StatusThreadState.Idle)
+                        {
+                            if(!l.Contains(key))
+                                l.Add(key);
+                            i++;
+                        }
+                        if (i >= neededNodes)
+                        {
+                            return l.ToArray();
+                        }
+                    }
+            }
+            return l.ToArray();
+        }
         #endregion
 
         #region MessageGenerationAndHandling
@@ -219,12 +249,24 @@ namespace Common.Components
         /// <param name="socket"></param>
         protected void MsgHandler_PartialProblems(SolvePartialProblems solvePartialProblems, Socket socket)
         {
-            /*
-             * TODO:
-             * 2. Find nodes that can solve partial problems
-             * 3. Send them "smaller" partial problems message (with subproblems to compute)
-             */
+            var n = solvePartialProblems.PartialProblems.Count();
+            ulong[] nodes = GetComputationNodes(solvePartialProblems.ProblemType, n);
+            if (nodes.Count() < n) throw new Exception("Not enough nodes available"); //TODO: własny wyjątek i jego obsługa
+            for (int i = 0; i < solvePartialProblems.PartialProblems.Count(); i++)
+                solvePartialProblems.PartialProblems[i].NodeID = nodes[i];
             SavedPartialProblems.Add(solvePartialProblems.Id, solvePartialProblems);
+            for (int i = 0; i < solvePartialProblems.PartialProblems.Count(); i++)
+            {
+                var msg = new SolvePartialProblems();
+                msg.ProblemType = solvePartialProblems.ProblemType;
+                msg.Id = solvePartialProblems.Id;
+                msg.SolvingTimeoutSpecified = solvePartialProblems.SolvingTimeoutSpecified;
+                msg.SolvingTimeout = solvePartialProblems.SolvingTimeout;
+                msg.CommonData = solvePartialProblems.CommonData;
+                msg.PartialProblems = new SolvePartialProblemsPartialProblem[1];
+                msg.PartialProblems[0] = solvePartialProblems.PartialProblems[i];
+                SendMessageToComponent(nodes[i], msg);
+            }
             throw new NotImplementedException();
         }
 

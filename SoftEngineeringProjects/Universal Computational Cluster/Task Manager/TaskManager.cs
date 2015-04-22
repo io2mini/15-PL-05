@@ -48,7 +48,7 @@ namespace Common.Components
              * 1. Handle multiple threads if this TM has more than one available
              */
 
-            var ts = new TaskSolver(divideProblem.Data);
+            var ts = GetTaskSolver(divideProblem.ProblemType, divideProblem.Data);
             var dataParts = ts.DivideProblem((int)divideProblem.ComputationalNodes);
             ulong freeTaskId = 0;
 
@@ -69,6 +69,15 @@ namespace Common.Components
             parts.PartialProblems = l.ToArray();
             //TODO: implement state changes
             SendMessage(parts);
+        }
+
+        private TaskSolver GetTaskSolver(string problemType, byte[] data)
+        {
+            /* TODO:
+             * 1. Initialize apropriate task solver based on problem type
+             * 2. If TM doesn't implement solving given problem type: throw exception
+             */
+            throw new NotImplementedException();
         }
     }
 }
