@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Common.Exceptions;
 using Common.Components;
-using Common.Communication;
+using Common.Configuration;
 using Common;
 
 namespace CommunicationServerTest
