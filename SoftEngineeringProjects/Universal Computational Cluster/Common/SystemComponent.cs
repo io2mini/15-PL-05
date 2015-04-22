@@ -1,4 +1,4 @@
-﻿using Common.Communication;
+﻿using Common.Configuration;
 using Common.Exceptions;
 using Common.Messages;
 using System;
@@ -58,7 +58,7 @@ namespace Common
         protected ulong Id { get; set; }
 
         public bool IsWorking { get; set; }
-
+        protected ThreadInfo threadInfo;
         public CommunicationInfo CommunicationInfo
         {
             get { return communicationInfo; }
@@ -68,6 +68,9 @@ namespace Common
         public SystemComponent()
         {
             IsWorking = true;
+            /*
+             * TODO: Initialize Thread Array
+             */
             Initialize();
         }
 
@@ -231,7 +234,7 @@ namespace Common
                     (o) =>
                     {
                         Console.WriteLine("Sending Status");
-                    SendMessage(StatusReportGenerator.Generate(this.Id));
+                    SendMessage(GenerateStatus());
                     Thread thread = new Thread(ReceiveResponse);
                     thread.IsBackground = true;
                     thread.Start() ;
@@ -247,7 +250,11 @@ namespace Common
             }
             
         }
-
+        protected virtual Status GenerateStatus()
+        {
+            return StatusReportGenerator.Generate(Id, threadInfo.Threads);
+        }
+        
         /// <summary>
         /// Metoda reaguje na NoOperation, aktualizując dane o Backup Serwerze
         /// </summary>

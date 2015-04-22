@@ -1,4 +1,4 @@
-﻿using Common.Communication;
+﻿using Common.Configuration;
 using Common.Components;
 using Common.Exceptions;
 using System;

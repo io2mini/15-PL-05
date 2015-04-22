@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using Common.Communication;
+using Common.Configuration;
 using Common.Components;
 using System;
 using System.Collections.Generic;

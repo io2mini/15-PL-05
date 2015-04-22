@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Common.Components;
-using Common.Communication;
+using Common.Configuration;
 using Common;
 using Common.Exceptions;
 

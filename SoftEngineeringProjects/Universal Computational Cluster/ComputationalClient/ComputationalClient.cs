@@ -37,8 +37,8 @@ namespace Common.Components
         bool ExistingProblem { get; set; }
         public void Start(Problem problem,bool existingProblem)
         {
-            
-            base.Start();
+
+            InitializeConnection();
             ExistingProblem = existingProblem;
             if (!ExistingProblem) CreateProblem(problem);
             else

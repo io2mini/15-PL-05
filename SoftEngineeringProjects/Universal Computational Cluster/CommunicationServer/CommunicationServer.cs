@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading;
 
 using System.Net;
-using Common.Communication;
+using Common.Configuration;
 namespace Common.Components
 {
     public class CommunicationServer : SystemComponent
