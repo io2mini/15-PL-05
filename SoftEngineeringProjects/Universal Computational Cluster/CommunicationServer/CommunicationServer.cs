@@ -162,9 +162,9 @@ namespace Common.Components
         /// <param name="problemType"></param>
         /// <param name="neededNodes"></param>
         /// <returns></returns>
-        private ulong[] GetComputationNodes(string problemType, int neededNodes)
+        private Dictionary<ulong, int> GetComputationNodes(string problemType, int neededNodes)
         {
-            var l = new List<ulong>();
+            var l = new Dictionary<ulong, int>();
             int i = 0;
             foreach (ulong key in ThreadStates.Keys)
             {
@@ -173,17 +173,19 @@ namespace Common.Components
                     {
                         if (thread.State == StatusThreadState.Idle)
                         {
-                            if(!l.Contains(key))
-                                l.Add(key);
+                            if (!l.ContainsKey(key))
+                                l.Add(key, 1);
+                            else
+                                l[key]++;
                             i++;
                         }
                         if (i >= neededNodes)
                         {
-                            return l.ToArray();
+                            return l;
                         }
                     }
             }
-            return l.ToArray();
+            return l;
         }
         #endregion
 
@@ -249,13 +251,21 @@ namespace Common.Components
         /// <param name="socket"></param>
         protected void MsgHandler_PartialProblems(SolvePartialProblems solvePartialProblems, Socket socket)
         {
-            var n = solvePartialProblems.PartialProblems.Count();
-            ulong[] nodes = GetComputationNodes(solvePartialProblems.ProblemType, n);
-            if (nodes.Count() < n) throw new Exception("Not enough nodes available"); //TODO: własny wyjątek i jego obsługa
-            for (int i = 0; i < solvePartialProblems.PartialProblems.Count(); i++)
-                solvePartialProblems.PartialProblems[i].NodeID = nodes[i];
+            var nodes = GetComputationNodes(solvePartialProblems.ProblemType, solvePartialProblems.PartialProblems.Count());
+            int ind = 0;
+            foreach (ulong id in nodes.Keys)
+            {
+                for (int i = 0; i < nodes[id]; i++)
+                {
+                    solvePartialProblems.PartialProblems[ind].NodeID = id;
+                    ind++;
+                }
+            }
+            if (ind < solvePartialProblems.PartialProblems.Count()) throw new Exception("Not enough nodes"); //TODO: handle exception; 
             SavedPartialProblems.Add(solvePartialProblems.Id, solvePartialProblems);
-            for (int i = 0; i < solvePartialProblems.PartialProblems.Count(); i++)
+
+            var toSend = new Dictionary<ulong, SolvePartialProblems>();
+            foreach(ulong id in nodes.Keys)
             {
                 var msg = new SolvePartialProblems();
                 msg.ProblemType = solvePartialProblems.ProblemType;
@@ -263,9 +273,18 @@ namespace Common.Components
                 msg.SolvingTimeoutSpecified = solvePartialProblems.SolvingTimeoutSpecified;
                 msg.SolvingTimeout = solvePartialProblems.SolvingTimeout;
                 msg.CommonData = solvePartialProblems.CommonData;
-                msg.PartialProblems = new SolvePartialProblemsPartialProblem[1];
-                msg.PartialProblems[0] = solvePartialProblems.PartialProblems[i];
-                SendMessageToComponent(nodes[i], msg);
+                var l = new List<SolvePartialProblemsPartialProblem>();
+                foreach (SolvePartialProblemsPartialProblem spppp in solvePartialProblems.PartialProblems)
+                {
+                    if (spppp.NodeID == id) l.Add(spppp);
+                }
+                msg.PartialProblems = l.ToArray();
+                toSend.Add(id, msg);
+            }
+
+            foreach (ulong id in toSend.Keys)
+            {
+                SendMessageToComponent(id, toSend[id]);
             }
         }
 
