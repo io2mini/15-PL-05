@@ -62,10 +62,12 @@ namespace Common.Components
             var l = new List<SolvePartialProblemsPartialProblem>((int)divideProblem.ComputationalNodes);
             for (int i = 1; i < dataParts.Count(); i++)
             {
-                var spp = new SolvePartialProblemsPartialProblem();
-                spp.Data = dataParts[i];
-                spp.TaskId = freeTaskId++;
-                spp.NodeID = this.Id;
+                var spp = new SolvePartialProblemsPartialProblem
+                {
+                    Data = dataParts[i],
+                    TaskId = freeTaskId++,
+                    NodeID = this.Id
+                };
                 l.Add(spp);
             }
             parts.PartialProblems = l.ToArray();

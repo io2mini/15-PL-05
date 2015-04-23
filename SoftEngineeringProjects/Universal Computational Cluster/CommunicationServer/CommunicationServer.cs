@@ -166,24 +166,17 @@ namespace Common.Components
         {
             var l = new Dictionary<ulong, int>();
             int i = 0;
-            foreach (ulong key in ThreadStates.Keys)
+            foreach (ulong key in from key in ThreadStates.Keys where ComponentTypes[key] == SystemComponentType.ComputationalNode && SolvableProblemTypes[key].Contains(problemType) from thread in ThreadStates[key] where thread.State == StatusThreadState.Idle select key)
             {
-                if (ComponentTypes[key] == SystemComponentType.ComputationalNode && SolvableProblemTypes[key].Contains(problemType))
-                    foreach (var thread in ThreadStates[key])
-                    {
-                        if (thread.State == StatusThreadState.Idle)
-                        {
-                            if (!l.ContainsKey(key))
-                                l.Add(key, 1);
-                            else
-                                l[key]++;
-                            i++;
-                        }
-                        if (i >= neededNodes)
-                        {
-                            return l;
-                        }
-                    }
+                if (l.ContainsKey(key))
+                    l[key]++;
+                else
+                    l.Add(key, 1);
+                i++;
+                if (i >= neededNodes)
+                {
+                    break;
+                }
             }
             return l;
         }
@@ -267,18 +260,15 @@ namespace Common.Components
             var toSend = new Dictionary<ulong, SolvePartialProblems>();
             foreach(ulong id in nodes.Keys)
             {
-                var msg = new SolvePartialProblems();
-                msg.ProblemType = solvePartialProblems.ProblemType;
-                msg.Id = solvePartialProblems.Id;
-                msg.SolvingTimeoutSpecified = solvePartialProblems.SolvingTimeoutSpecified;
-                msg.SolvingTimeout = solvePartialProblems.SolvingTimeout;
-                msg.CommonData = solvePartialProblems.CommonData;
-                var l = new List<SolvePartialProblemsPartialProblem>();
-                foreach (SolvePartialProblemsPartialProblem spppp in solvePartialProblems.PartialProblems)
+                var msg = new SolvePartialProblems
                 {
-                    if (spppp.NodeID == id) l.Add(spppp);
-                }
-                msg.PartialProblems = l.ToArray();
+                    ProblemType = solvePartialProblems.ProblemType,
+                    Id = solvePartialProblems.Id,
+                    SolvingTimeoutSpecified = solvePartialProblems.SolvingTimeoutSpecified,
+                    SolvingTimeout = solvePartialProblems.SolvingTimeout,
+                    CommonData = solvePartialProblems.CommonData,
+                    PartialProblems = solvePartialProblems.PartialProblems.Where(spppp => spppp.NodeID == id).ToArray()
+                };
                 toSend.Add(id, msg);
             }
 
