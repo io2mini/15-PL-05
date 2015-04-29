@@ -20,6 +20,11 @@ namespace DVRP
 
         // Pytanie - to mają być common ^, czy pchamy to wszyskim w ramach jednego problemu ->, a TN ma to puste?
         private int[][] _clientsOrder; /// Generowane dla kazdego podproblemu
+                                       /// 
+        public List<Client> Clients { get { return _clients; } }
+        public List<Depot> Depots { get { return _depots; } }
+        public List<Vehicle> Vehicles { get { return _fleet; } }
+
 
         public Problem(List<Vehicle> fleet, List<Client> clients, List<Depot> depots, int[][] clientsOrder)
         {
@@ -60,7 +65,7 @@ namespace DVRP
 
         public static Problem Deserialize(byte[] byteArray)
         {
-            return Serializer.Deserialize(byteArray) as Problem;
+            return (Problem)Serializer.Deserialize(byteArray);
         }
 
         private byte[] ObjectToByteArray(Object obj)

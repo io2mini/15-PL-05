@@ -52,7 +52,7 @@ namespace DVRP
 
         public static Solution Deserialize(byte[] byteArray)
         {
-            return Serializer.Deserialize(byteArray) as Solution;
+            return (Solution)Serializer.Deserialize(byteArray);
         }
     }
 }
