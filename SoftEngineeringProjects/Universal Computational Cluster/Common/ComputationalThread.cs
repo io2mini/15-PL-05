@@ -1,38 +1,35 @@
-﻿using Common.Messages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using Common.Messages;
+using UCCTaskSolver;
 
 namespace Common
 {
     /// <summary>
-    /// Klasa zawierająca parametry wątku obliczeniowego posiadanego przez Node lub TM
+    ///     Klasa zawierająca parametry wątku obliczeniowego posiadanego przez Node lub TM
     /// </summary>
     public class ComputationalThread
     {
-        public ulong ProblemInstanceID;
-        public StatusThreadState State;
-        public ulong TaskID;
-        public bool ProblemInstanceIDSpecified;
-        public bool TaskIDSpecified;
+        public ulong ProblemInstanceId;
+        public bool ProblemInstanceIdSpecified;
         public string ProblemType;
+        public StatusThreadState State;
         public DateTime StateChange;
-        public UCCTaskSolver.TaskSolver taskSolver;
         public bool StateChangeSpecified;
+        public ulong TaskId;
+        public bool TaskIdSpecified;
+        public TaskSolver TaskSolver;
+
         public ComputationalThread()
         {
-            ProblemInstanceIDSpecified = false;
-            ProblemInstanceID = 0;
-            TaskIDSpecified = false;
-            TaskID = 0;
+            ProblemInstanceIdSpecified = false;
+            ProblemInstanceId = 0;
+            TaskIdSpecified = false;
+            TaskId = 0;
             ProblemType = null;
             StateChange = DateTime.Now;
             StateChangeSpecified = false;
-            taskSolver = null;
+            TaskSolver = null;
             State = StatusThreadState.Idle;
-
         }
     }
 }

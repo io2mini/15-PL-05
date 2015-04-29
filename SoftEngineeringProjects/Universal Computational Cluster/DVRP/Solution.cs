@@ -1,12 +1,7 @@
-﻿using DVRP.Objects;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
+using DVRP.Objects;
 
 namespace DVRP
 {
@@ -14,17 +9,7 @@ namespace DVRP
     public class Solution
     {
         // cost of 
-        private double _cost;
-        private List<List<int>> _vehicleLocationList;
-
-        public double Cost
-        {
-            get
-            {
-                return _cost;
-            }
-
-        }
+        private readonly List<List<int>> _vehicleLocationList;
 
         public Solution(List<List<int>> vehicleLocationList)
         {
@@ -32,15 +17,17 @@ namespace DVRP
             _vehicleLocationList = vehicleLocationList;
         }
 
+        public double Cost { get; private set; }
+
         public void CountCost(List<Location> locations)
         {
-            _cost = 0;
-            for (int i = 0; i < _vehicleLocationList.Count(); i++)
+            Cost = 0;
+            for (var i = 0; i < _vehicleLocationList.Count(); i++)
             {
                 if (_vehicleLocationList[i] == null) throw new NullReferenceException();
-                for (int j = 1; j < _vehicleLocationList[i].Count(); j++)
+                for (var j = 1; j < _vehicleLocationList[i].Count(); j++)
                 {
-                    _cost += locations[_vehicleLocationList[i][j]] | locations[_vehicleLocationList[i][j]];
+                    Cost += locations[_vehicleLocationList[i][j]] | locations[_vehicleLocationList[i][j]];
                 }
             }
         }
@@ -52,7 +39,7 @@ namespace DVRP
 
         public static Solution Deserialize(byte[] byteArray)
         {
-            return (Solution)Serializer.Deserialize(byteArray);
+            return (Solution) Serializer.Deserialize(byteArray);
         }
     }
 }

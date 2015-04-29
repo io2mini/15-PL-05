@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common.Messages.Generators
+﻿namespace Common.Messages.Generators
 {
     public class ErrorGenerator
     {
-        public static Error Generate(String errorMessage, ErrorErrorType errorType)
+        public static Error Generate(string errorMessage, ErrorErrorType errorType)
         {
             // Utwórz instanscję
-            Error message = new Error();
-
-            // Uzupełnij pola
-            message.ErrorMessage = errorMessage;
-            message.ErrorType = errorType;
+            var message = new Error
+            {
+                ErrorMessage = errorMessage,
+                ErrorType = errorType
+            };
 
             // Zwróć
             return message;

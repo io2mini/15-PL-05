@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DVRP
 {
@@ -47,23 +46,24 @@ namespace DVRP
 
         public static uint[][] GenerateCombinations(uint n, uint k)
         {
-            List<uint[]> combinations = new List<uint[]>();
+            var combinations = new List<uint[]>();
             GenerateCombinationsRecursively(n, k, 0, new uint[n], ref combinations);
             return combinations.ToArray();
         }
 
-        private static void GenerateCombinationsRecursively(uint n, uint k, uint index, uint[] tab, ref List<uint[]> tabs)
+        private static void GenerateCombinationsRecursively(uint n, uint k, uint index, uint[] tab,
+            ref List<uint[]> tabs)
         {
             if (index == n)
             {
-                uint[] tab_prim = new uint[tab.Length];
-                for (int i = 0; i < tab_prim.Length; i++)
+                var tab_prim = new uint[tab.Length];
+                for (var i = 0; i < tab_prim.Length; i++)
                     tab_prim[i] = tab[i];
                 tabs.Add(tab_prim);
             }
-            for (int i = 0; i < k; i++)
+            for (var i = 0; i < k; i++)
             {
-                tab[index] = (uint)i;
+                tab[index] = (uint) i;
                 GenerateCombinationsRecursively(n, k, index + 1, tab, ref tabs);
             }
         }

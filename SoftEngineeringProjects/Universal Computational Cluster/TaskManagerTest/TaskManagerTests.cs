@@ -1,9 +1,9 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Common;
 using Common.Components;
 using Common.Configuration;
-using Common;
 using Common.Exceptions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TaskManagerTest
 {
@@ -11,30 +11,31 @@ namespace TaskManagerTest
     public class TaskManagerTests
     {
         [TestMethod]
-        [ExpectedException(typeof(ParsingArgumentException))]
+        [ExpectedException(typeof (ParsingArgumentException))]
         public void WrongParametersTestExpectingParsingException()
         {
-          TaskManager taskManager = new TaskManager();
-          String parametersLine = "-port 8080 -ala 122";
-          taskManager.CommunicationInfo = ParametersParser.ReadParameters(parametersLine, SystemComponentType.TaskManager);
-
+            var taskManager = new TaskManager();
+            var parametersLine = "-port 8080 -ala 122";
+            taskManager.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.TaskManager);
         }
 
         [TestMethod]
         public void ParametersTestExpectingNoException()
         {
-           TaskManager taskManager = new TaskManager();
-           String parametersLine = "-port 8080 -address 127.0.0.1";
-           taskManager.CommunicationInfo = ParametersParser.ReadParameters(parametersLine, SystemComponentType.TaskManager);
-           Assert.AreEqual(taskManager.CommunicationInfo.CommunicationServerPort, 8080);
-           Assert.AreEqual(taskManager.CommunicationInfo.CommunicationServerAddress, new Uri("http://127.0.0.1"));
+            var taskManager = new TaskManager();
+            var parametersLine = "-port 8080 -address 127.0.0.1";
+            taskManager.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.TaskManager);
+            Assert.AreEqual(taskManager.CommunicationInfo.CommunicationServerPort, 8080);
+            Assert.AreEqual(taskManager.CommunicationInfo.CommunicationServerAddress, new Uri("http://127.0.0.1"));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ConnectionException))]
+        [ExpectedException(typeof (ConnectionException))]
         public void StartTestExpectintConnectionException()
         {
-            TaskManager taskManager = new TaskManager();
+            var taskManager = new TaskManager();
             taskManager.IsWorking = true;
             taskManager.CommunicationInfo = new CommunicationInfo();
             taskManager.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.2");
