@@ -24,7 +24,9 @@ namespace DVRP
 
         public override byte[][] DivideProblem(int threadCount)
         {
-            
+            var permuted_clients = Permuter.GeneratePermutations((uint)_problem.Clients.Count());
+            // Extra depot means Depot where path cost = 0
+            var combined_depots = Permuter.GenerateCombinations((uint)_problem.Clients.Count() + 1, (uint)(_problem.Depots.Count() + 1));
             throw new NotImplementedException();
         }
 
