@@ -7,22 +7,17 @@ namespace DVRP.Objects
     [Serializable]
     public class Depot
     {
-        private uint _id;
-        private Location _location;
-        private TimeSpan _startTime;
-        private TimeSpan _endTime;
+        public uint Id { get; private set; }
+        public Location Location { get; private set; }
+        public TimeSpan StartTime { get; private set; }
+        public TimeSpan EndTime { get; private set; }
 
         public Depot (Location location, TimeSpan startTime, TimeSpan endTime, uint id)
         {
-            _location = location;
-            _startTime = startTime;
-            _endTime = endTime;
-            _id = id;
-        }
-
-        public uint Id
-        {
-            get { return _id; }
+            Location = location;
+            StartTime = startTime;
+            EndTime = endTime;
+            Id = id;
         }
     }
 }

@@ -10,15 +10,15 @@ namespace DVRP.Objects
     [Serializable]
     public class Vehicle
     {
-        private Location _location;
-        private int _capacity;
-        private int _speed;
+        public Location Location { get; private set; }
+        public int Capacity { get; private set; }
+        public int Speed { get; private set; }
 
         public Vehicle(Location location, int capacity, int speed)
         {
-            _location = location;
-            _capacity = capacity;
-            _speed = speed;
+            Location = location;
+            Capacity = capacity;
+            Speed = speed;
         }
     }
 }

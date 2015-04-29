@@ -5,6 +5,7 @@ using DVRP.Objects;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using System.Linq;
 
 namespace DVRP
 {
@@ -12,25 +13,62 @@ namespace DVRP
     public class Problem
     {
         // vehicles
-        private List<Vehicle> _fleet;
+        public List<Vehicle> Fleet { get; private set; }
         // clients to handle
-        private List<Client> _clients;
+        public List<Client> Clients { get; private set; }
         // bases
-        private List<Depot> _depots;
+        public List<Depot> Depots { get; private set; }
 
         // Pytanie - to mają być common ^, czy pchamy to wszyskim w ramach jednego problemu ->, a TN ma to puste?
         private int[][] _clientsOrder; /// Generowane dla kazdego podproblemu
         /// 
-        public List<Client> Clients { get { return _clients; } }
-        public List<Depot> Depots { get { return _depots; } }
-        public List<Vehicle> Vehicles { get { return _fleet; } }
+        //public List<Client> Clients { get { return _clients; } }
+        //public List<Depot> Depots { get { return _depots; } }
+        public List<Vehicle> Vehicles { get { return Fleet; } }
 
+        public Location GetLocation(uint id)
+        {
+            var l = Clients.Select(client => new Tuple<uint, Location>(client.Id,client.Location)).Union(Depots.Select(depot => new Tuple<uint, Location>(depot.Id, depot.Location))).ToList();
+            foreach (var location in l.Where(location => location.Item1 == id))
+            {
+                return location.Item2;
+            }
+            throw new KeyNotFoundException(); 
+        }
+
+        public bool IsDepot(uint id)
+        {
+            return Depots.Select(depot => depot.Id).Contains(id);
+        }
+
+        public Depot GetDepot(uint id)
+        {
+            foreach (var depot in Depots.Where(depot => depot.Id == id))
+            {
+                return depot;
+            }
+            throw new KeyNotFoundException();
+        }
+
+        public bool IsClient(uint id)
+        {
+            return Clients.Select(client => client.Id).Contains(id);
+        }
+
+        public Client GetClient(uint id)
+        {
+            foreach (var client in Clients.Where(depot => depot.Id == id))
+            {
+                return client;
+            }
+            throw new KeyNotFoundException();
+        }
 
         public Problem(List<Vehicle> fleet, List<Client> clients, List<Depot> depots, int[][] clientsOrder)
         {
-            _fleet = fleet;
-            _clients = clients;
-            _depots = depots;
+            Fleet = fleet;
+            Clients = clients;
+            Depots = depots;
             _clientsOrder = clientsOrder;
         }
 
