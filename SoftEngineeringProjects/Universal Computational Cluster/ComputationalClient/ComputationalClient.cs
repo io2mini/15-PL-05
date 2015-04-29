@@ -35,7 +35,7 @@ namespace Common.Components
             SchemaTypes.Add(SolveRequestResponse, new Tuple<string, Type>(Resources.SolveRequestResponse, typeof(SolveRequestResponse)));
         }
         bool ExistingProblem { get; set; }
-        public void Start(Problem problem,bool existingProblem)
+        public void Start(Problem problem, bool existingProblem)
         {
 
             InitializeConnection();
@@ -81,7 +81,7 @@ namespace Common.Components
         }
         private void CreateProblem(Problem path)
         {
-            
+
 
             SendSolveRequestMessage(path);
             Thread t = new Thread(ReceiveResponse);
@@ -105,7 +105,7 @@ namespace Common.Components
 
         protected void MsgHandler_SolveRequestResponse(Messages.SolveRequestResponse solveRequestResponse, Socket socket)
         {
-            
+
             ProblemID = solveRequestResponse.Id;
             AskForSolutions();
         }
