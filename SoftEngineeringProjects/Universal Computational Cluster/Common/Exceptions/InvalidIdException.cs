@@ -10,13 +10,13 @@ namespace Common.Exceptions
     /// Klasa do reprezentacji wyjątku rzucanego podczas próbie wysłania status report
     /// komponenta o id < 0
     /// </summary>
-    public class NegativeIdException : Exception
+    public class InvalidIdException : Exception
     {
-        public NegativeIdException() : base() { }
+        public InvalidIdException() : base() { }
 
-        public NegativeIdException(String message) : base(message) { }
+        public InvalidIdException(String message) : base(message) { }
 
-        public NegativeIdException(String message, Exception e) : base(message, e) { }
+        public InvalidIdException(String message, Exception e) : base(message, e) { }
     }
 
 }

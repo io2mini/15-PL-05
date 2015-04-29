@@ -142,10 +142,10 @@ namespace Common
         /// <summary>
         /// Metoda wysyłajaca Error Message 
         /// </summary>
-        /// <param name="">Wyjątek przyjmowy do przesłania w message typu Erroe</param>
-        protected void SendExceptionErrorMessage(Exception e)
+        /// <param name="message">wiadomosć przekazywana w Error Message</param>
+        protected void SendErrorMessage(String message, ErrorErrorType errorType)
         {
-            SendMessage(ErrorGenerator.Generate(e.ToString() , ErrorErrorType.ExceptionOccured));
+            SendMessage(ErrorGenerator.Generate(message , errorType));
         }
 
         /// <summary>
@@ -249,7 +249,7 @@ namespace Common
                         thread.Start();
                     }, null, 0, (int)message.Timeout * MilisecondsMultiplier);
             }
-            catch (NegativeIdException)
+            catch (InvalidIdException)
             {
                 Console.WriteLine("Negative Id for component");
             }

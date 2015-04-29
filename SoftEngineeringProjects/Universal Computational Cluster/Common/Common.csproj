@@ -46,7 +46,7 @@
     <Compile Include="Configuration\CommunicationInfo.cs" />
     <Compile Include="ComputationalThread.cs" />
     <Compile Include="Configuration\ThreadsInfo.cs" />
-    <Compile Include="Exceptions\NegativeIdException.cs" />
+    <Compile Include="Exceptions\InvalidIdException.cs" />
     <Compile Include="Exceptions\NotEnoughIdleThreadsException.cs" />
     <Compile Include="Exceptions\ParsingArgumentException.cs" />
     <Compile Include="Exceptions\ConnectionException.cs" />

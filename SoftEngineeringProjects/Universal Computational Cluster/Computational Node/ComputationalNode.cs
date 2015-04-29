@@ -28,7 +28,7 @@ namespace Common.Components
             }
             catch (NotEnoughIdleThreadsException e)
             {
-                SendExceptionErrorMessage(e);
+                SendErrorMessage(e.ToString(), ErrorErrorType.ExceptionOccured);
             }
         }
         public void MsgHandler_SolvePartialProblems(Messages.SolvePartialProblems partialProblems)
@@ -42,7 +42,7 @@ namespace Common.Components
             {
                 if (partialProblems.PartialProblems[i].NodeID == Id)
                 {
-                    //TODO: Send Error Message
+                    throw new InvalidIdException("Ivalid Node Id in Partial Problem");
                 }
             }
             // TODO: jesli mamy mniej idle threadow niz powinnismy rzucamy error
