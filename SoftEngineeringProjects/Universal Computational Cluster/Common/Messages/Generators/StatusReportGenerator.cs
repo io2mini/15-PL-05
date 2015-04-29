@@ -18,7 +18,7 @@ namespace Common.Messages.Generators
         /// <returns>Status - Status Report komponentu</returns>
         public static Status Generate(ulong ComponentId,ComputationalThread[] Threads)
         {
-            if (ComponentId < 0) throw new NegativeIdException();
+            if (ComponentId < 0) throw new InvalidIdException();
             var result = new Status();
             result.Id = ComponentId;
             var threads = new List<StatusThread>();

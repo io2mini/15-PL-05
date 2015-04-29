@@ -24,11 +24,11 @@ namespace Common.Configuration
             CommunicationInfo cInfo = new CommunicationInfo();
             switch (type)
             {
-                case SystemComponentType.CommunicationServer :
-                    if(parameters.Contains<String>(BACKUP_PARAMETER))
+                case SystemComponentType.CommunicationServer:
+                    if (parameters.Contains<String>(BACKUP_PARAMETER))
                     {
                         type = SystemComponentType.BackupCommunicationServer;
-                        if(parameters.Length != 7)
+                        if (parameters.Length != 7)
                         {
                             String message = "Wrong number of arguments passed, give -address [address] -port [port] -backup"
                                 + "-t [timeout]";
@@ -44,8 +44,8 @@ namespace Common.Configuration
                         }
                     }
                     break;
-                default :
-                    if(parameters.Length != 4)
+                default:
+                    if (parameters.Length != 4)
                     {
                         String message = "Wrong number of arguments passed, give -address [address] -port [port]";
                         throw new ParsingArgumentException(message);
@@ -56,19 +56,19 @@ namespace Common.Configuration
             {
                 switch (type)
                 {
-                    case SystemComponentType.TaskManager :
+                    case SystemComponentType.TaskManager:
                         ParseArgumentsForComputation(parameters, ref i, ref cInfo);
                         break;
-                    case SystemComponentType.ComputationalNode :
+                    case SystemComponentType.ComputationalNode:
                         ParseArgumentsForComputation(parameters, ref i, ref cInfo);
                         break;
-                    case SystemComponentType.ComputationalClient :
+                    case SystemComponentType.ComputationalClient:
                         ParseArgumentsForComputation(parameters, ref i, ref cInfo);
                         break;
-                    case SystemComponentType.CommunicationServer :
+                    case SystemComponentType.CommunicationServer:
                         ParseArgumentsForCommunicationServer(parameters, ref i, ref cInfo);
                         break;
-                    case SystemComponentType.BackupCommunicationServer :
+                    case SystemComponentType.BackupCommunicationServer:
                         ParseArgumentsForBackupCommunicationServer(parameters, ref i, ref cInfo);
                         break;
                 }
@@ -84,7 +84,7 @@ namespace Common.Configuration
                 {
                     if (Regex.IsMatch(parameters[++i], ipRegex))
                     {
-                        parameters[i] = "http://"+parameters[i]+"/";
+                        parameters[i] = "http://" + parameters[i] + "/";
                     }
                     cInfo.CommunicationServerAddress = new Uri(parameters[i]);
                 }
@@ -202,7 +202,7 @@ namespace Common.Configuration
                 String message = String.Format("No parameter match : {0}", parameters[i]);
                 throw new ParsingArgumentException(message);
             }
-           
+
         }
     }
 }

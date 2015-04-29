@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 
 namespace Common
 {
-
+    /// <summary>
+    /// Klasa zawierająca parametry wątku obliczeniowego posiadanego przez Node lub TM
+    /// </summary>
     public class ComputationalThread
     {
         public ulong ProblemInstanceID;

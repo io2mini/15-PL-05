@@ -14,7 +14,7 @@ namespace DVRP.Objects
         private int _capacity;
         private int _speed;
 
-        public Vehicle (Location location, int capacity, int speed)
+        public Vehicle(Location location, int capacity, int speed)
         {
             _location = location;
             _capacity = capacity;

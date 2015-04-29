@@ -81,7 +81,7 @@ namespace Common
         {
             SchemaTypes = new Dictionary<string, Tuple<string, Type>>();
             //RegisterResponse
-            SchemaTypes.Add(RegisterResponse,new Tuple<string, Type>(Resources.RegisterResponse, typeof(RegisterResponse)));
+            SchemaTypes.Add(RegisterResponse, new Tuple<string, Type>(Resources.RegisterResponse, typeof(RegisterResponse)));
             //NoOperation
             SchemaTypes.Add(NoOperation, new Tuple<string, Type>(Resources.NoOperation, typeof(NoOperation)));
             //Error
@@ -103,7 +103,7 @@ namespace Common
 
         protected SystemComponentType ParseType(string s)
         {
-            switch(s)
+            switch (s)
             {
                 case "CommunicationServer":
                     return SystemComponentType.CommunicationServer;
@@ -133,11 +133,20 @@ namespace Common
             {
                 SendMessage(msg);
             }
-            catch(MessageNotSentException)
+            catch (MessageNotSentException)
             {
                 Console.WriteLine("Register Message Not Send");
             }
-        }    
+        }
+
+        /// <summary>
+        /// Metoda wysyłajaca Error Message 
+        /// </summary>
+        /// <param name="message">wiadomosć przekazywana w Error Message</param>
+        protected void SendErrorMessage(String message, ErrorErrorType errorType)
+        {
+            SendMessage(ErrorGenerator.Generate(message , errorType));
+        }
 
         /// <summary>
         /// Metoda używana do otrzymywania wiadomści, wyświetla na konsolę otrzymany message 
@@ -145,13 +154,13 @@ namespace Common
         protected void ReceiveResponse()
         {
             if (!tcpClient.Connected) tcpClient.Connect(communicationInfo.CommunicationServerAddress.Host, (int)communicationInfo.CommunicationServerPort);
-            var stream= tcpClient.GetStream();
+            var stream = tcpClient.GetStream();
             byte[] byteArray = new byte[1024];
             try
             {
                 stream.Read(byteArray, 0, 1024);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 Console.WriteLine("Connection was killed by host");
                 return;
@@ -160,9 +169,9 @@ namespace Common
             //Console.WriteLine(message);
             Validate(message, null); //Uważać z nullem w klasach dziedziczących
         }
-        
+
         #region MessageGenerationAndHandling
-        
+
         /// <summary>
         /// Ogólna metoda wywołująca odpowiedni handler dla otrzymanej wiadomości
         /// </summary>
@@ -234,27 +243,27 @@ namespace Common
                     (o) =>
                     {
                         Console.WriteLine("Sending Status");
-                    SendMessage(GenerateStatus());
-                    Thread thread = new Thread(ReceiveResponse);
-                    thread.IsBackground = true;
-                    thread.Start() ;
-                    },null, 0, (int)message.Timeout * MilisecondsMultiplier);
+                        SendMessage(GenerateStatus());
+                        Thread thread = new Thread(ReceiveResponse);
+                        thread.IsBackground = true;
+                        thread.Start();
+                    }, null, 0, (int)message.Timeout * MilisecondsMultiplier);
             }
-            catch(NegativeIdException)
+            catch (InvalidIdException)
             {
                 Console.WriteLine("Negative Id for component");
             }
-            catch(MessageNotSentException)
+            catch (MessageNotSentException)
             {
                 Console.WriteLine("Message Not send for component type {0} with id {1}", deviceType.ToString(), this.Id);
             }
-            
+
         }
         protected virtual Status GenerateStatus()
         {
-            return StatusReportGenerator.Generate(Id, threadInfo.Threads);
+            return StatusReportGenerator.Generate(Id, threadInfo.Threads.ToArray());
         }
-        
+
         /// <summary>
         /// Metoda reaguje na NoOperation, aktualizując dane o Backup Serwerze
         /// </summary>
@@ -335,8 +344,8 @@ namespace Common
             try
             {
                 tcpClient = new TcpClient(communicationInfo.CommunicationServerAddress.Host,
-                (int)communicationInfo.CommunicationServerPort );
-               
+                (int)communicationInfo.CommunicationServerPort);
+
             }
             catch (SocketException e)
             {
@@ -344,9 +353,9 @@ namespace Common
                     communicationInfo.CommunicationServerAddress.Host, communicationInfo.CommunicationServerPort);
                 throw new ConnectionException(message, e);
             }
-            
-        }
 
+        }
+       
         /// <summary>
         /// Metoda wysyłająca Message do serwera
         /// </summary>

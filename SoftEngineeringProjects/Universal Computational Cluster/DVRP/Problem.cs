@@ -20,7 +20,7 @@ namespace DVRP
 
         // Pytanie - to mają być common ^, czy pchamy to wszyskim w ramach jednego problemu ->, a TN ma to puste?
         private int[][] _clientsOrder; /// Generowane dla kazdego podproblemu
-                                       /// 
+        /// 
         public List<Client> Clients { get { return _clients; } }
         public List<Depot> Depots { get { return _depots; } }
         public List<Vehicle> Vehicles { get { return _fleet; } }
@@ -36,7 +36,7 @@ namespace DVRP
 
         public Problem()
         {
-               
+
         }
 
         public Problem[] DivideProblem(int n)
