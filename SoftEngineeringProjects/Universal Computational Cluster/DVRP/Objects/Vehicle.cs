@@ -7,10 +7,18 @@ using System.Threading.Tasks;
 
 namespace DVRP.Objects
 {
-    class Vehicle
+    [Serializable]
+    public class Vehicle
     {
-        private Point _location;
+        private Tuple<double, double> _location;
         private int _capacity;
         private int _speed;
+
+        public Vehicle (Tuple<double, double> location, int capacity, int speed)
+        {
+            _location = location;
+            _capacity = capacity;
+            _speed = speed;
+        }
     }
 }

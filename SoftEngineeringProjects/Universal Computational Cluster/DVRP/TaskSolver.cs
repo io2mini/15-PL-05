@@ -10,6 +10,7 @@ namespace DVRP
     {
         public TaskSolver(byte[] problemData) : base(problemData)
         {
+
             throw new NotImplementedException();
         }
 
@@ -20,6 +21,7 @@ namespace DVRP
 
         public override byte[][] DivideProblem(int threadCount)
         {
+            
             throw new NotImplementedException();
         }
 

@@ -4,10 +4,18 @@ using System.Drawing;
 
 namespace DVRP.Objects
 {
+    [Serializable]
     public class Depot
     {
-        private Point _location;
-        private TimeSpan _starTime;
+        private Tuple<double, double> _location;
+        private TimeSpan _startTime;
         private TimeSpan _endTime;
+
+        public Depot (Tuple<double, double> location, TimeSpan startTime, TimeSpan endTime)
+        {
+            _location = location;
+            _startTime = startTime;
+            _endTime = endTime;
+        }
     }
 }
