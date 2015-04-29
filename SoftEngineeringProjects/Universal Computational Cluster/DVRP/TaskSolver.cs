@@ -8,10 +8,12 @@ namespace DVRP
 {
     public class TaskSolver : UCCTaskSolver.TaskSolver
     {
+        private Problem _problem;
+
         public TaskSolver(byte[] problemData) : base(problemData)
         {
+             _problem = Problem.Deserialize(problemData);
 
-            throw new NotImplementedException();
         }
 
         public override byte[] Solve(byte[] partialData, TimeSpan timeout)
