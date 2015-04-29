@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace DVRP.Objects
 {
+    [Serializable]
     public class Location
     {
         private readonly double _x;

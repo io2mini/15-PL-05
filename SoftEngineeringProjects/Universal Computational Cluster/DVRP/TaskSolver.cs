@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,9 +28,22 @@ namespace DVRP
             throw new NotImplementedException();
         }
 
-        public override byte[] MergeSolution(byte[][] solutions)
+        public override byte[] MergeSolution(byte[][] byteSolutions)
         {
-            throw new NotImplementedException();
+            if (byteSolutions == null) throw new ArgumentNullException();
+            Solution solution = null;
+            double cost = Double.MaxValue;
+            foreach(byte[] byteArray in byteSolutions)
+            {
+                Solution solution_prim = Solution.Deserialize(byteArray);
+                if(solution_prim.Cost < cost)
+                {
+                    cost = solution_prim.Cost;
+                    solution = solution_prim;
+                }
+            }
+            if (solution == null) throw new SolutionNotFoundException();
+            return solution.Serialize();
         }
 
         public override string Name

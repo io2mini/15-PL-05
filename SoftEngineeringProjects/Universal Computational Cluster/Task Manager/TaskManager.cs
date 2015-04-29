@@ -78,8 +78,8 @@ namespace Common.Components
         private TaskSolver GetTaskSolver(string problemType, byte[] data)
         {
             /* TODO:
-             * 1. Initialize apropriate task solver based on problem type
-             * 2. If TM doesn't implement solving given problem type: throw exception
+             * 1. Initialize apropriate task solver based on solution type
+             * 2. If TM doesn't implement solving given solution type: throw exception
              */
             throw new NotImplementedException();
         }

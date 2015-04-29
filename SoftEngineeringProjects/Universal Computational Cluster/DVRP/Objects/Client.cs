@@ -6,7 +6,7 @@ namespace DVRP.Objects
     [Serializable]
     public class Client
     {
-        private Tuple<double, double> _location;
+        private Location _location;
         private TimeSpan _startTime;
         private TimeSpan _endTime;
         //max time needed for transport
@@ -14,7 +14,7 @@ namespace DVRP.Objects
         // size of transport
         private double _size;
 
-        public Client (Tuple<double, double> location, TimeSpan startTime, TimeSpan endTime, double unld, double size )
+        public Client (Location location, TimeSpan startTime, TimeSpan endTime, double unld, double size )
         {
             _location = location;
             _startTime = startTime;

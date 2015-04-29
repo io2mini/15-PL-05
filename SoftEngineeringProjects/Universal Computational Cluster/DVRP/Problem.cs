@@ -55,31 +55,12 @@ namespace DVRP
 
         public byte[] Serialize()
         {
-            try
-            {
-                IFormatter formatter = new BinaryFormatter();
-                var stream = new MemoryStream();
-                formatter.Serialize(stream, this);
-                byte[] byteArray = stream.ToArray();
-                stream.Close();
-                return byteArray;
-            }
-            catch (Exception e) { throw e; }
-            return null;
+            return Serializer.Serialize(this);
         }
 
         public static Problem Deserialize(byte[] byteArray)
         {
-            Problem problem = null;
-            try
-            {
-                IFormatter formatter = new BinaryFormatter();
-                Stream stream = new MemoryStream(byteArray);
-                problem = (Problem)formatter.Deserialize(stream);
-                stream.Close();
-            }
-            catch (Exception e) { }
-            return problem;
+            return Serializer.Deserialize(byteArray) as Problem;
         }
 
         private byte[] ObjectToByteArray(Object obj)

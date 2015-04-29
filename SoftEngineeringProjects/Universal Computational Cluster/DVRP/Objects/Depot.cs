@@ -7,11 +7,11 @@ namespace DVRP.Objects
     [Serializable]
     public class Depot
     {
-        private Tuple<double, double> _location;
+        private Location _location;
         private TimeSpan _startTime;
         private TimeSpan _endTime;
 
-        public Depot (Tuple<double, double> location, TimeSpan startTime, TimeSpan endTime)
+        public Depot (Location location, TimeSpan startTime, TimeSpan endTime)
         {
             _location = location;
             _startTime = startTime;

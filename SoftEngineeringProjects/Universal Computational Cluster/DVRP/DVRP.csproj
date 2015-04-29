@@ -46,12 +46,20 @@
     <Compile Include="MathExtensions.cs" />
     <Compile Include="Objects\Location.cs" />
     <Compile Include="Permuter.cs" />
+    <Compile Include="Serializer.cs" />
+    <Compile Include="Solution.cs" />
     <Compile Include="TaskSolver.cs" />
     <Compile Include="Objects\Client.cs" />
     <Compile Include="Objects\Depot.cs" />
     <Compile Include="Objects\Vehicle.cs" />
     <Compile Include="Problem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{ac1302e2-f903-44d2-a0b9-eb65263dd10a}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
