@@ -346,7 +346,7 @@ namespace Common
             }
             
         }
-
+       
         /// <summary>
         /// Metoda wysyłająca Message do serwera
         /// </summary>

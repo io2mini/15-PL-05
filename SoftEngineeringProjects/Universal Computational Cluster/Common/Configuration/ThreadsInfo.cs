@@ -8,13 +8,13 @@ namespace Common.Configuration
 {
     public class ThreadInfo
     {
-        public ComputationalThread[] Threads;
+        public List<ComputationalThread> Threads;
         public ThreadInfo(int n)
         {
-           var Threads = new List<ComputationalThread>();
-            for(int i=0;i<n;i++) Threads.Add( new ComputationalThread());
-            this.Threads = Threads.ToArray();
-            
+            var Threads = new List<ComputationalThread>();
+            for (int i = 0; i < n; i++) Threads.Add(new ComputationalThread());
+            this.Threads = Threads;
         }
+
     }
 }
