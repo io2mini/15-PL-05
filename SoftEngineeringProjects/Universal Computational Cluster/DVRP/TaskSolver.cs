@@ -11,9 +11,10 @@ namespace DVRP
     {
         private Problem _problem;
 
-        public TaskSolver(byte[] problemData) : base(problemData)
+        public TaskSolver(byte[] problemData)
+            : base(problemData)
         {
-             _problem = Problem.Deserialize(problemData);
+            _problem = Problem.Deserialize(problemData);
         }
 
         public override byte[] Solve(byte[] partialData, TimeSpan timeout)
@@ -34,10 +35,10 @@ namespace DVRP
             if (byteSolutions == null) throw new ArgumentNullException();
             Solution solution = null;
             double cost = Double.MaxValue;
-            foreach(byte[] byteArray in byteSolutions)
+            foreach (byte[] byteArray in byteSolutions)
             {
                 Solution solution_prim = Solution.Deserialize(byteArray);
-                if(solution_prim.Cost < cost)
+                if (solution_prim.Cost < cost)
                 {
                     cost = solution_prim.Cost;
                     solution = solution_prim;

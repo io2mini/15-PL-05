@@ -11,10 +11,9 @@ namespace Common.Configuration
         public ComputationalThread[] Threads;
         public ThreadInfo(int n)
         {
-           var Threads = new List<ComputationalThread>();
-            for(int i=0;i<n;i++) Threads.Add( new ComputationalThread());
+            var Threads = new List<ComputationalThread>();
+            for (int i = 0; i < n; i++) Threads.Add(new ComputationalThread());
             this.Threads = Threads.ToArray();
-            
         }
     }
 }

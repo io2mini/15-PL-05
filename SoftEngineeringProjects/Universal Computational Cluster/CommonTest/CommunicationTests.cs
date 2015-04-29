@@ -54,7 +54,7 @@ namespace CommonTest
             communicationServer.InitializeIPList();
             communicationServer.Start();
             ComputationalNode[] computationalNodes = new ComputationalNode[5];
-            for (int i = 0; i < computationalNodes.Length; i++ )
+            for (int i = 0; i < computationalNodes.Length; i++)
             {
                 computationalNodes[i] = new ComputationalNode();
                 computationalNodes[i].IsWorking = true;

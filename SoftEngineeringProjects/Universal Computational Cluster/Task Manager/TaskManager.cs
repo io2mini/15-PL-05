@@ -14,8 +14,9 @@ namespace Common.Components
     public class TaskManager : SystemComponent
     {
         const String DivideProblem = "DivideProblem";
-        
-        public TaskManager() : base() 
+
+        public TaskManager()
+            : base()
         {
             deviceType = SystemComponentType.TaskManager;
             solvableProblems = new string[] { "DVRP" };
@@ -49,7 +50,7 @@ namespace Common.Components
              * 0. If not Idle throw exception and send error
              * 1. Handle multiple threads if this TM has more than one available
              */
-            
+
             var ts = GetTaskSolver(divideProblem.ProblemType, divideProblem.Data);
             var dataParts = ts.DivideProblem((int)divideProblem.ComputationalNodes);
             ulong freeTaskId = 0;
@@ -84,6 +85,6 @@ namespace Common.Components
             throw new NotImplementedException();
         }
 
-        
+
     }
 }

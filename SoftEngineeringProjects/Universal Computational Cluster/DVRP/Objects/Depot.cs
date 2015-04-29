@@ -11,7 +11,7 @@ namespace DVRP.Objects
         private TimeSpan _startTime;
         private TimeSpan _endTime;
 
-        public Depot (Location location, TimeSpan startTime, TimeSpan endTime)
+        public Depot(Location location, TimeSpan startTime, TimeSpan endTime)
         {
             _location = location;
             _startTime = startTime;

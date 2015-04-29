@@ -14,7 +14,7 @@ namespace DVRP.Objects
         // size of transport
         private double _size;
 
-        public Client (Location location, TimeSpan startTime, TimeSpan endTime, double unld, double size )
+        public Client(Location location, TimeSpan startTime, TimeSpan endTime, double unld, double size)
         {
             _location = location;
             _startTime = startTime;

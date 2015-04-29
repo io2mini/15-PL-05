@@ -5,7 +5,8 @@ namespace Common.Components
 {
     public class ComputationalNode : SystemComponent
     {
-        public ComputationalNode() : base()
+        public ComputationalNode()
+            : base()
         {
             deviceType = SystemComponentType.ComputationalNode;
             solvableProblems = new string[] { "DVRP" };

@@ -61,7 +61,7 @@ namespace DVRP
                     tab_prim[i] = tab[i];
                 tabs.Add(tab_prim);
             }
-            for(int i = 0; i < k; i++)
+            for (int i = 0; i < k; i++)
             {
                 tab[index] = (uint)i;
                 GenerateCombinationsRecursively(n, k, index + 1, tab, ref tabs);
@@ -73,7 +73,7 @@ namespace DVRP
             if (_n == k)
             {
                 _permutations.Add(new uint[_n]);
-                Array.Copy(_permutation, _permutations[_permutations.Count-1], _n);
+                Array.Copy(_permutation, _permutations[_permutations.Count - 1], _n);
                 return;
             }
             for (uint m = 0; m < _n; m++)
@@ -85,7 +85,7 @@ namespace DVRP
                     GenerateNextPermutation(k + 1);
                     _used[m] = false;
                 }
-            }      
+            }
         }
     }
 }

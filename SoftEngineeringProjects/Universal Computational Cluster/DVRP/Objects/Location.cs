@@ -23,14 +23,16 @@ namespace DVRP.Objects
         /// 
         /// </summary>
         /// <param name="coordinate">Zmienna inicjalizująca obie współrzędne.</param>
-        public Location(double coordinate) : this(coordinate, coordinate)
+        public Location(double coordinate)
+            : this(coordinate, coordinate)
         {
         }
 
         /// <summary>
         /// Konstruktor lokalizacji o współrzędnych (0,0).
         /// </summary>
-        public Location() : this(0)
+        public Location()
+            : this(0)
         {
         }
 
@@ -56,7 +58,7 @@ namespace DVRP.Objects
         /// <param name="l1"></param>
         /// <param name="l2"></param>
         /// <returns>Odległość między l1 i l2.</returns>
-        public static double operator|(Location l1, Location l2)
+        public static double operator |(Location l1, Location l2)
         {
             return DistanceBetween(l1, l2);
         }
@@ -70,7 +72,7 @@ namespace DVRP.Objects
         {
             return Math.Sqrt(Math.Pow(l1.X - l2.X, 2) + Math.Pow(l1.Y - l2.Y, 2));
         }
-        
+
         /// <summary>
         /// Euklidesowa funkcja odległości
         /// </summary>
