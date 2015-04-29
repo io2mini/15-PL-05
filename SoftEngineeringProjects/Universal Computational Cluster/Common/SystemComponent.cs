@@ -140,6 +140,15 @@ namespace Common
         }    
 
         /// <summary>
+        /// Metoda wysyłajaca Error Message 
+        /// </summary>
+        /// <param name="">Wyjątek przyjmowy do przesłania w message typu Erroe</param>
+        protected void SendExceptionErrorMessage()
+        {
+            SendMessage(ErrorGenerator.Generate("", ErrorErrorType.ExceptionOccured));
+        }
+
+        /// <summary>
         /// Metoda używana do otrzymywania wiadomści, wyświetla na konsolę otrzymany message 
         /// </summary>
         protected void ReceiveResponse()

@@ -14,7 +14,6 @@ namespace DVRP
         public TaskSolver(byte[] problemData) : base(problemData)
         {
              _problem = Problem.Deserialize(problemData);
-
         }
 
         public override byte[] Solve(byte[] partialData, TimeSpan timeout)
