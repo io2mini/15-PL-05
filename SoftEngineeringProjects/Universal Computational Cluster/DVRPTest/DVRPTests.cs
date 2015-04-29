@@ -35,11 +35,11 @@ namespace DVRPTest
                 },
                 new List<Client>()
                 {
-                    new Client(new Location(3,3), new TimeSpan(2,3,4), new TimeSpan(4,4,4), 2, 2)
+                    new Client(new Location(3,3), new TimeSpan(2,3,4), new TimeSpan(4,4,4), 2, 2, 1)
                 },
                 new List<Depot>() 
                 { 
-                    new Depot(new Location(2,2), new TimeSpan(1,10,1), new TimeSpan(1,11,11))
+                    new Depot(new Location(2,2), new TimeSpan(1,10,1), new TimeSpan(1,11,11), 2)
                 },
                 new int[2][]);
             String problemString = problem.ToString();
