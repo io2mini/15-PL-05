@@ -19,16 +19,16 @@ namespace Common.Components
         {
             try
             {
-            switch (key)
-            {
-                case SolvePartialProblems:
-                    MsgHandler_SolvePartialProblems((SolvePartialProblems)message);
-                    break;
+                switch (key)
+                {
+                    case SolvePartialProblems:
+                        MsgHandler_SolvePartialProblems((SolvePartialProblems)message);
+                        break;
+                }
             }
-            }
-            catch(NotEnoughIdleThreadsException e)
+            catch (NotEnoughIdleThreadsException e)
             {
-                
+                SendExceptionErrorMessage(e);
             }
         }
         public void MsgHandler_SolvePartialProblems(Messages.SolvePartialProblems partialProblems)

@@ -143,9 +143,9 @@ namespace Common
         /// Metoda wysyłajaca Error Message 
         /// </summary>
         /// <param name="">Wyjątek przyjmowy do przesłania w message typu Erroe</param>
-        protected void SendExceptionErrorMessage()
+        protected void SendExceptionErrorMessage(Exception e)
         {
-            SendMessage(ErrorGenerator.Generate("", ErrorErrorType.ExceptionOccured));
+            SendMessage(ErrorGenerator.Generate(e.ToString() , ErrorErrorType.ExceptionOccured));
         }
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace Common
         }
         protected virtual Status GenerateStatus()
         {
-            return StatusReportGenerator.Generate(Id, threadInfo.Threads);
+            return StatusReportGenerator.Generate(Id, threadInfo.Threads.ToArray());
         }
         
         /// <summary>
