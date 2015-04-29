@@ -1,28 +1,30 @@
-﻿using Common.Exceptions;
+﻿using System;
+using System.Net.Sockets;
+using Common.Exceptions;
 using Common.Messages;
-using System;
 using UCCTaskSolver;
 
 namespace Common.Components
 {
     public class ComputationalNode : SystemComponent
     {
-        const string SolvePartialProblems = "SolvePartialProblems";
+        private const string SolvePartialProblems = "SolvePartialProblems";
+
         public ComputationalNode()
-            : base()
         {
-            deviceType = SystemComponentType.ComputationalNode;
-            solvableProblems = new string[] { "DVRP" };
-            pararellThreads = 1;
+            DeviceType = SystemComponentType.ComputationalNode;
+            SolvableProblems = new[] {"DVRP"};
+            PararellThreads = 1;
         }
-        protected override void HandleMessage(Message message, string key, System.Net.Sockets.Socket socket)
+
+        protected override void HandleMessage(Message message, string key, Socket socket)
         {
             try
             {
                 switch (key)
                 {
                     case SolvePartialProblems:
-                        MsgHandler_SolvePartialProblems((SolvePartialProblems)message);
+                        MsgHandler_SolvePartialProblems((SolvePartialProblems) message);
                         break;
                 }
             }
@@ -31,14 +33,17 @@ namespace Common.Components
                 SendErrorMessage(e.ToString(), ErrorErrorType.ExceptionOccured);
             }
         }
-        public void MsgHandler_SolvePartialProblems(Messages.SolvePartialProblems partialProblems)
+
+        public void MsgHandler_SolvePartialProblems(SolvePartialProblems partialProblems)
         {
-            var list = threadInfo.Threads.FindAll((CT) => (CT.ProblemType == partialProblems.ProblemType && CT.State == StatusThreadState.Idle));
+            var list =
+                ThreadInfo.Threads.FindAll(
+                    CT => (CT.ProblemType == partialProblems.ProblemType && CT.State == StatusThreadState.Idle));
             if (list.Count < partialProblems.PartialProblems.Length)
             {
                 throw new NotEnoughIdleThreadsException("Not enough idle threads for problem type");
             }
-            for (int i = 0; i < partialProblems.PartialProblems.Length; i++)
+            for (var i = 0; i < partialProblems.PartialProblems.Length; i++)
             {
                 if (partialProblems.PartialProblems[i].NodeID == Id)
                 {

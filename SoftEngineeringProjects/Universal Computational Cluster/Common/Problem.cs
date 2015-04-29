@@ -1,45 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common
+﻿namespace Common
 {
     public class Problem
     {
-        private String problemType;
-        private ulong solvingTimeOut;
-        private byte[] serializedProblem;
-        private ulong problemInstanceId;
-
-        public Problem()
-        {
-
-        }
-
-        public byte[] SerializedProblem
-        {
-            get { return serializedProblem; }
-            set { serializedProblem = value; }
-        }
-
-        public ulong SolvingTimeOut
-        {
-            get { return solvingTimeOut; }
-            set { solvingTimeOut = value; }
-        }
-
-        public ulong ProblemInstanceId
-        {
-            get { return problemInstanceId; }
-            set { problemInstanceId = value; }
-        }
-
-        public string ProblemType
-        {
-            get { return problemType; }
-            set { problemType = value; }
-        }
+        public byte[] SerializedProblem { get; set; }
+        public ulong SolvingTimeOut { get; set; }
+        public ulong ProblemInstanceId { get; set; }
+        public string ProblemType { get; set; }
     }
 }

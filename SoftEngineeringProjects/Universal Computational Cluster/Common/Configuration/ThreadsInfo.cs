@@ -1,20 +1,16 @@
 using System.Collections.Generic;
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Common.Configuration
 {
     public class ThreadInfo
     {
         public List<ComputationalThread> Threads;
+
         public ThreadInfo(int n)
         {
-            var Threads = new List<ComputationalThread>();
-            for (int i = 0; i < n; i++) Threads.Add(new ComputationalThread());
-            this.Threads = Threads;
+            var threads = new List<ComputationalThread>();
+            for (var i = 0; i < n; i++) threads.Add(new ComputationalThread());
+            Threads = threads;
         }
     }
 }

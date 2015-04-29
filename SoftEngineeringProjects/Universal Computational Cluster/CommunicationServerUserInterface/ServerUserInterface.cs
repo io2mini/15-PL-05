@@ -1,25 +1,19 @@
-﻿using Common.Configuration;
+﻿using System;
 using Common.Components;
+using Common.Configuration;
 using Common.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Common.UserInterface
 {
     public class ServerUserInterface
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            CommunicationServer communicationServer = new CommunicationServer();
+            var communicationServer = new CommunicationServer();
             Console.WriteLine("Communication Server started successfully");
             string newLine;
-            bool hasBeenRead = false;
-            
+            var hasBeenRead = false;
+
             while (communicationServer.IsWorking && !hasBeenRead)
             {
                 newLine = Console.ReadLine();
@@ -35,24 +29,21 @@ namespace Common.UserInterface
                 }
                 try
                 {
-
-                    communicationServer.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.CommunicationServer);
+                    communicationServer.CommunicationInfo = ParametersParser.ReadParameters(newLine,
+                        SystemComponentType.CommunicationServer);
                     communicationServer.InitializeIPList();
                     hasBeenRead = true;
                 }
                 catch (ParsingArgumentException)
                 {
                     Console.WriteLine("Wrong Arguments");
-                    continue;
                 }
-                
             }
             communicationServer.Start();
 
             // Osbluga komendy zakonczenia programu
             while (communicationServer.IsWorking)
             {
-
             }
         }
     }

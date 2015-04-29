@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DVRP
+﻿namespace DVRP
 {
     public static class MathExtensions
     {

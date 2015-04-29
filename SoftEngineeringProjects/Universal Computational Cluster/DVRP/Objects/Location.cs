@@ -1,10 +1,4 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DVRP.Objects
 {
@@ -19,8 +13,8 @@ namespace DVRP.Objects
             _x = x;
             _y = y;
         }
+
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="coordinate">Zmienna inicjalizująca obie współrzędne.</param>
         public Location(double coordinate)
@@ -29,7 +23,7 @@ namespace DVRP.Objects
         }
 
         /// <summary>
-        /// Konstruktor lokalizacji o współrzędnych (0,0).
+        ///     Konstruktor lokalizacji o współrzędnych (0,0).
         /// </summary>
         public Location()
             : this(0)
@@ -37,7 +31,7 @@ namespace DVRP.Objects
         }
 
         /// <summary>
-        /// Współrzędna X.
+        ///     Współrzędna X.
         /// </summary>
         public double X
         {
@@ -45,7 +39,7 @@ namespace DVRP.Objects
         }
 
         /// <summary>
-        /// Współrzędna Y.
+        ///     Współrzędna Y.
         /// </summary>
         public double Y
         {
@@ -53,7 +47,7 @@ namespace DVRP.Objects
         }
 
         /// <summary>
-        /// Euklidesowa funkcja odległości
+        ///     Euklidesowa funkcja odległości
         /// </summary>
         /// <param name="l1"></param>
         /// <param name="l2"></param>
@@ -62,8 +56,9 @@ namespace DVRP.Objects
         {
             return DistanceBetween(l1, l2);
         }
+
         /// <summary>
-        /// Euklidesowa funkcja odległości
+        ///     Euklidesowa funkcja odległości
         /// </summary>
         /// <param name="l1"></param>
         /// <param name="l2"></param>
@@ -74,7 +69,7 @@ namespace DVRP.Objects
         }
 
         /// <summary>
-        /// Euklidesowa funkcja odległości
+        ///     Euklidesowa funkcja odległości
         /// </summary>
         /// <param name="other"></param>
         /// <returns>Zwraca odległość other od tego obiektu</returns>

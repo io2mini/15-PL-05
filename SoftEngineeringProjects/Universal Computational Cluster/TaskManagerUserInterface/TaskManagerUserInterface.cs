@@ -1,42 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Common.Configuration;
 using Common.Components;
+using Common.Configuration;
 using Common.Exceptions;
 
 namespace Common.UserInterface
 {
     public class TaskManagerUserInterface
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            TaskManager taskManager = new TaskManager();
+            var taskManager = new TaskManager();
             Console.WriteLine("Task Manager started successfully");
-            String newLine;
-            bool hasReadData = false;
+            string newLine;
+            var hasReadData = false;
             while (taskManager.IsWorking && !hasReadData)
             {
                 newLine = Console.ReadLine();
                 try
                 {
-                    taskManager.CommunicationInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.TaskManager);
+                    taskManager.CommunicationInfo = ParametersParser.ReadParameters(newLine,
+                        SystemComponentType.TaskManager);
                     hasReadData = true;
                 }
-                catch(ParsingArgumentException)
+                catch (ParsingArgumentException)
                 {
                     Console.WriteLine("Wrong Arguments");
-                    continue;
                 }
-                
             }
 
             taskManager.Start();
             while (taskManager.IsWorking)
             {
-
             }
             Console.WriteLine("Task Manager ended successfully");
         }
