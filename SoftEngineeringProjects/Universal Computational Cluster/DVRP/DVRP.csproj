@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MathExtensions.cs" />
+    <Compile Include="Objects\Location.cs" />
     <Compile Include="Permuter.cs" />
     <Compile Include="TaskSolver.cs" />
     <Compile Include="Objects\Client.cs" />
