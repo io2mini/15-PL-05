@@ -3,18 +3,20 @@ using System.Net.Sockets;
 using Common.Exceptions;
 using Common.Messages;
 using UCCTaskSolver;
+using System.Collections.Generic;
 
 namespace Common.Components
 {
     public class ComputationalNode : SystemComponent
     {
         private const string SolvePartialProblems = "SolvePartialProblems";
-
+      
         public ComputationalNode()
         {
             DeviceType = SystemComponentType.ComputationalNode;
             SolvableProblems = new[] {"DVRP"};
             PararellThreads = 1;
+           
         }
 
         protected override void HandleMessage(Message message, string key, Socket socket)
@@ -50,6 +52,7 @@ namespace Common.Components
                     throw new InvalidIdException("Ivalid Node Id in Partial Problem");
                 }
             }
+
             // TODO: jesli mamy mniej idle threadow niz powinnismy rzucamy error
             // TODO: jeśli któryś problem ma różniący się NodeId niż ten CN to send apropriate error msg;
             // TODO: implement state changes for threads
