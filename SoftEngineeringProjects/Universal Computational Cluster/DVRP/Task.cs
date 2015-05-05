@@ -1,4 +1,5 @@
 ﻿using System;
+using DVRP.Objects;
 
 namespace DVRP
 {
@@ -6,13 +7,14 @@ namespace DVRP
     public class Task
     {
         /// <summary>
+        /// 
         /// </summary>
-        /// <param name="p">Dane problemu</param>
-        /// <param name="sequences">Sekwencje do sprawdzenia</param>
-        public Task(Problem p, uint[][] sequences)
+        /// <param name="problem">Problem do rozwiązania</param>
+        /// <param name="routes">Tablica tras do sprawdzenia</param>
+        public Task(Problem problem, Route[][] routes)
         {
-            Problem = p;
-            Sequences = sequences;
+            Problem = problem;
+            Routes = routes;
         }
 
         /// <summary>
@@ -23,7 +25,7 @@ namespace DVRP
         /// <summary>
         ///     Sekwencje do sprawdzenia
         /// </summary>
-        public uint[][] Sequences { get; private set; }
+        public Route[][] Routes { get; private set; }
 
         public static Task Deserialize(byte[] byteArray)
         {

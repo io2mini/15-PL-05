@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace DVRP
 {
@@ -86,6 +87,33 @@ namespace DVRP
                     _used[m] = false;
                 }
             }
+        }
+
+        public static bool[][] GenerateBooleanCombination(uint length, uint howManyDivides = 0)
+        {
+            var l = new List<bool[]>();
+            var tab = new bool[length];
+            GenerateBooleanCombinationRecursively(1, tab, howManyDivides, 1, ref l);
+            return l.ToArray();
+        }
+
+        private static void GenerateBooleanCombinationRecursively(int actualIndex, bool[] tab, uint howManyDivides, uint actualdivides, ref List<bool[]> resultList)
+        {
+            if (actualIndex == tab.Length || actualdivides==howManyDivides)
+            {
+                var t = new bool[tab.Length];
+                for (int i = 0; i < tab.Length; i++)
+                {
+                    t[i] = tab[i];
+                }
+                resultList.Add(t);
+                return;
+            }
+            tab[actualIndex] = true;
+            GenerateBooleanCombinationRecursively(actualIndex + 1, tab, howManyDivides, actualdivides + 1,
+                ref resultList);
+            tab[actualIndex] = false;
+            GenerateBooleanCombinationRecursively(actualIndex+1, tab, howManyDivides, actualdivides, ref resultList);
         }
     }
 }

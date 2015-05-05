@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="MathExtensions.cs" />
     <Compile Include="Objects\Location.cs" />
+    <Compile Include="Objects\Route.cs" />
     <Compile Include="Permuter.cs" />
     <Compile Include="Serializer.cs" />
     <Compile Include="Solution.cs" />
