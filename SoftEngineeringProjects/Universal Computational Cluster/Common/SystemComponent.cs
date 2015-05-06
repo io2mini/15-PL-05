@@ -24,35 +24,35 @@ namespace Common
         ComputationalNode,
         TaskManager
     }
-
+   
     public abstract class SystemComponent
     {
         protected NoOperationBackupCommunicationServersBackupCommunicationServer BackupServer;
-        protected CommunicationInfo communicationInfo;
-        protected SystemComponentType DeviceType;
+        public CommunicationInfo Info { get; set; }
+        public SystemComponentType DeviceType { get; protected set; }
         protected byte PararellThreads;
         protected string[] SolvableProblems;
         protected TcpClient TcpClient;
         protected ThreadInfo ThreadInfo;
-
+        public event ThreadStateChanged ThreadStateChanged;
         protected SystemComponent()
         {
             IsWorking = true;
             /*
              * TODO: Initialize Thread Array
              */
+            // ReSharper disable once DoNotCallOverridableMethodsInConstructor
             Initialize();
         }
 
         protected ulong Id { get; set; }
         public bool IsWorking { get; set; }
 
-        public CommunicationInfo CommunicationInfo
+        protected virtual void OnChanged(EventArgs e)
         {
-            get { return communicationInfo; }
-            set { communicationInfo = value; }
+            if (ThreadStateChanged != null)
+                ThreadStateChanged(this, e);
         }
-
         /// <summary>
         ///     Metoda inicjalizujące słowniki do analizy wiadomości
         /// </summary>
@@ -101,17 +101,16 @@ namespace Common
         ///     Metoda mająca na celu wysłanie odpowiedniego komnuniktatu w zalezności od urządzenia,
         ///     na którym jest wywoływana.
         /// </summary>
-        /// <param name="deviceType">Typ urządzenia rejestującego się.</param>
         private void SendRegisterMessage()
         {
-            var msg = RegisterGenerator.Generate(DeviceType, SolvableProblems, PararellThreads, false, null);
+            var msg = RegisterGenerator.Generate(DeviceType, SolvableProblems, PararellThreads);
             try
             {
                 SendMessage(msg);
             }
             catch (MessageNotSentException)
             {
-                Console.WriteLine("Register Message Not Send");
+                Console.WriteLine(Resources.SystemComponent_SendRegisterMessage_Register_Message_Not_Send);
             }
         }
 
@@ -119,6 +118,7 @@ namespace Common
         ///     Metoda wysyłajaca Error Message
         /// </summary>
         /// <param name="message">wiadomosć przekazywana w Error Message</param>
+        /// <param name="errorType">typ błędu do wygenerowania</param>
         protected void SendErrorMessage(string message, ErrorErrorType errorType)
         {
             SendMessage(ErrorGenerator.Generate(message, errorType));
@@ -130,8 +130,8 @@ namespace Common
         protected void ReceiveResponse()
         {
             if (!TcpClient.Connected)
-                TcpClient.Connect(communicationInfo.CommunicationServerAddress.Host,
-                    communicationInfo.CommunicationServerPort);
+                TcpClient.Connect(Info.CommunicationServerAddress.Host,
+                    Info.CommunicationServerPort);
             var stream = TcpClient.GetStream();
             var byteArray = new byte[1024];
             try
@@ -140,7 +140,7 @@ namespace Common
             }
             catch (Exception)
             {
-                Console.WriteLine("Connection was killed by host");
+                Console.WriteLine(Resources.SystemComponent_ReceiveResponse_Connection_was_killed_by_host);
                 return;
             }
             var message = Message.Sanitize(byteArray);
@@ -216,10 +216,9 @@ namespace Common
         /// <summary>
         ///     Abstrakcyjna klasa do obsługi komunikatu o błędzie, obsługa zależna od odbiorcy.
         /// </summary>
-        /// <param name="error"></param>
         protected virtual void MsgHandler_Error(Error message)
         {
-            Console.WriteLine("Error Message");
+            Console.WriteLine(Resources.SystemComponent_MsgHandler_Error_Error_Message);
             switch (message.ErrorType)
             {
                 case ErrorErrorType.UnknownSender:
@@ -231,7 +230,7 @@ namespace Common
                 case ErrorErrorType.InvalidOperation:
                 {
                     //TODO:switch to idle/partially idle state
-                    throw new NotImplementedException();
+                    ThreadInfo.SetStateAll(StatusThreadState.Idle);
                     break;
                 }
             }
@@ -244,15 +243,15 @@ namespace Common
         /// <param name="message"> Message typu Register Response na który reagujemy</param>
         protected void MsgHandler_RegisterResponse(RegisterResponse message)
         {
-            Console.WriteLine("RegisterResponse Message id={0}", message.Id);
-            communicationInfo.Time = message.Timeout;
+            Console.WriteLine(Resources.SystemComponent_MsgHandler_RegisterResponse_, message.Id);
+            Info.Time = message.Timeout;
             Id = message.Id;
             try
             {
                 StatusReporter = new Timer(
                     o =>
                     {
-                        Console.WriteLine("Sending Status");
+                        Console.WriteLine(Resources.SystemComponent_MsgHandler_RegisterResponse_Sending_Status);
                         SendMessage(GenerateStatus());
                         var thread = new Thread(ReceiveResponse);
                         thread.IsBackground = true;
@@ -261,11 +260,11 @@ namespace Common
             }
             catch (InvalidIdException)
             {
-                Console.WriteLine("Negative Id for component");
+                Console.WriteLine(Resources.SystemComponent_MsgHandler_RegisterResponse_Negative_Id_for_component);
             }
             catch (MessageNotSentException)
             {
-                Console.WriteLine("Message Not send for component type {0} with id {1}", DeviceType, Id);
+                Console.WriteLine(Resources.SystemComponent_MsgHandler_RegisterResponse_Message_Not_send_for_component_type__0__with_id__1_, DeviceType, Id);
             }
         }
 
@@ -280,36 +279,36 @@ namespace Common
         /// <param name="message"> Message typu NoOperation na który reagujemy</param>
         protected void MsgHandler_NoOperation(NoOperation message)
         {
-            Console.WriteLine("NoOperation Message");
+            Console.WriteLine(Resources.SystemComponent_MsgHandler_NoOperation_NoOperation_Message);
             BackupServer = message.BackupCommunicationServers.BackupCommunicationServer;
         }
 
         /// <summary>
         ///     Metoda walidująca wiadomości z istniejącymi schemami
         /// </summary>
-        /// <param name="XML">wiadomość w postaci łańcucha znaków</param>
+        /// <param name="xml">wiadomość w postaci łańcucha znaków</param>
         /// <param name="socket">Socket z którego otrzymano</param>
-        protected void Validate(string XML, Socket socket)
+        protected void Validate(string xml, Socket socket)
         {
             XDocument message;
             try
             {
-                message = XDocument.Parse(XML, LoadOptions.PreserveWhitespace);
+                message = XDocument.Parse(xml, LoadOptions.PreserveWhitespace);
             }
-            catch (XmlException e)
+            catch (XmlException)
             {
-                //Console.WriteLine("Wrong msg\n" + e.Message + "\n" + XML + "\n");
+               //TODO: Log warning
                 return;
             }
-            foreach (var Key in SchemaTypes.Keys)
+            foreach (var key in SchemaTypes.Keys)
             {
                 var schemas = new XmlSchemaSet();
-                schemas.Add(null, XmlReader.Create(new StringReader(SchemaTypes[Key].Item1)));
+                schemas.Add(null, XmlReader.Create(new StringReader(SchemaTypes[key].Item1)));
                 var errorOccured = false;
                 message.Validate(schemas, (o, e) => { errorOccured = true; });
                 if (!errorOccured)
                 {
-                    HandleMessage(Message.ParseXML(SchemaTypes[Key].Item2, XML), Key, socket);
+                    HandleMessage(Message.ParseXML(SchemaTypes[key].Item2, xml), key, socket);
                     break;
                 }
             }
@@ -326,7 +325,7 @@ namespace Common
         public virtual void SaveConfig(string path)
         {
             var xmlSerializer = new XmlSerializer(typeof (CommunicationInfo));
-            xmlSerializer.Serialize(new FileStream(path, FileMode.Create), communicationInfo);
+            xmlSerializer.Serialize(new FileStream(path, FileMode.Create), Info);
         }
 
         /// <summary>
@@ -338,7 +337,7 @@ namespace Common
             var xmlDeSerializer = new XmlSerializer(typeof (CommunicationInfo));
             try
             {
-                communicationInfo = (CommunicationInfo) xmlDeSerializer.Deserialize(new FileStream(path, FileMode.Open));
+                Info = (CommunicationInfo) xmlDeSerializer.Deserialize(new FileStream(path, FileMode.Open));
             }
             catch (FileNotFoundException e)
             {
@@ -357,13 +356,13 @@ namespace Common
         {
             try
             {
-                TcpClient = new TcpClient(communicationInfo.CommunicationServerAddress.Host,
-                    communicationInfo.CommunicationServerPort);
+                TcpClient = new TcpClient(Info.CommunicationServerAddress.Host,
+                    Info.CommunicationServerPort);
             }
             catch (SocketException e)
             {
                 var message = string.Format("Problems with connecting to Communication Server host: {0} ; port: {1}",
-                    communicationInfo.CommunicationServerAddress.Host, communicationInfo.CommunicationServerPort);
+                    Info.CommunicationServerAddress.Host, Info.CommunicationServerPort);
                 throw new ConnectionException(message, e);
             }
         }
@@ -380,8 +379,8 @@ namespace Common
                 //Console.WriteLine(message);
                 if (!TcpClient.Connected)
                 {
-                    TcpClient.Connect(communicationInfo.CommunicationServerAddress.Host,
-                        communicationInfo.CommunicationServerPort);
+                    TcpClient.Connect(Info.CommunicationServerAddress.Host,
+                        Info.CommunicationServerPort);
                 }
                 var stream = TcpClient.GetStream();
                 var writer = new StreamWriter(stream, Encoding.UTF8) {AutoFlush = false};

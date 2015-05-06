@@ -29,7 +29,7 @@ namespace Common.UserInterface
                 }
                 try
                 {
-                    communicationServer.CommunicationInfo = ParametersParser.ReadParameters(newLine,
+                    communicationServer.Info = ParametersParser.ReadParameters(newLine,
                         SystemComponentType.CommunicationServer);
                     communicationServer.InitializeIPList();
                     hasBeenRead = true;
