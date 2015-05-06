@@ -12,7 +12,6 @@ namespace DVRP
 
         public Solution(List<Route> vehicleLocationList)
         {
-            if (_vehicleLocationList == null) throw new ArgumentNullException();
             _vehicleLocationList = vehicleLocationList;
         }
 

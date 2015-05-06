@@ -28,14 +28,20 @@ namespace DVRP
                     //if(c.StartTime>actualTime || c.EndTime<actualTime) return double.MaxValue; //wersja bez czekania
 
                         //Wersja z czekaniem na otwarcie:
-                        if (c.EndTime < actualTime) return double.MaxValue;
+                    if (c.EndTime < actualTime)
+                    {
+                        return double.MaxValue;
+                    }
                         if (c.StartTime > actualTime) actualTime = c.StartTime;
                         //koniec wersji z czekaniem na otwarcie
 
                     actualTime += TimeSpan.FromMinutes(c.Unld);
                     //if(c.StartTime>actualTime || c.EndTime<actualTime) return double.MaxValue; TODO: sprawdzić czy cały rozładunek musi się zmieścić w oknie czasowym
-                    load -= c.Size;
-                    if (load < 0) return double.MaxValue;
+                    load += c.Size;
+                    if (load < 0)
+                    {
+                        return double.MaxValue;
+                    }
                 }
                 if(p.IsDepot(r.Sequence[i]))
                 {
@@ -43,14 +49,20 @@ namespace DVRP
                     //if(d.StartTime>actualTime || d.EndTime<actualTime) return double.MaxValue; //wersja bez czekania
 
                         //Wersja z czekaniem na otwarcie:
-                        if (d.EndTime < actualTime) return double.MaxValue;
+                    if (d.EndTime < actualTime)
+                    {
+                        return double.MaxValue;
+                    }
                         if (d.StartTime > actualTime) actualTime = d.StartTime;
                         //koniec wersji z czekaniem na otwarcie
 
                     load = p.Fleet[0].Capacity;
                     //Zakładamy, że pobyt w depocie trwa 0 czasu;
                 }
-                if (cost > bestCost) return double.MaxValue;
+                if (cost > bestCost)
+                {
+                    return double.MaxValue;
+                }
             }
             return cost;
         }
