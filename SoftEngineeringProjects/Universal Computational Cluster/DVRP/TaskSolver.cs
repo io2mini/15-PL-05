@@ -149,7 +149,7 @@ namespace DVRP
             //}
 
             // Extra depot means Depot where path cost = 0
-            //Dzielenie na taski
+            // Dzielenie na taski
             var seqCount = (double)combinedDestinations.Count/(double)threadCount;
             var actualNodeIndex = 1;
             var sequences = new List<Route[]>();

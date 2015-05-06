@@ -10,7 +10,7 @@ namespace Common.Components
 {
     public class TaskManager : SystemComponent
     {
-        private const string DivideProblem = "DivideProblem";
+        private const string DivideProblem = "DivideProblem", SolutionRequest = "SolutionRequest";
 
         public TaskManager()
         {
@@ -24,6 +24,8 @@ namespace Common.Components
             base.Initialize();
             //DivideProblem
             SchemaTypes.Add(DivideProblem, new Tuple<string, Type>(Resources.Error, typeof (DivideProblem)));
+            //SolutionRequest
+            SchemaTypes.Add(SolutionRequest, new Tuple<string, Type>(Resources.SolutionRequest, typeof(SolutionRequest)));
         }
 
         protected override void HandleMessage(Message message, string key, Socket socket)
@@ -54,7 +56,7 @@ namespace Common.Components
             var parts = new SolvePartialProblems();
             parts.Id = divideProblem.Id;
             parts.ProblemType = divideProblem.ProblemType;
-            parts.CommonData = dataParts[0];
+            parts.CommonData = dataParts[0]; //TODO: check for null?
             //TODO: solving timeout?
             var l = new List<SolvePartialProblemsPartialProblem>((int) divideProblem.ComputationalNodes);
             for (var i = 1; i < dataParts.Count(); i++)

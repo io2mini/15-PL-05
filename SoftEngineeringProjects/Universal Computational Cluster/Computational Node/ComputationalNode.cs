@@ -1,9 +1,11 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using Common.Exceptions;
 using Common.Messages;
+using Common.Properties;
 using UCCTaskSolver;
 
 // ReSharper disable once CheckNamespace
@@ -12,17 +14,27 @@ namespace Common.Components
 
     public class ComputationalNode : SystemComponent
     {
-        private const string SolvePartialProblems = "SolvePartialProblems";
+        private const string SolvePartialProblems = "SolvePartialProblems", SolutionRequest = "SolutionRequest";
         
         public ComputationalNode()
         {
             DeviceType = SystemComponentType.ComputationalNode;
             SolvableProblems = new[] {"DVRP"};
-            PararellThreads = 1;
+            PararellThreads = 1; //TODO: load this from config
             ThreadStateChanged += ThreadStateChangedHandler;
             TaskSolverFactories = new Dictionary<string, TaskSolverFactory>();
             TaskSolverFactories.Add("DVRP",DVRP.TaskSolver.TaskSolverFactory);
         }
+
+        protected override void Initialize()
+        {
+            base.Initialize();
+            //SolutionRequest
+            SchemaTypes.Add(SolutionRequest, new Tuple<string, Type>(Resources.SolutionRequest, typeof(SolutionRequest)));
+            //SolvePartialProblems
+            SchemaTypes.Add(SolvePartialProblems, new Tuple<string, Type>(Resources.PartialProblems, typeof(SolvePartialProblems)));
+        }
+
         private void ThreadStateChangedHandler(object sender, ThreadStateChangedEventArgs e)
         {
 

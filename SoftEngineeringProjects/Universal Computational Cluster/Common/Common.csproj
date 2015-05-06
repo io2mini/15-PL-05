@@ -53,6 +53,7 @@
     <Compile Include="Exceptions\MessageNotSentException.cs" />
     <Compile Include="Exceptions\SolutionNotFoundException.cs" />
     <Compile Include="Exceptions\TaskManagerNotIdleException.cs" />
+    <Compile Include="Exceptions\UnrecognizedProblemException.cs" />
     <Compile Include="Messages\Generators\ErrorGenerator.cs" />
     <Compile Include="Messages\Generators\RegisterGenerator.cs" />
     <Compile Include="Messages\Generators\RegisterResponseGenerator.cs" />
