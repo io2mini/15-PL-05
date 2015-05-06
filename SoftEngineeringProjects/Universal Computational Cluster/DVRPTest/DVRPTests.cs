@@ -46,5 +46,23 @@ namespace DVRPTest
             var serialized = problem.Serialize();
             Assert.AreEqual(Problem.Deserialize(serialized).ToString(), problemString);
         }
+
+        [TestMethod]
+        public void DVRPComputationTest()
+        {
+            var problemFileUri = new Uri(@"C:\Users\Jakub\Desktop\15-PL-05\Documentation\io2_8_plain_a_D.vrp");
+            // Utwórz nowy problem
+            DVRP.Problem p = DVRP.Problem.CreateProblemInstanceFromFile(problemFileUri);
+            DVRP.TaskSolver ts = new DVRP.TaskSolver(p.Serialize());
+            var ttb = ts.DivideProblem(8);
+            List<byte[]> solutions = new List<byte[]>();
+            for (int i = 1; i < ttb.GetLength(0); i++)
+            {
+                DVRP.TaskSolver tsn = new TaskSolver(ttb[0]);
+                solutions.Add(tsn.Solve(ttb[i], new TimeSpan()));
+            }
+            var ms = ts.MergeSolution(solutions.ToArray());
+            var s = Solution.Deserialize(ms);
+        }
     }
 }
