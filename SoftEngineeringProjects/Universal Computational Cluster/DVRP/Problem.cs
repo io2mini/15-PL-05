@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -125,10 +126,18 @@ namespace DVRP
 
             Dictionary<uint, Location> locations = new Dictionary<uint, Location>();
             Dictionary<uint, double> demands = new Dictionary<uint, double>();
-            List<uint> depots = new List<uint>();
+            List<uint> depotsIds = new List<uint>();
+            List<uint> clientsIds = new List<uint>();
+            //Dictionary<uint, >
+            Dictionary<uint, Tuple<TimeSpan, TimeSpan>> depotTimesWindows = new Dictionary<uint, Tuple<TimeSpan, TimeSpan>>();
+            Dictionary<uint, TimeSpan> timesAvivals = new Dictionary<uint, TimeSpan>();
+            Dictionary<uint, double> unld = new Dictionary<uint, double>();
 
-            string name;
-            int num_depots, num_capacities, num_visits, num_locations, num_vehicles, capacities;
+            int numberOfVehicles = 0;
+            int vehiclesCapaticies = 0;
+
+            //string name;
+            //int num_depots, num_capacities, num_visits, num_locations, num_vehicles, capacities;
 
             for (int i = 0; i < problemFileLines.Length; i++)
             {
@@ -138,7 +147,7 @@ namespace DVRP
                         do
                         {
                             i++;
-                            depots.Add(Convert.ToUInt32(problemFileLines[i].Trim()));
+                            depotsIds.Add(Convert.ToUInt32(problemFileLines[i].Trim()));
                         } while (!problemFileLines[i + 1].Equals("DEMAND_SECTION"));
                         break;
                     case "DEMAND_SECTION":
@@ -146,8 +155,8 @@ namespace DVRP
                         {
                             i++;
                             string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
-                            uint id = Convert.ToUInt32(line[0]);
-                            demands.Add(id, Convert.ToDouble(line[1]));
+                            clientsIds.Add(Convert.ToUInt32(line[0]));
+                            demands.Add(Convert.ToUInt32(line[0]), Convert.ToDouble(line[1]));
                         } while (!problemFileLines[i + 1].Equals("LOCATION_COORD_SECTION"));
                         break;
                     case "LOCATION_COORD_SECTION":
@@ -155,13 +164,67 @@ namespace DVRP
                         {
                             i++;
                             string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
-                            locations.Add(Convert.ToUInt32(line[0]), new Location(Convert.ToDouble(line[1]),Convert.ToDouble([line[2]]));
+                            locations.Add(Convert.ToUInt32(line[0]), new Location(Convert.ToDouble(line[1]),Convert.ToDouble(line[2])));
                         } while (!problemFileLines[i + 1].Equals("DEPOT_LOCATION_SECTION"));
+                        break;
+                    case "DURATION_SECTION":
+                        do
+                        {
+                            i++;
+                            string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
+                            unld.Add(Convert.ToUInt32(line[0]), Convert.ToDouble(line[1]));
+                        } while (!problemFileLines[i + 1].Equals("DEPOT_TIME_WINDOW_SECTION"));
+                        break;
+                    case "DEPOT_TIME_WINDOW_SECTION":
+                        do
+                        {
+                            i++;
+                            string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
+                            depotTimesWindows.Add(Convert.ToUInt32(line[0]), new Tuple<TimeSpan, TimeSpan>(new TimeSpan(0,Convert.ToInt32(line[1]),0), new TimeSpan(0,Convert.ToInt32(line[2]),0)));
+                        } while (!problemFileLines[i + 1].Equals("COMMENT: TIMESTEP: 7"));
+                        break;
+                    case "TIME_AVAIL_SECTION":
+                        do
+                        {
+                            i++;
+                            string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
+                            timesAvivals.Add(Convert.ToUInt32(line[0]), new TimeSpan(0,Convert.ToInt32(line[1]),0));
+                        } while (!problemFileLines[i + 1].Equals("EOF"));
+                        break;
+                }
+
+                string[] divLine = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
+                switch (divLine[0])
+                {
+                    case "NUM_VEHICLES:":
+                        numberOfVehicles = Convert.ToInt32(divLine[1]);
+                        break;
+                    case "CAPACITIES:":
+                        vehiclesCapaticies = Convert.ToInt32(divLine[1]);
                         break;
                 }
             }
 
-            return new Problem();
+            List<Depot> depots = new List<Depot>();
+            List<Vehicle> vehicles = new List<Vehicle>();
+            List<Client> clients = new List<Client>();
+
+            for (int i = 0; i < depotsIds.Count; i++)
+            {
+                depots.Add(new Depot(locations[depotsIds[i]], depotTimesWindows[depotsIds[i]].Item1, depotTimesWindows[depotsIds[i]].Item2, depotsIds[i]));
+            }
+
+            for (int i = 0; i < clientsIds.Count; i++)
+            {
+                clients.Add(new Client(locations[clientsIds[i]], timesAvivals[clientsIds[i]], new TimeSpan(0, 560, 0), unld[clientsIds[i]], demands[clientsIds[i]], clientsIds[i]));
+            }
+
+            for (int i = 0; i < numberOfVehicles; i++)
+            {
+                vehicles.Add(new Vehicle(new Location(0, 0), vehiclesCapaticies, 1));
+            }
+
+            return new Problem(vehicles, clients, depots, null);
         }
     }
 }
