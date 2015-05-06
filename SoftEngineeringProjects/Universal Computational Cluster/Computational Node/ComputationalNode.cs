@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using Common.Exceptions;
@@ -8,16 +9,19 @@ using UCCTaskSolver;
 // ReSharper disable once CheckNamespace
 namespace Common.Components
 {
+
     public class ComputationalNode : SystemComponent
     {
         private const string SolvePartialProblems = "SolvePartialProblems";
-      
+        
         public ComputationalNode()
         {
             DeviceType = SystemComponentType.ComputationalNode;
             SolvableProblems = new[] {"DVRP"};
             PararellThreads = 1;
             ThreadStateChanged += ThreadStateChangedHandler;
+            TaskSolverFactories = new Dictionary<string, TaskSolverFactory>();
+            TaskSolverFactories.Add("DVRP",DVRP.TaskSolver.TaskSolverFactory);
         }
         private void ThreadStateChangedHandler(object sender, ThreadStateChangedEventArgs e)
         {
@@ -64,7 +68,9 @@ namespace Common.Components
             // TODO: save solutions
         }
 
+        public delegate TaskSolver TaskSolverFactory(byte[] data);
 
+        private Dictionary<string, TaskSolverFactory> TaskSolverFactories;
         protected TaskSolver GetTaskSolver(string problemType, byte[] data)
         {
             /* TODO:
@@ -73,10 +79,15 @@ namespace Common.Components
              */
             if (!SolvableProblems.Contains(problemType))
             {
-                //TODO: our own exception
-                throw new Exception();
+                //TODO: exception message
+                throw new UnrecognizedProblemException();
             }
-            throw new NotImplementedException();
+            if (!TaskSolverFactories.ContainsKey(problemType))
+            {
+                //TODO: exception message
+                throw new UnrecognizedProblemException();
+            }
+            return TaskSolverFactories[problemType](data);
         }
     }
 }
