@@ -15,15 +15,15 @@ namespace CommonTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -t 2";
-            communicationServer.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.CommunicationServer);
             communicationServer.IsWorking = true;
-            communicationServer.InitializeIPList();
+            communicationServer.InitializeIpList();
             communicationServer.Start();
             var taskManager = new TaskManager
             {
                 IsWorking = true,
-                CommunicationInfo = new CommunicationInfo
+                Info = new CommunicationInfo
                 {
                     CommunicationServerAddress = new Uri("http://127.0.0.1"),
                     CommunicationServerPort = 8080
@@ -37,15 +37,15 @@ namespace CommonTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -t 2";
-            communicationServer.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.CommunicationServer);
             communicationServer.IsWorking = true;
-            communicationServer.InitializeIPList();
+            communicationServer.InitializeIpList();
             communicationServer.Start();
             var computationalNode = new ComputationalNode
             {
                 IsWorking = true,
-                CommunicationInfo = new CommunicationInfo
+                Info = new CommunicationInfo
                 {
                     CommunicationServerAddress = new Uri("http://127.0.0.1"),
                     CommunicationServerPort = 8080
@@ -59,10 +59,10 @@ namespace CommonTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -t 2";
-            communicationServer.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.CommunicationServer);
             communicationServer.IsWorking = true;
-            communicationServer.InitializeIPList();
+            communicationServer.InitializeIpList();
             communicationServer.Start();
             var computationalNodes = new ComputationalNode[5];
             for (var i = 0; i < computationalNodes.Length; i++)
@@ -70,7 +70,7 @@ namespace CommonTest
                 computationalNodes[i] = new ComputationalNode
                 {
                     IsWorking = true,
-                    CommunicationInfo = new CommunicationInfo
+                    Info = new CommunicationInfo
                     {
                         CommunicationServerAddress = new Uri("http://127.0.0.1"),
                         CommunicationServerPort = 8080
@@ -86,14 +86,14 @@ namespace CommonTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8010 -t 2";
-            communicationServer.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.CommunicationServer);
             communicationServer.IsWorking = true;
             communicationServer.Start();
             var computationalNode = new ComputationalNode
             {
                 IsWorking = true,
-                CommunicationInfo = new CommunicationInfo
+                Info = new CommunicationInfo
                 {
                     CommunicationServerAddress = new Uri("http://127.0.0.1"),
                     CommunicationServerPort = 8010
@@ -107,22 +107,22 @@ namespace CommonTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -t 2";
-            communicationServer.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.CommunicationServer);
             communicationServer.IsWorking = true;
-            communicationServer.InitializeIPList();
+            communicationServer.InitializeIpList();
             communicationServer.Start();
             var taskManager = new TaskManager
             {
                 IsWorking = true,
-                CommunicationInfo = new CommunicationInfo
+                Info = new CommunicationInfo
                 {
                     CommunicationServerAddress = new Uri("http://127.0.0.1"),
                     CommunicationServerPort = 8080
                 }
             };
             taskManager.Start();
-            communicationServer = null;
+            communicationServer.Stop();
         }
 
         [TestMethod]
@@ -130,15 +130,15 @@ namespace CommonTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -t 2";
-            communicationServer.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.CommunicationServer);
             communicationServer.IsWorking = true;
-            communicationServer.InitializeIPList();
+            communicationServer.InitializeIpList();
             communicationServer.Start();
             var taskManager = new TaskManager
             {
                 IsWorking = true,
-                CommunicationInfo = new CommunicationInfo
+                Info = new CommunicationInfo
                 {
                     CommunicationServerAddress = new Uri("http://127.0.0.1"),
                     CommunicationServerPort = 8080
@@ -148,7 +148,7 @@ namespace CommonTest
             var computationalNode = new ComputationalNode
             {
                 IsWorking = true,
-                CommunicationInfo = new CommunicationInfo
+                Info = new CommunicationInfo
                 {
                     CommunicationServerAddress = new Uri("http://127.0.0.1"),
                     CommunicationServerPort = 8080

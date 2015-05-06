@@ -61,6 +61,60 @@ namespace Common.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Deregistering id={0}.
+        /// </summary>
+        public static string CommunicationServer_Deregister_ {
+            get {
+                return ResourceManager.GetString("CommunicationServer_Deregister_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Register Message, Sending Register Response id={0}.
+        /// </summary>
+        public static string CommunicationServer_MsgHandler_Register_ {
+            get {
+                return ResourceManager.GetString("CommunicationServer_MsgHandler_Register_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Status Message id={0}, sending {1}.
+        /// </summary>
+        public static string CommunicationServer_MsgHandler_Status_ {
+            get {
+                return ResourceManager.GetString("CommunicationServer_MsgHandler_Status_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sent {0} bytes to client..
+        /// </summary>
+        public static string CommunicationServer_SendCallback_Sent__0__bytes_to_client_ {
+            get {
+                return ResourceManager.GetString("CommunicationServer_SendCallback_Sent__0__bytes_to_client_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Accepted connection from {0}.
+        /// </summary>
+        public static string CommunicationServer_StartListening_Accepted_connection_from__0_ {
+            get {
+                return ResourceManager.GetString("CommunicationServer_StartListening_Accepted_connection_from__0_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Started listening on: {0}.
+        /// </summary>
+        public static string CommunicationServer_StartListening_Started_listening_on___0_ {
+            get {
+                return ResourceManager.GetString("CommunicationServer_StartListening_Started_listening_on___0_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;xs:schema attributeFormDefault=&quot;unqualified&quot; elementFormDefault=&quot;qualified&quot;  targetNamespace=&quot;http://www.mini.pw.edu.pl/ucc/&quot; xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;&gt;
         ///&lt;xs:element name=&quot;DivideProblem&quot;&gt;
@@ -89,6 +143,15 @@ namespace Common.Properties {
         public static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Computational Node started successfully.
+        /// </summary>
+        public static string NodeUserInterface_Main_Computational_Node_started_successfully {
+            get {
+                return ResourceManager.GetString("NodeUserInterface_Main_Computational_Node_started_successfully", resourceCulture);
             }
         }
         
@@ -162,6 +225,24 @@ namespace Common.Properties {
         public static string RegisterResponse {
             get {
                 return ResourceManager.GetString("RegisterResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Communication Server started successfully.
+        /// </summary>
+        public static string ServerUserInterface_Main_Communication_Server_started_successfully {
+            get {
+                return ResourceManager.GetString("ServerUserInterface_Main_Communication_Server_started_successfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong Arguments.
+        /// </summary>
+        public static string ServerUserInterface_Main_Wrong_Arguments {
+            get {
+                return ResourceManager.GetString("ServerUserInterface_Main_Wrong_Arguments", resourceCulture);
             }
         }
         
@@ -327,6 +408,15 @@ namespace Common.Properties {
         public static string SystemComponent_SendRegisterMessage_Register_Message_Not_Send {
             get {
                 return ResourceManager.GetString("SystemComponent_SendRegisterMessage_Register_Message_Not_Send", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Task Manager started successfully.
+        /// </summary>
+        public static string TaskManagerUserInterface_Main_Task_Manager_started_successfully {
+            get {
+                return ResourceManager.GetString("TaskManagerUserInterface_Main_Task_Manager_started_successfully", resourceCulture);
             }
         }
     }

@@ -19,7 +19,7 @@ namespace Common.Components
             PararellThreads = 1;
             ThreadStateChanged += ThreadStateChangedHandler;
         }
-        private void ThreadStateChangedHandler(object sender, EventArgs e)
+        private void ThreadStateChangedHandler(object sender, ThreadStateChangedEventArgs e)
         {
 
         }

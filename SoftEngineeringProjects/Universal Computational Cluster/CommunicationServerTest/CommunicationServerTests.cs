@@ -15,7 +15,7 @@ namespace CommunicationServerTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -ala 122";
-            communicationServer.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.CommunicationServer);
         }
 
@@ -24,10 +24,10 @@ namespace CommunicationServerTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -t 2";
-            communicationServer.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.CommunicationServer);
-            Assert.AreEqual(communicationServer.CommunicationInfo.CommunicationServerPort, 8080);
-            Assert.AreEqual(communicationServer.CommunicationInfo.Time, (ulong) 2);
+            Assert.AreEqual(communicationServer.Info.CommunicationServerPort, 8080);
+            Assert.AreEqual(communicationServer.Info.Time, (ulong) 2);
         }
 
         [TestMethod]
@@ -35,10 +35,10 @@ namespace CommunicationServerTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -t 2";
-            communicationServer.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.CommunicationServer);
             communicationServer.IsWorking = true;
-            communicationServer.InitializeIPList();
+            communicationServer.InitializeIpList();
             communicationServer.Start();
         }
     }

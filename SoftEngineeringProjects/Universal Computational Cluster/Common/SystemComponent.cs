@@ -48,7 +48,7 @@ namespace Common
         protected ulong Id { get; set; }
         public bool IsWorking { get; set; }
 
-        protected virtual void OnChanged(EventArgs e)
+        protected virtual void OnChanged(ThreadStateChangedEventArgs e)
         {
             if (ThreadStateChanged != null)
                 ThreadStateChanged(this, e);
@@ -150,7 +150,7 @@ namespace Common
 
         #region Constants
 
-        private const string RegisterResponse = "RegisterResponse",
+        protected const string RegisterResponse = "RegisterResponse",
             NoOperation = "NoOperation",
             Error = "Error",
             Solution = "Solution";

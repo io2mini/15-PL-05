@@ -4,7 +4,7 @@ namespace Common.Exceptions
 {
     /// <summary>
     ///     Klasa do reprezentacji wyjątku rzucanego podczas próbie wysłania status report
-    ///     komponenta o id < 0
+    ///     komponenta o id mniejszym od 0
     /// </summary>
     public class InvalidIdException : Exception
     {

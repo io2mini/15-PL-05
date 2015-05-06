@@ -37,7 +37,7 @@ namespace Common.Components
             _threadStates = new Dictionary<ulong, StatusThread[]>();
             _savedPartialProblems = new Dictionary<ulong, SolvePartialProblems>();
             DeviceType = SystemComponentType.CommunicationServer;
-            SolvableProblems = new[] {"DVRP"};
+            SolvableProblems = new[] { "DVRP" };
             PararellThreads = 1;
         }
 
@@ -54,17 +54,17 @@ namespace Common.Components
             //Inicjalizacja
             base.Initialize();
             //Register
-            SchemaTypes.Add(Register, new Tuple<string, Type>(Resources.Register, typeof (Register)));
+            SchemaTypes.Add(Register, new Tuple<string, Type>(Resources.Register, typeof(Register)));
             //Status
-            SchemaTypes.Add(Status, new Tuple<string, Type>(Resources.Status, typeof (Status)));
+            SchemaTypes.Add(Status, new Tuple<string, Type>(Resources.Status, typeof(Status)));
             //SolveRequest
-            SchemaTypes.Add(SolveRequest, new Tuple<string, Type>(Resources.SolveRequest, typeof (SolveRequest)));
+            SchemaTypes.Add(SolveRequest, new Tuple<string, Type>(Resources.SolveRequest, typeof(SolveRequest)));
             //PartialProblems
             SchemaTypes.Add(PartialProblems,
-                new Tuple<string, Type>(Resources.PartialProblems, typeof (SolvePartialProblems)));
+                new Tuple<string, Type>(Resources.PartialProblems, typeof(SolvePartialProblems)));
             //SolutionRequest
             SchemaTypes.Add(SolutionRequest,
-                new Tuple<string, Type>(Resources.SolutionRequest, typeof (SolutionRequest)));
+                new Tuple<string, Type>(Resources.SolutionRequest, typeof(SolutionRequest)));
         }
 
         /// <summary>
@@ -77,11 +77,11 @@ namespace Common.Components
             var thread = new Thread(MessageQueueWork);
             thread.IsBackground = true;
             thread.Start();
-            foreach (var CI in CommunicationInfos)
+            foreach (var ci in CommunicationInfos)
             {
                 var listener = new Thread(StartListening);
                 listener.IsBackground = true;
-                listener.Start(CI);
+                listener.Start(ci);
             }
         }
 
@@ -91,6 +91,9 @@ namespace Common.Components
         public override void Start()
         {
             InitializeMessageQueue(Info.CommunicationServerPort);
+            while (IsWorking)
+            {
+            }
         }
 
         #region Constants
@@ -137,6 +140,7 @@ namespace Common.Components
                     Validate(message.Item1, message.Item2);
                 }
             }
+            // ReSharper disable once FunctionNeverReturns
         }
 
         /// <summary>
@@ -165,18 +169,14 @@ namespace Common.Components
         /// <returns>Ilość dostępnych threadów.</returns>
         private ulong GetAvailableThreads(string problemType)
         {
-            ulong i = 0;
-            foreach (var thread in from key in _threadStates.Keys
-                where
-                    _componentTypes[key] == SystemComponentType.ComputationalNode &&
-                    _solvableProblemTypes[key].Contains(problemType)
-                from thread in _threadStates[key]
-                where thread.State == StatusThreadState.Idle
-                select thread)
-            {
-                i++;
-            }
-            return i;
+            return (ulong)(from key in _threadStates.Keys
+                           where
+                               _componentTypes[key] == SystemComponentType.ComputationalNode &&
+                               _solvableProblemTypes[key].Contains(problemType)
+                           from thread in _threadStates[key]
+                           where thread.State == StatusThreadState.Idle
+                           select thread).Count();
+
         }
 
         /// <summary>
@@ -190,12 +190,12 @@ namespace Common.Components
             var l = new Dictionary<ulong, int>();
             var i = 0;
             foreach (var key in from key in _threadStates.Keys
-                where
-                    _componentTypes[key] == SystemComponentType.ComputationalNode &&
-                    _solvableProblemTypes[key].Contains(problemType)
-                from thread in _threadStates[key]
-                where thread.State == StatusThreadState.Idle
-                select key)
+                                where
+                                    _componentTypes[key] == SystemComponentType.ComputationalNode &&
+                                    _solvableProblemTypes[key].Contains(problemType)
+                                from thread in _threadStates[key]
+                                where thread.State == StatusThreadState.Idle
+                                select key)
             {
                 if (l.ContainsKey(key))
                     l[key]++;
@@ -225,19 +225,19 @@ namespace Common.Components
             switch (key)
             {
                 case Register:
-                    MsgHandler_Register((Register) message, socket);
+                    MsgHandler_Register((Register)message, socket);
                     return;
                 case Status:
-                    MsgHandler_Status((Status) message, socket);
+                    MsgHandler_Status((Status)message, socket);
                     return;
                 case SolveRequest:
-                    MsgHandler_SolveRequest((SolveRequest) message, socket);
+                    MsgHandler_SolveRequest((SolveRequest)message, socket);
                     return;
                 case PartialProblems:
-                    MsgHandler_PartialProblems((SolvePartialProblems) message, socket);
+                    MsgHandler_PartialProblems((SolvePartialProblems)message, socket);
                     return;
                 case SolutionRequest:
-                    MsgHandler_SolutionRequest((SolutionRequest) message, socket);
+                    MsgHandler_SolutionRequest((SolutionRequest)message, socket);
                     return;
                 default:
                     base.HandleMessage(message, key, socket);
@@ -253,7 +253,6 @@ namespace Common.Components
         private void MsgHandler_SolutionRequest(SolutionRequest solutionRequest, Socket socket)
         {
             //TODO: send solutionMessage
-            var p = new Problem();
             throw new NotImplementedException();
         }
 
@@ -324,7 +323,7 @@ namespace Common.Components
              */
             _problems.Add(problemId, solveRequest.Data);
 
-            var response = new SolveRequestResponse {Id = problemId};
+            var response = new SolveRequestResponse { Id = problemId };
             SendMessageToComponent(socket, response);
 
             var msg = new DivideProblem
@@ -360,10 +359,10 @@ namespace Common.Components
         /// <param name="sender">Socket na którym go otrzymaliśmy.</param>
         protected void MsgHandler_Status(Status status, Socket sender)
         {
-            Console.WriteLine("Status Message id={0}, sending NoOperation", status.Id);
+            Console.WriteLine(Resources.CommunicationServer_MsgHandler_Status_, status.Id, NoOperation);
             if (!_idToSocket.ContainsKey(status.Id))
             {
-                var err = new Error {ErrorType = ErrorErrorType.UnknownSender};
+                var err = new Error { ErrorType = ErrorErrorType.UnknownSender };
                 SendMessageToComponent(sender, err);
                 return;
             }
@@ -390,12 +389,12 @@ namespace Common.Components
             //TODO: sprawdzenie, czy już nie jest zarejestrowany
 
             var id = _firstFreeComponentId++;
-            Console.WriteLine("Register Message, Sending Register Response id={0}", id);
+            Console.WriteLine(Resources.CommunicationServer_MsgHandler_Register_, id);
             var timer = RegisterComponent(socket, id, ParseType(register.Type), register.SolvableProblems);
             var response = new RegisterResponse
             {
                 Id = id,
-                Timeout = (uint) Info.Time,
+                Timeout = (uint)Info.Time,
                 BackupCommunicationServers = new RegisterResponseBackupCommunicationServers
                 {
                     BackupCommunicationServer =
@@ -435,7 +434,7 @@ namespace Common.Components
                 if (!_timerStoppers[id]) Deregister(id);
                 else _timerStoppers[id] = false;
             };
-            timer.Interval = TimeoutModifier*(uint) Info.Time;
+            timer.Interval = TimeoutModifier * (uint)Info.Time;
             _timers.Add(id, timer);
             _componentTypes.Add(id, type);
             return timer;
@@ -464,29 +463,29 @@ namespace Common.Components
         /// <summary>
         ///     Metoda usuwająca komponent i zrywająca z nim połączenie.
         /// </summary>
-        /// <param name="Id">ID komponentu do derejestracji.</param>
+        /// <param name="id">ID komponentu do derejestracji.</param>
         /// <returns></returns>
-        protected bool Deregister(ulong Id)
+        protected bool Deregister(ulong id)
         {
             //return false;
-            if (!_idToSocket.ContainsKey(Id)) return false;
+            if (!_idToSocket.ContainsKey(id)) return false;
 
-            var SocketCloser = new Thread(CloseSocket);
-            SocketCloser.IsBackground = true;
-            SocketCloser.Start(_idToSocket[Id]);
+            var socketCloser = new Thread(CloseSocket);
+            socketCloser.IsBackground = true;
+            socketCloser.Start(_idToSocket[id]);
 
-            _socketToId.Remove(_idToSocket[Id]);
-            _idToSocket.Remove(Id);
-            _componentTypes.Remove(Id);
-            _threadStates.Remove(Id);
-            _solvableProblemTypes.Remove(Id);
+            _socketToId.Remove(_idToSocket[id]);
+            _idToSocket.Remove(id);
+            _componentTypes.Remove(id);
+            _threadStates.Remove(id);
+            _solvableProblemTypes.Remove(id);
 
-            _timers[Id].Enabled = false;
-            _timers[Id].Close();
-            _timers.Remove(Id);
-            _timerStoppers.Remove(Id);
-            _componentTypes.Remove(Id);
-            Console.WriteLine("Deregistering id={0}", Id);
+            _timers[id].Enabled = false;
+            _timers[id].Close();
+            _timers.Remove(id);
+            _timerStoppers.Remove(id);
+            _componentTypes.Remove(id);
+            Console.WriteLine(Resources.CommunicationServer_Deregister_, id);
             return true;
         }
 
@@ -513,11 +512,11 @@ namespace Common.Components
         /// <summary>
         ///     Metoda wysyłająca wiadomość do komponentu.
         /// </summary>
-        /// <param name="Id">Komponent do którego wysyłamy wiadomość.</param>
+        /// <param name="id">Komponent do którego wysyłamy wiadomość.</param>
         /// <param name="message">Wiadomość do wysłania.</param>
-        protected void SendMessageToComponent(ulong Id, Message message)
+        protected void SendMessageToComponent(ulong id, Message message)
         {
-            SendMessageToComponent(_idToSocket[Id], message);
+            SendMessageToComponent(_idToSocket[id], message);
         }
 
         /// <summary>
@@ -544,7 +543,7 @@ namespace Common.Components
         /// <summary>
         ///     Inicjalizuje listę adresów do nasłuchiwania
         /// </summary>
-        public void InitializeIPList()
+        public void InitializeIpList()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
             var local = new CommunicationInfo
@@ -576,20 +575,19 @@ namespace Common.Components
         /// </summary>
         private void StartListening(object communicationInfo)
         {
-            var CommInfo = (CommunicationInfo) communicationInfo;
-            var bytes = new byte[1024];
-            var ipAddress = IPAddress.Parse(CommInfo.CommunicationServerAddress.Host);
-            var tcpListener = new TcpListener(ipAddress, CommInfo.CommunicationServerPort);
-            var localEndPoint = new IPEndPoint(ipAddress, CommInfo.CommunicationServerPort);
+            var commInfo = (CommunicationInfo)communicationInfo;
+            var ipAddress = IPAddress.Parse(commInfo.CommunicationServerAddress.Host);
+            var tcpListener = new TcpListener(ipAddress, commInfo.CommunicationServerPort);
+
             try
             {
                 tcpListener.Start();
                 while (IsWorking)
                 {
-                    Console.WriteLine("Started listening on: {0}", CommInfo.CommunicationServerAddress);
+                    Console.WriteLine(Resources.CommunicationServer_StartListening_Started_listening_on___0_, commInfo.CommunicationServerAddress);
                     var socket = tcpListener.AcceptSocket();
-                    Console.WriteLine("Accepted connection from {0}", socket.RemoteEndPoint);
-                    var thread = new Thread(ReceiveMessage) {IsBackground = true};
+                    Console.WriteLine(Resources.CommunicationServer_StartListening_Accepted_connection_from__0_, socket.RemoteEndPoint);
+                    var thread = new Thread(ReceiveMessage) { IsBackground = true };
                     thread.Start(socket);
                 }
             }
@@ -605,7 +603,7 @@ namespace Common.Components
         /// <param name="socket">sochet, na którym nasłuchujemy.</param>
         private void ReceiveMessage(object socket)
         {
-            ReceiveMessage((Socket) socket);
+            ReceiveMessage((Socket)socket);
         }
 
         /// <summary>
@@ -645,10 +643,10 @@ namespace Common.Components
         {
             try
             {
-                var handler = (Socket) ar.AsyncState;
+                var handler = (Socket)ar.AsyncState;
                 var bytesSent = handler.EndSend(ar);
                 // na potrzeby testów
-                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
+                Console.WriteLine(Resources.CommunicationServer_SendCallback_Sent__0__bytes_to_client_, bytesSent);
             }
             catch (Exception e)
             {
@@ -657,5 +655,10 @@ namespace Common.Components
         }
 
         #endregion
+
+        public void Stop()
+        {
+            IsWorking = false;
+        }
     }
 }
