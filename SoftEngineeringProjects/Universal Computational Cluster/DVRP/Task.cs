@@ -11,16 +11,10 @@ namespace DVRP
         /// </summary>
         /// <param name="problem">Problem do rozwiązania</param>
         /// <param name="routes">Tablica tras do sprawdzenia</param>
-        public Task(Problem problem, Route[][] routes)
+        public Task(Route[][] routes)
         {
-            Problem = problem;
             Routes = routes;
         }
-
-        /// <summary>
-        ///     Dane problemu
-        /// </summary>
-        public Problem Problem { get; private set; }
 
         /// <summary>
         ///     Sekwencje do sprawdzenia

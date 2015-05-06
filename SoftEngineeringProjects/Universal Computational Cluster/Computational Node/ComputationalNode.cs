@@ -1,24 +1,41 @@
 ﻿using System;
+using System.CodeDom;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security;
 using Common.Exceptions;
 using Common.Messages;
+using Common.Properties;
 using UCCTaskSolver;
 
 // ReSharper disable once CheckNamespace
 namespace Common.Components
 {
+
     public class ComputationalNode : SystemComponent
     {
-        private const string SolvePartialProblems = "SolvePartialProblems";
-      
+        private const string SolvePartialProblems = "SolvePartialProblems", SolutionRequest = "SolutionRequest";
+        
         public ComputationalNode()
         {
             DeviceType = SystemComponentType.ComputationalNode;
             SolvableProblems = new[] {"DVRP"};
-            PararellThreads = 1;
-            ThreadStateChanged += ThreadStateChangedHandler;
+            PararellThreads = 1; //TODO: load this from config
+            
+            TaskSolverFactories = new Dictionary<string, TaskSolverFactory>();
+            TaskSolverFactories.Add("DVRP",DVRP.TaskSolver.TaskSolverFactory);
         }
+
+        protected override void Initialize()
+        {
+            base.Initialize();
+            //SolutionRequest
+            SchemaTypes.Add(SolutionRequest, new Tuple<string, Type>(Resources.SolutionRequest, typeof(SolutionRequest)));
+            //SolvePartialProblems
+            SchemaTypes.Add(SolvePartialProblems, new Tuple<string, Type>(Resources.PartialProblems, typeof(SolvePartialProblems)));
+        }
+
         private void ThreadStateChangedHandler(object sender, ThreadStateChangedEventArgs e)
         {
 
@@ -32,6 +49,10 @@ namespace Common.Components
                     case SolvePartialProblems:
                         MsgHandler_SolvePartialProblems((SolvePartialProblems) message);
                         break;
+                    case SolutionRequest:
+                        MsgHandler_SolutionRequest((SolutionRequest)message);
+                        break;
+
                 }
             }
             catch (NotEnoughIdleThreadsException e)
@@ -40,31 +61,39 @@ namespace Common.Components
             }
         }
 
+        private void MsgHandler_SolutionRequest(global::SolutionRequest solutionRequest)
+        {
+            throw new NotImplementedException();
+        }
+
         public void MsgHandler_SolvePartialProblems(SolvePartialProblems partialProblems)
         {
             var list =
                 ThreadInfo.Threads.FindAll(
-                    ct => (ct.ProblemType == partialProblems.ProblemType && ct.State == StatusThreadState.Idle));
-            if (list.Count < partialProblems.PartialProblems.Length)
+                    ct => (ct.State == StatusThreadState.Idle));
+            if (list.Count < partialProblems.PartialProblems.Length-1)
             {
                 throw new NotEnoughIdleThreadsException("Not enough idle threads for problem type");
             }
-            for (var i = 0; i < partialProblems.PartialProblems.Length; i++)
+            if (partialProblems.PartialProblems.Any(t => t.NodeID != Id))
             {
-                if (partialProblems.PartialProblems[i].NodeID == Id)
-                {
-                    throw new InvalidIdException("Ivalid Node Id in Partial Problem");
-                }
+                throw new InvalidIdException("Ivalid Node Id in Partial Problem");
             }
-
-            // TODO: jesli mamy mniej idle threadow niz powinnismy rzucamy error
-            // TODO: jeśli któryś problem ma różniący się NodeId niż ten CN to send apropriate error msg;
+            for(int i=0;i<partialProblems.PartialProblems.Length;i++)
+            {
+                list[i].TaskSolver = GetTaskSolver(partialProblems.ProblemType,
+                    partialProblems.PartialProblems[0].Data);
+                list[i].StartSolving(partialProblems.Id,partialProblems.ProblemType,partialProblems.PartialProblems[i+1].TaskId,new TimeSpan(0,0,0,0,(int)partialProblems.SolvingTimeout),partialProblems.PartialProblems[0].Data,partialProblems.PartialProblems[i
+                    +1].Data);
+            }
             // TODO: implement state changes for threads
             // TODO: implement solving threads
             // TODO: save solutions
         }
 
+        public delegate TaskSolver TaskSolverFactory(byte[] data);
 
+        private Dictionary<string, TaskSolverFactory> TaskSolverFactories;
         protected TaskSolver GetTaskSolver(string problemType, byte[] data)
         {
             /* TODO:
@@ -73,10 +102,15 @@ namespace Common.Components
              */
             if (!SolvableProblems.Contains(problemType))
             {
-                //TODO: our own exception
-                throw new Exception();
+                //TODO: exception message
+                throw new UnrecognizedProblemException();
             }
-            throw new NotImplementedException();
+            if (!TaskSolverFactories.ContainsKey(problemType))
+            {
+                //TODO: exception message
+                throw new UnrecognizedProblemException();
+            }
+            return TaskSolverFactories[problemType](data);
         }
     }
 }

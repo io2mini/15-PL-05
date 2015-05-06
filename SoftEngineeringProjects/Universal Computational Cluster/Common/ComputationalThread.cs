@@ -22,9 +22,17 @@ namespace Common
         public TaskSolver TaskSolver;
         public Thread Solver;
         public ThreadInfo Localisation;
-        public void StartSolving(ulong problemInstanceId, string problemType, ulong taskId, TimeSpan timeout, byte[] data)
+        public byte[] SolutionData;
+        public byte[] CommonData;
+        public void StartSolving(ulong problemInstanceId, string problemType, ulong taskId, TimeSpan timeout,byte[] commonData, byte[] data)
         {
-            
+            ProblemInstanceId = problemInstanceId;
+            ProblemInstanceIdSpecified = true;
+            ProblemType = problemType;
+            TaskId = taskId;
+            TaskIdSpecified = true;
+            CommonData = commonData;
+            SolutionData = null;
             ThreadStart starter = () => Solve(data, timeout);
             Solver = new Thread(starter);
             Solver.Start();
@@ -35,9 +43,7 @@ namespace Common
         }
         private void SolutionCallback(byte[] data)
         {
-            Solver = null;
-            if (State == StatusThreadState.Idle) return;
-            Localisation.SolutionCallback(data,this);
+            SolutionData = data;
         }
         public ComputationalThread()
         {
@@ -51,6 +57,7 @@ namespace Common
             Solver = null;
             TaskSolver = null;
             State = StatusThreadState.Idle;
+            SolutionData = null;
         }
 
         public void SetStatus(StatusThreadState status)

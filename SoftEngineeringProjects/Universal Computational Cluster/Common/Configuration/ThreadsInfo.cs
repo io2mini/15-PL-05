@@ -15,12 +15,7 @@ namespace Common.Configuration
             Threads = threads;
         }
 
-        public void SolutionCallback(byte[] p, ComputationalThread T)
-        {
-           
-           
-        }
-
+        
         public void SetStateAll(StatusThreadState status)
         {
             foreach (var thread in Threads)

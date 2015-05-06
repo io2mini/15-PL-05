@@ -34,7 +34,7 @@ namespace Common
         protected string[] SolvableProblems;
         protected TcpClient TcpClient;
         protected ThreadInfo ThreadInfo;
-        public event ThreadStateChanged ThreadStateChanged;
+        
         protected SystemComponent()
         {
             IsWorking = true;
@@ -48,11 +48,6 @@ namespace Common
         protected ulong Id { get; set; }
         public bool IsWorking { get; set; }
 
-        protected virtual void OnChanged(ThreadStateChangedEventArgs e)
-        {
-            if (ThreadStateChanged != null)
-                ThreadStateChanged(this, e);
-        }
         /// <summary>
         ///     Metoda inicjalizujące słowniki do analizy wiadomości
         /// </summary>

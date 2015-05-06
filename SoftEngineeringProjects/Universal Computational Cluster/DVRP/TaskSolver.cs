@@ -93,12 +93,16 @@ namespace DVRP
     public class TaskSolver : UCCTaskSolver.TaskSolver
     {
 
-        private Problem _problem;
+        public static TaskSolver TaskSolverFactory(byte[] problemData)
+        {
+            return new TaskSolver(problemData);
+        }
+
+        public Problem ProblemInstance { get; private set; }
 
         public TaskSolver(byte[] problemData) : base(problemData)
         {
-             _problem = Problem.Deserialize(problemData);
-
+             ProblemInstance = Problem.Deserialize(problemData);
         }
 
         public override byte[] Solve(byte[] partialData, TimeSpan timeout)
@@ -109,7 +113,7 @@ namespace DVRP
             Route[] bestSequence = null;
             foreach (var sequence in task.Routes)
             {
-                var costPrim = sequence.Sum(route => route.CalculteRouteCost(_problem, cost));
+                var costPrim = sequence.Sum(route => route.CalculteRouteCost(ProblemInstance, cost));
                 if (costPrim < cost)
                 {
                     cost = costPrim;
@@ -122,16 +126,16 @@ namespace DVRP
 
         public double CountSigleVehicleCost(Route r, double bestCost)
         {
-            return r.CalculteRouteCost(_problem, bestCost);
+            return r.CalculteRouteCost(ProblemInstance, bestCost);
         }
 
         public override byte[][] DivideProblem(int threadCount)
         {
-            var permutedClients = AssignClientIds(Permuter.GeneratePermutations((uint)_problem.Clients.Count()));
-            var divides = Permuter.GenerateBooleanCombination((uint)permutedClients.Length, (uint)_problem.Vehicles.Count);
+            var permutedClients = AssignClientIds(Permuter.GeneratePermutations((uint)ProblemInstance.Clients.Count()));
+            var divides = Permuter.GenerateBooleanCombination((uint)permutedClients.Length, (uint)ProblemInstance.Vehicles.Count);
             var RouteClients = DivideClients(permutedClients, divides).ToList();
             var combinedDestinations = new List<Route[]>();
-            combinedDestinations = RouteClients.Select(routes => routes.Select(r => r.GenerateAndAddDepotsToRoute(_problem)).Select(lll => lll.ToArray()).ToList()).Aggregate(combinedDestinations, (current, l) => current.Union(l).ToList());
+            combinedDestinations = RouteClients.Select(routes => routes.Select(r => r.GenerateAndAddDepotsToRoute(ProblemInstance)).Select(lll => lll.ToArray()).ToList()).Aggregate(combinedDestinations, (current, l) => current.Union(l).ToList());
             //Powyższe wygenerowane resharperem z poniższego gdzie combinedDestinations to ll:
             //foreach (Route[] routes in RouteClients)
             //{
@@ -145,17 +149,18 @@ namespace DVRP
             //}
 
             // Extra depot means Depot where path cost = 0
-            //Dzielenie na taski
+            // Dzielenie na taski
             var seqCount = (double)combinedDestinations.Count/(double)threadCount;
             var actualNodeIndex = 1;
             var sequences = new List<Route[]>();
             var tasksForNodes = new List<byte[]>();
+            tasksForNodes.Add(ProblemInstance.Serialize()); // Common data przechowywane w zerowym indeksie
             for (int i = 0; i < combinedDestinations.Count; i++)
             {
                 if (i > actualNodeIndex*seqCount)
                 {
                     actualNodeIndex++;
-                    var t = new Task(_problem, sequences.ToArray());
+                    var t = new Task(sequences.ToArray());
                     tasksForNodes.Add(t.Serialize());
                     sequences.Clear();
                 }
@@ -218,10 +223,10 @@ namespace DVRP
             {
                 for (int j = 0; j < p[i].Length; j++)
                 {
-                    if (p[i][j] == _problem.Depots.Count()) p[i][j] = uint.MaxValue;
+                    if (p[i][j] == ProblemInstance.Depots.Count()) p[i][j] = uint.MaxValue;
                     else
                     {
-                        p[i][j] = _problem.Depots[(int)p[i][j]].Id;
+                        p[i][j] = ProblemInstance.Depots[(int)p[i][j]].Id;
                     }
                 }
             }
@@ -233,7 +238,7 @@ namespace DVRP
             for (int i = 0; i < p.GetLength(0); i++)
                 for (int j = 0; j < p[i].Length; j++)
                 {
-                    p[i][j] = _problem.Clients[(int)p[i][j]].Id;
+                    p[i][j] = ProblemInstance.Clients[(int)p[i][j]].Id;
                 }
             return p;
         }
