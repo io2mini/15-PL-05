@@ -57,8 +57,6 @@ namespace Common.Components
                 }
             }
 
-            // TODO: jesli mamy mniej idle threadow niz powinnismy rzucamy error
-            // TODO: jeśli któryś problem ma różniący się NodeId niż ten CN to send apropriate error msg;
             // TODO: implement state changes for threads
             // TODO: implement solving threads
             // TODO: save solutions
