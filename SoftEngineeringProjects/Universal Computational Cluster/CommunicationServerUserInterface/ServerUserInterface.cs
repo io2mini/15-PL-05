@@ -2,6 +2,7 @@
 using Common.Components;
 using Common.Configuration;
 using Common.Exceptions;
+using Common.Properties;
 
 namespace Common.UserInterface
 {
@@ -10,7 +11,7 @@ namespace Common.UserInterface
         private static void Main(string[] args)
         {
             var communicationServer = new CommunicationServer();
-            Console.WriteLine("Communication Server started successfully");
+            Console.WriteLine(Resources.ServerUserInterface_Main_Communication_Server_started_successfully);
             string newLine;
             var hasBeenRead = false;
 
@@ -22,7 +23,7 @@ namespace Common.UserInterface
                     if (!hasBeenRead)
                     {
                         communicationServer.LoadConfig(SystemComponent.Path);
-                        communicationServer.InitializeIPList();
+                        communicationServer.InitializeIpList();
                         hasBeenRead = true;
                     }
                     break;
@@ -31,20 +32,18 @@ namespace Common.UserInterface
                 {
                     communicationServer.Info = ParametersParser.ReadParameters(newLine,
                         SystemComponentType.CommunicationServer);
-                    communicationServer.InitializeIPList();
+                    communicationServer.InitializeIpList();
                     hasBeenRead = true;
                 }
                 catch (ParsingArgumentException)
                 {
-                    Console.WriteLine("Wrong Arguments");
+                    Console.WriteLine(Resources.ServerUserInterface_Main_Wrong_Arguments);
                 }
             }
             communicationServer.Start();
 
             // Osbluga komendy zakonczenia programu
-            while (communicationServer.IsWorking)
-            {
-            }
+            
         }
     }
 }

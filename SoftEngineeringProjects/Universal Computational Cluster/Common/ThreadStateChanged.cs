@@ -19,5 +19,5 @@ namespace Common
         public StatusThreadState NewState;
         
     }
-    public delegate void ThreadStateChanged(object sender, EventArgs e); //TODO: create our event args class
+    public delegate void ThreadStateChanged(object sender, ThreadStateChangedEventArgs e); //TODO: create our event args class
 }

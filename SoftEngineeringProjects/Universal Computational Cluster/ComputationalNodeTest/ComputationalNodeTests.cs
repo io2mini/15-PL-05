@@ -16,7 +16,7 @@ namespace ComputationalNodeTest
         {
             var computationalNode = new ComputationalNode();
             var parametersLine = "-port 8080 -ala 122";
-            computationalNode.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            computationalNode.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.ComputationalNode);
         }
 
@@ -25,10 +25,10 @@ namespace ComputationalNodeTest
         {
             var computationalNode = new ComputationalNode();
             var parametersLine = "-port 8080 -address 127.0.0.1";
-            computationalNode.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            computationalNode.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.ComputationalNode);
-            Assert.AreEqual(computationalNode.CommunicationInfo.CommunicationServerPort, 8080);
-            Assert.AreEqual(computationalNode.CommunicationInfo.CommunicationServerAddress, new Uri("http://127.0.0.1"));
+            Assert.AreEqual(computationalNode.Info.CommunicationServerPort, 8080);
+            Assert.AreEqual(computationalNode.Info.CommunicationServerAddress, new Uri("http://127.0.0.1"));
         }
 
         [TestMethod]
@@ -37,9 +37,9 @@ namespace ComputationalNodeTest
         {
             var computationalNode = new ComputationalNode();
             computationalNode.IsWorking = true;
-            computationalNode.CommunicationInfo = new CommunicationInfo();
-            computationalNode.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.2");
-            computationalNode.CommunicationInfo.CommunicationServerPort = 8080;
+            computationalNode.Info = new CommunicationInfo();
+            computationalNode.Info.CommunicationServerAddress = new Uri("http://127.0.0.2");
+            computationalNode.Info.CommunicationServerPort = 8080;
             computationalNode.Start();
         }
     }

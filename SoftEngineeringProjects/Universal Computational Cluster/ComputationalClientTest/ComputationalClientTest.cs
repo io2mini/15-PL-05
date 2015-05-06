@@ -16,7 +16,7 @@ namespace ComputationalClientTest
         {
             var computationalClient = new ComputationalClient();
             var parametersLine = "-port 8080 -ala 122";
-            computationalClient.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            computationalClient.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.ComputationalNode);
         }
 
@@ -25,10 +25,10 @@ namespace ComputationalClientTest
         {
             var computationalClient = new ComputationalClient();
             var parametersLine = "-port 8080 -address 127.0.0.1";
-            computationalClient.CommunicationInfo = ParametersParser.ReadParameters(parametersLine,
+            computationalClient.Info = ParametersParser.ReadParameters(parametersLine,
                 SystemComponentType.ComputationalClient);
-            Assert.AreEqual(computationalClient.CommunicationInfo.CommunicationServerPort, 8080);
-            Assert.AreEqual(computationalClient.CommunicationInfo.CommunicationServerAddress,
+            Assert.AreEqual(computationalClient.Info.CommunicationServerPort, 8080);
+            Assert.AreEqual(computationalClient.Info.CommunicationServerAddress,
                 new Uri("http://127.0.0.1"));
         }
 
@@ -38,9 +38,9 @@ namespace ComputationalClientTest
         {
             var computationalClient = new ComputationalClient();
             computationalClient.IsWorking = true;
-            computationalClient.CommunicationInfo = new CommunicationInfo();
-            computationalClient.CommunicationInfo.CommunicationServerAddress = new Uri("http://127.0.0.2");
-            computationalClient.CommunicationInfo.CommunicationServerPort = 8080;
+            computationalClient.Info = new CommunicationInfo();
+            computationalClient.Info.CommunicationServerAddress = new Uri("http://127.0.0.2");
+            computationalClient.Info.CommunicationServerPort = 8080;
             computationalClient.Start();
         }
     }

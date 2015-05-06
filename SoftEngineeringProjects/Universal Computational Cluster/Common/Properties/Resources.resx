@@ -175,4 +175,34 @@
   <data name="SystemComponent_MsgHandler_NoOperation_NoOperation_Message" xml:space="preserve">
     <value>NoOperation Message</value>
   </data>
+  <data name="CommunicationServer_SendCallback_Sent__0__bytes_to_client_" xml:space="preserve">
+    <value>Sent {0} bytes to client.</value>
+  </data>
+  <data name="CommunicationServer_StartListening_Started_listening_on___0_" xml:space="preserve">
+    <value>Started listening on: {0}</value>
+  </data>
+  <data name="CommunicationServer_StartListening_Accepted_connection_from__0_" xml:space="preserve">
+    <value>Accepted connection from {0}</value>
+  </data>
+  <data name="CommunicationServer_Deregister_" xml:space="preserve">
+    <value>Deregistering id={0}</value>
+  </data>
+  <data name="CommunicationServer_MsgHandler_Register_" xml:space="preserve">
+    <value>Register Message, Sending Register Response id={0}</value>
+  </data>
+  <data name="CommunicationServer_MsgHandler_Status_" xml:space="preserve">
+    <value>Status Message id={0}, sending {1}</value>
+  </data>
+  <data name="ServerUserInterface_Main_Communication_Server_started_successfully" xml:space="preserve">
+    <value>Communication Server started successfully</value>
+  </data>
+  <data name="NodeUserInterface_Main_Computational_Node_started_successfully" xml:space="preserve">
+    <value>Computational Node started successfully</value>
+  </data>
+  <data name="TaskManagerUserInterface_Main_Task_Manager_started_successfully" xml:space="preserve">
+    <value>Task Manager started successfully</value>
+  </data>
+  <data name="ServerUserInterface_Main_Wrong_Arguments" xml:space="preserve">
+    <value>Wrong Arguments</value>
+  </data>
 </root>

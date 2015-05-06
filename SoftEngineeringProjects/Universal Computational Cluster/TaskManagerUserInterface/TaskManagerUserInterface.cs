@@ -2,6 +2,7 @@
 using Common.Components;
 using Common.Configuration;
 using Common.Exceptions;
+using Common.Properties;
 
 namespace Common.UserInterface
 {
@@ -10,7 +11,7 @@ namespace Common.UserInterface
         private static void Main(string[] args)
         {
             var taskManager = new TaskManager();
-            Console.WriteLine("Task Manager started successfully");
+            Console.WriteLine(Resources.TaskManagerUserInterface_Main_Task_Manager_started_successfully);
             string newLine;
             var hasReadData = false;
             while (taskManager.IsWorking && !hasReadData)
@@ -18,7 +19,7 @@ namespace Common.UserInterface
                 newLine = Console.ReadLine();
                 try
                 {
-                    taskManager.CommunicationInfo = ParametersParser.ReadParameters(newLine,
+                    taskManager.Info = ParametersParser.ReadParameters(newLine,
                         SystemComponentType.TaskManager);
                     hasReadData = true;
                 }

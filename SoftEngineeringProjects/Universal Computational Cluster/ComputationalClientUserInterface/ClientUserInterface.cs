@@ -16,7 +16,7 @@ namespace Common.UserInterface
             while (computationalClient.IsWorking && !hasBeenRead)
             {
                 newLine = Console.ReadLine();
-                computationalClient.CommunicationInfo = ParametersParser.ReadParameters(newLine,
+                computationalClient.Info = ParametersParser.ReadParameters(newLine,
                     SystemComponentType.ComputationalClient);
                 hasBeenRead = true;
             }

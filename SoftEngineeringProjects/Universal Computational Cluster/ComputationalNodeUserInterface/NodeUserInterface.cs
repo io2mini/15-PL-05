@@ -2,6 +2,7 @@
 using Common.Components;
 using Common.Configuration;
 using Common.Exceptions;
+using Common.Properties;
 
 namespace Common.UserInterface
 {
@@ -10,7 +11,7 @@ namespace Common.UserInterface
         private static void Main(string[] args)
         {
             var computationalNode = new ComputationalNode();
-            Console.WriteLine("Computational Node started successfully");
+            Console.WriteLine(Resources.NodeUserInterface_Main_Computational_Node_started_successfully);
             string newLine;
             var hasData = false;
             while (computationalNode.IsWorking && !hasData)
@@ -18,7 +19,7 @@ namespace Common.UserInterface
                 newLine = Console.ReadLine();
                 try
                 {
-                    computationalNode.CommunicationInfo = ParametersParser.ReadParameters(newLine,
+                    computationalNode.Info = ParametersParser.ReadParameters(newLine,
                         SystemComponentType.ComputationalNode);
                     hasData = true;
                 }
