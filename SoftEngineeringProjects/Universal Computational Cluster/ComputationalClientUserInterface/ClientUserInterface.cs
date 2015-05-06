@@ -28,21 +28,20 @@ namespace Common.UserInterface
             {
                 Console.Error.WriteLine("Not implemented:");
 
-                // Utwórz nowy problem
-
-
                 // Podaj problem type
                 Console.WriteLine("Type problem type name:");
                 newLine = Console.ReadLine();
                 newProblem.ProblemType = newLine.Trim();
 
+                // Wczytanie instnacji prolemu
                 Console.WriteLine("Type path file of problem instance:");
                 newLine = Console.ReadLine();
-                // Szybki pars
-
+                // TODO: Szybki pars
                 // Utwórz nowe uri
                 var problemFileUri = new Uri(newLine);
-                newProblem.SerializedProblem = File.ReadAllBytes(problemFileUri.AbsolutePath);
+                // Utwórz nowy problem
+                DVRP.Problem p = DVRP.Problem.CreateProblemInstanceFromFile(problemFileUri);
+                newProblem.SerializedProblem = p.Serialize();
                 Console.WriteLine("OK. Problem instance is ready.");
 
                 // Pobierz czas oczekiwania na rozwiazanie
