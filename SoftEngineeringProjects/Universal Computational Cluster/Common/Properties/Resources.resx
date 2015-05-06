@@ -151,4 +151,28 @@
   <data name="Status" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Schema\Status.xsd;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="SystemComponent_SendRegisterMessage_Register_Message_Not_Send" xml:space="preserve">
+    <value>Register Message Not Send</value>
+  </data>
+  <data name="SystemComponent_ReceiveResponse_Connection_was_killed_by_host" xml:space="preserve">
+    <value>Connection was killed by host</value>
+  </data>
+  <data name="SystemComponent_MsgHandler_Error_Error_Message" xml:space="preserve">
+    <value>Error Message</value>
+  </data>
+  <data name="SystemComponent_MsgHandler_RegisterResponse_" xml:space="preserve">
+    <value>RegisterResponse Message id={0}</value>
+  </data>
+  <data name="SystemComponent_MsgHandler_RegisterResponse_Sending_Status" xml:space="preserve">
+    <value>Sending Status</value>
+  </data>
+  <data name="SystemComponent_MsgHandler_RegisterResponse_Negative_Id_for_component" xml:space="preserve">
+    <value>Negative Id for component</value>
+  </data>
+  <data name="SystemComponent_MsgHandler_RegisterResponse_Message_Not_send_for_component_type__0__with_id__1_" xml:space="preserve">
+    <value>Message Not send for component type {0} with id {1}</value>
+  </data>
+  <data name="SystemComponent_MsgHandler_NoOperation_NoOperation_Message" xml:space="preserve">
+    <value>NoOperation Message</value>
+  </data>
 </root>

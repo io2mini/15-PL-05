@@ -90,7 +90,7 @@ namespace Common.Components
         /// </summary>
         public override void Start()
         {
-            InitializeMessageQueue(communicationInfo.CommunicationServerPort);
+            InitializeMessageQueue(Info.CommunicationServerPort);
         }
 
         #region Constants
@@ -395,7 +395,7 @@ namespace Common.Components
             var response = new RegisterResponse
             {
                 Id = id,
-                Timeout = (uint) CommunicationInfo.Time,
+                Timeout = (uint) Info.Time,
                 BackupCommunicationServers = new RegisterResponseBackupCommunicationServers
                 {
                     BackupCommunicationServer =
@@ -435,7 +435,7 @@ namespace Common.Components
                 if (!_timerStoppers[id]) Deregister(id);
                 else _timerStoppers[id] = false;
             };
-            timer.Interval = TimeoutModifier*(uint) CommunicationInfo.Time;
+            timer.Interval = TimeoutModifier*(uint) Info.Time;
             _timers.Add(id, timer);
             _componentTypes.Add(id, type);
             return timer;
@@ -550,7 +550,7 @@ namespace Common.Components
             var local = new CommunicationInfo
             {
                 CommunicationServerAddress = new Uri("http://127.0.0.1/"),
-                CommunicationServerPort = communicationInfo.CommunicationServerPort
+                CommunicationServerPort = Info.CommunicationServerPort
             };
             CommunicationInfos.Add(local);
             foreach (var ip in host.AddressList)
@@ -564,7 +564,7 @@ namespace Common.Components
                 localIp = "http://" + localIp + "/";
                 var c = new CommunicationInfo
                 {
-                    CommunicationServerPort = CommunicationInfo.CommunicationServerPort,
+                    CommunicationServerPort = Info.CommunicationServerPort,
                     CommunicationServerAddress = new Uri(localIp)
                 };
                 CommunicationInfos.Add(c);

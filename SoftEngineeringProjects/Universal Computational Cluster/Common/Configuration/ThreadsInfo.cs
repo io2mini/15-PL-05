@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using Common.Messages;
 
 namespace Common.Configuration
 {
@@ -7,17 +7,26 @@ namespace Common.Configuration
     {
         public List<ComputationalThread> Threads;
         public SystemComponent Parent;
-        public ThreadInfo(int n,SystemComponent Parent)
+        public ThreadInfo(int n,SystemComponent parent)
         {
-            this.Parent = Parent;
+            Parent = parent;
             var threads = new List<ComputationalThread>();
             for (var i = 0; i < n; i++) threads.Add(new ComputationalThread());
             Threads = threads;
         }
 
-        internal void SolutionCallback(byte[] p,ComputationalThread T)
+        public void SolutionCallback(byte[] p, ComputationalThread T)
         {
-            throw new NotImplementedException();
+           
+           
+        }
+
+        public void SetStateAll(StatusThreadState status)
+        {
+            foreach (var thread in Threads)
+            {
+                thread.SetStatus(status);
+            }
         }
     }
 }

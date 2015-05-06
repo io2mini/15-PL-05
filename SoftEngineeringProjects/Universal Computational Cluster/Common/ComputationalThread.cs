@@ -1,8 +1,8 @@
 ﻿using System;
-using Common.Messages;
-using UCCTaskSolver;
 using System.Threading;
 using Common.Configuration;
+using Common.Messages;
+using UCCTaskSolver;
 
 namespace Common
 {
@@ -22,7 +22,7 @@ namespace Common
         public TaskSolver TaskSolver;
         public Thread Solver;
         public ThreadInfo Localisation;
-        public void StartSolving(ulong problemInstanceID, string ProblemType, ulong taskID, TimeSpan timeout, byte[] data)
+        public void StartSolving(ulong problemInstanceId, string problemType, ulong taskId, TimeSpan timeout, byte[] data)
         {
             
             ThreadStart starter = () => Solve(data, timeout);
@@ -36,6 +36,7 @@ namespace Common
         private void SolutionCallback(byte[] data)
         {
             Solver = null;
+            if (State == StatusThreadState.Idle) return;
             Localisation.SolutionCallback(data,this);
         }
         public ComputationalThread()
@@ -50,6 +51,17 @@ namespace Common
             Solver = null;
             TaskSolver = null;
             State = StatusThreadState.Idle;
+        }
+
+        public void SetStatus(StatusThreadState status)
+        {
+            // TODO: ignore callback if aborting
+            if (status == StatusThreadState.Idle)
+            {
+                Solver.Abort();
+                Solver = null;
+            }
+            State = status;
         }
     }
 }

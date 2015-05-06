@@ -256,5 +256,78 @@ namespace Common.Properties {
                 return ResourceManager.GetString("Status", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error Message.
+        /// </summary>
+        public static string SystemComponent_MsgHandler_Error_Error_Message {
+            get {
+                return ResourceManager.GetString("SystemComponent_MsgHandler_Error_Error_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NoOperation Message.
+        /// </summary>
+        public static string SystemComponent_MsgHandler_NoOperation_NoOperation_Message {
+            get {
+                return ResourceManager.GetString("SystemComponent_MsgHandler_NoOperation_NoOperation_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RegisterResponse Message id={0}.
+        /// </summary>
+        public static string SystemComponent_MsgHandler_RegisterResponse_ {
+            get {
+                return ResourceManager.GetString("SystemComponent_MsgHandler_RegisterResponse_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message Not send for component type {0} with id {1}.
+        /// </summary>
+        public static string SystemComponent_MsgHandler_RegisterResponse_Message_Not_send_for_component_type__0__with_id__1_ {
+            get {
+                return ResourceManager.GetString("SystemComponent_MsgHandler_RegisterResponse_Message_Not_send_for_component_type__" +
+                        "0__with_id__1_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Negative Id for component.
+        /// </summary>
+        public static string SystemComponent_MsgHandler_RegisterResponse_Negative_Id_for_component {
+            get {
+                return ResourceManager.GetString("SystemComponent_MsgHandler_RegisterResponse_Negative_Id_for_component", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sending Status.
+        /// </summary>
+        public static string SystemComponent_MsgHandler_RegisterResponse_Sending_Status {
+            get {
+                return ResourceManager.GetString("SystemComponent_MsgHandler_RegisterResponse_Sending_Status", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connection was killed by host.
+        /// </summary>
+        public static string SystemComponent_ReceiveResponse_Connection_was_killed_by_host {
+            get {
+                return ResourceManager.GetString("SystemComponent_ReceiveResponse_Connection_was_killed_by_host", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Register Message Not Send.
+        /// </summary>
+        public static string SystemComponent_SendRegisterMessage_Register_Message_Not_Send {
+            get {
+                return ResourceManager.GetString("SystemComponent_SendRegisterMessage_Register_Message_Not_Send", resourceCulture);
+            }
+        }
     }
 }

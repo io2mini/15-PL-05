@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Common;
+
 namespace Common.Messages
 {
-    [System.SerializableAttribute()]
+    [Serializable()]
     public abstract class Message
     {
         /// <summary>
@@ -18,7 +15,7 @@ namespace Common.Messages
         /// <returns>Message in string form</returns>
         public static string Sanitize(byte[] byteArray)
         {
-            var message = System.Text.Encoding.UTF8.GetString(byteArray);
+            var message = Encoding.UTF8.GetString(byteArray);
             string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
             if (message.StartsWith(_byteOrderMarkUtf8))
             {
