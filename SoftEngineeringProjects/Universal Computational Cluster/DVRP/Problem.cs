@@ -122,12 +122,10 @@ namespace DVRP
         {
             // Oczytaj parametry z pliku
             string[] problemFileLines = File.ReadAllLines(fileUri.AbsolutePath);
-            Dictionary<uint, Vehicle> vehicles = new Dictionary<uint, Vehicle>();
-            Dictionary<uint, Client> clients = new Dictionary<uint, Client>();
-            Dictionary<uint, Depot> depots = new Dictionary<uint, Depot>();
 
             Dictionary<uint, Location> locations = new Dictionary<uint, Location>();
             Dictionary<uint, double> demands = new Dictionary<uint, double>();
+            List<uint> depots = new List<uint>();
 
             string name;
             int num_depots, num_capacities, num_visits, num_locations, num_vehicles, capacities;
@@ -140,8 +138,7 @@ namespace DVRP
                         do
                         {
                             i++;
-                            uint id = Convert.ToUInt32(problemFileLines[i].Trim());
-                            depots.Add(id, new Depot(id));
+                            depots.Add(Convert.ToUInt32(problemFileLines[i].Trim()));
                         } while (!problemFileLines[i + 1].Equals("DEMAND_SECTION"));
                         break;
                     case "DEMAND_SECTION":
