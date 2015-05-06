@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security;
 using Common.Exceptions;
 using Common.Messages;
 using UCCTaskSolver;
@@ -12,21 +13,18 @@ namespace Common.Components
 
     public class ComputationalNode : SystemComponent
     {
-        private const string SolvePartialProblems = "SolvePartialProblems";
+        private const string SolvePartialProblems = "SolvePartialProblems", SolutionRequest = "SolutionRequest";
         
         public ComputationalNode()
         {
             DeviceType = SystemComponentType.ComputationalNode;
             SolvableProblems = new[] {"DVRP"};
             PararellThreads = 1;
-            ThreadStateChanged += ThreadStateChangedHandler;
+            
             TaskSolverFactories = new Dictionary<string, TaskSolverFactory>();
             TaskSolverFactories.Add("DVRP",DVRP.TaskSolver.TaskSolverFactory);
         }
-        private void ThreadStateChangedHandler(object sender, ThreadStateChangedEventArgs e)
-        {
-
-        }
+        
         protected override void HandleMessage(Message message, string key, Socket socket)
         {
             try
@@ -36,6 +34,10 @@ namespace Common.Components
                     case SolvePartialProblems:
                         MsgHandler_SolvePartialProblems((SolvePartialProblems) message);
                         break;
+                    case SolutionRequest:
+                        MsgHandler_SolutionRequest((SolutionRequest)message);
+                        break;
+
                 }
             }
             catch (NotEnoughIdleThreadsException e)
@@ -44,23 +46,31 @@ namespace Common.Components
             }
         }
 
+        private void MsgHandler_SolutionRequest(global::SolutionRequest solutionRequest)
+        {
+            throw new NotImplementedException();
+        }
+
         public void MsgHandler_SolvePartialProblems(SolvePartialProblems partialProblems)
         {
             var list =
                 ThreadInfo.Threads.FindAll(
-                    ct => (ct.ProblemType == partialProblems.ProblemType && ct.State == StatusThreadState.Idle));
-            if (list.Count < partialProblems.PartialProblems.Length)
+                    ct => (ct.State == StatusThreadState.Idle));
+            if (list.Count < partialProblems.PartialProblems.Length-1)
             {
                 throw new NotEnoughIdleThreadsException("Not enough idle threads for problem type");
             }
-            for (var i = 0; i < partialProblems.PartialProblems.Length; i++)
+            if (partialProblems.PartialProblems.Any(t => t.NodeID != Id))
             {
-                if (partialProblems.PartialProblems[i].NodeID == Id)
-                {
-                    throw new InvalidIdException("Ivalid Node Id in Partial Problem");
-                }
+                throw new InvalidIdException("Ivalid Node Id in Partial Problem");
             }
-
+            for(int i=0;i<partialProblems.PartialProblems.Length;i++)
+            {
+                list[i].TaskSolver = GetTaskSolver(partialProblems.ProblemType,
+                    partialProblems.PartialProblems[0].Data);
+                list[i].StartSolving(partialProblems.Id,partialProblems.ProblemType,partialProblems.PartialProblems[i+1].TaskId,new TimeSpan(0,0,0,0,(int)partialProblems.SolvingTimeout),partialProblems.PartialProblems[0].Data,partialProblems.PartialProblems[i
+                    +1].Data);
+            }
             // TODO: implement state changes for threads
             // TODO: implement solving threads
             // TODO: save solutions
