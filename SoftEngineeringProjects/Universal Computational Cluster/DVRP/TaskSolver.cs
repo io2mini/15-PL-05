@@ -61,10 +61,11 @@ namespace DVRP
             for(int i=0; i<r.Sequence.Length; i++)
             {
                 l.Add(r.Sequence[i]);
+                if (depotSequence[i + 1] != uint.MaxValue) 
                 l.Add(depotSequence[i + 1]);
             }
             //zwrócenie listy z usuniętym "sztucznym" depotem (oznaczającym "nie jedź do depotu")
-            return new Route(l.Where(id => id != uint.MaxValue).ToArray());
+            return new Route(l.ToArray());
         }
 
         public static Route[] GenerateAndAddDepotsToRoute(this Route r, Problem p, List<uint[][]> l)

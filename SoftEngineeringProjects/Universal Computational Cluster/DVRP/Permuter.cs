@@ -116,5 +116,123 @@ namespace DVRP
             tab[actualIndex] = false;
             GenerateBooleanCombinationRecursively(actualIndex+1, tab, howManyDivides, actualdivides, ref resultList);
         }
+
+        public static int[][] GenerateLengthBrackets(int divideCount, int desiredSum)
+        {
+            var l = new List<List<int>> { new List<int>{1, int.MaxValue} };
+            for (int i = 2; i <= desiredSum; i++)
+            {
+                var ll = new List<List<int>>();
+                var actList = new List<int> { 1 };
+                if (l[0].Count <= divideCount)
+                {
+                    actList.AddRange(l[0]);
+                    ll.Add(actList);
+                }
+                for (int j = 0; j < l.Count; j++)
+                {
+                    for (int k = l[j].Count - 1; k >= 0 && l[j][k + 1] > l[j][k]; k--)
+                    {
+                        actList.Clear();
+                        actList.AddRange(l[j]);
+                        actList[k]++;
+                        ll.Add(actList);
+                    }
+                }
+                l = ll;
+            }
+            var Result = new List<int[]>();
+            foreach (var intlist in l)
+            {
+                var s = new int[divideCount + 1];
+                for (int i = 0; i < intlist.Count - 1; i++)
+                {
+                    s[intlist[i]]++;
+                }
+                Result.Add(s);
+            }
+            return Result.ToArray();
+        }
+        public void FillBracketsSingle(int i, List<List<uint>> Brackets, int[] bracketCapacities,ref List<uint[][]> result, int idCount)
+        {
+            if (i >= idCount)
+            {
+                List<uint[]> ListofArrays = new List<uint[]>();
+                foreach (var L in Brackets) ListofArrays.Add(L.ToArray());
+                result.Add(ListofArrays.ToArray());
+                return;
+            }
+            for (int j = 0; j < Brackets.Count; j++)
+            {
+                if (Brackets[j].Count < bracketCapacities[j]*j)
+                {
+                    Brackets[j].Add((uint)i);
+                    FillBracketsSingle(i + 1, Brackets, bracketCapacities, ref result, idCount);
+                    Brackets[j].RemoveAt(Brackets[j].Count - 1);
+                }
+            }
+        }
+        public List<uint[][][]> GenerateAndFillBrackets(int divideCount, int desiredSum)
+        {
+            var bracketCapacities = GenerateLengthBrackets(divideCount, desiredSum);
+            var bracketAssignments = new List<uint[][][]>();
+            foreach (var arr in bracketCapacities)
+            {
+                var bracketAssignment = new List<uint[][]>();
+                var brackets = new List<List<uint>>();
+                for(int i=0; i<arr.Length; i++) brackets.Add(new List<uint>());
+                FillBracketsSingle(0, brackets ,arr, ref bracketAssignment, desiredSum);
+                bracketAssignments.Add(bracketAssignment.ToArray());
+            }
+            //TODO: use PermuteAll
+            return bracketAssignments;
+        }
+        public void FillBracketLevelRecursively(ref List<uint[][]> Result,List<List<uint>> Brackets, int i, int bracketsize, uint[] array)
+        {
+            if(i==array.Length)
+            {
+                List<uint[]> ListofArrays = new List<uint[]>();
+                foreach (var L in Brackets) ListofArrays.Add(L.ToArray());
+                Result.Add(ListofArrays.ToArray());
+                return;
+            }
+            for (int j = 0; j < Brackets.Count; j++)
+            {
+                if (Brackets[j].Count < bracketsize) continue;
+               
+                for (int k = 0; k < Brackets[j].Count; k++)
+                {
+                    if (Brackets[j][k] < int.MaxValue) continue;
+                    Brackets[j][k] = array[i];
+                    FillBracketLevelRecursively(ref Result, Brackets, i + 1, bracketsize, array);
+                    Brackets[j][k] = int.MaxValue;
+                }
+                Brackets[j].RemoveAt(Brackets[j].Count - 1);            
+            }
+        }
+        public uint[][][] PermuteAll(uint[] array,int bracketsize,int bracketcount)
+        {
+           //TODO: fill in function
+            List<uint[][]> Result = new List<uint[][]>();
+            List<List<uint>> Brackets = new List<List<uint>>();
+            for (int i = 0; i < bracketcount; i++)
+            {
+                Brackets.Add(new List<uint>());
+                for (int j = 0; j < bracketsize; j++) Brackets[i].Add(int.MaxValue);
+            }
+            
+            FillBracketLevelRecursively(ref Result, Brackets, 0, bracketsize, array);
+            return Result.ToArray();
+        }
+        public uint[][] Permute(uint[] array)
+        {
+            var indexPermutations = GeneratePermutationsRecursively((uint)array.Length);
+            for (int i = 0; i < indexPermutations.GetLength(0); i++)
+            {
+                for (int j = 0; j < indexPermutations[i].Length; j++)
+                    indexPermutations[i][j] = array[indexPermutations[i][j]];
+            }
+            return indexPermutations;
+        }
     }
 }
