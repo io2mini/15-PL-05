@@ -12,24 +12,25 @@ namespace DVRP
 
         public static uint[][] GeneratePermutations(uint n)
         {
-            _permutations = new List<uint[]>();
+            return GeneratePermutationsRecursively(n);
+            //_permutations = new List<uint[]>();
 
-            _permutation = new uint[n];
-            for (uint i = 1; i <= n; i++)
-            {
-                _permutation[i - 1] = i;
-            }
+            //_permutation = new uint[n];
+            //for (uint i = 1; i <= n; i++)
+            //{
+            //    _permutation[i - 1] = i;
+            //}
 
-            //http://www.drzewo-wiedzy.pl/?page=artykul&id=48
-            //http://www.cut-the-knot.org/do_you_know/AllPerm.shtml
-            //http://sirjoker.w.interia.pl/mat/dyskr/Algorytmy.pdf
-            //http://main.edu.pl/pl/user.phtml?op=lesson&n=34&page=algorytmika
-            //http://www.softwareandfinance.com/CSharp/Permutation_Algorithm.html
+            ////http://www.drzewo-wiedzy.pl/?page=artykul&id=48
+            ////http://www.cut-the-knot.org/do_you_know/AllPerm.shtml
+            ////http://sirjoker.w.interia.pl/mat/dyskr/Algorytmy.pdf
+            ////http://main.edu.pl/pl/user.phtml?op=lesson&n=34&page=algorytmika
+            ////http://www.softwareandfinance.com/CSharp/Permutation_Algorithm.html
 
-            _permutations.Add(new uint[n]);
-            Array.Copy(_permutation, _permutations[_permutations.Count - 1], n);
+            //_permutations.Add(new uint[n]);
+            //Array.Copy(_permutation, _permutations[_permutations.Count - 1], n);
 
-            return _permutations.ToArray();
+            //return _permutations.ToArray();
         }
 
         public static uint[][] GeneratePermutationsRecursively(uint n)
@@ -60,6 +61,7 @@ namespace DVRP
                 for (var i = 0; i < tab_prim.Length; i++)
                     tab_prim[i] = tab[i];
                 tabs.Add(tab_prim);
+                return;
             }
             for (var i = 0; i < k; i++)
             {

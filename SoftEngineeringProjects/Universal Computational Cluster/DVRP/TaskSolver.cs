@@ -67,12 +67,12 @@ namespace DVRP
             return new Route(l.Where(id => id != uint.MaxValue).ToArray());
         }
 
-        public static Route[] GenerateAndAddDepotsToRoute(this Route r, Problem p)
+        public static Route[] GenerateAndAddDepotsToRoute(this Route r, Problem p, List<uint[][]> l)
         {
             //Generowanie kombinacji depotów i konwersja ich indeksów na id
-            var combinedDepots = AssignDepotIds(Permuter.GenerateCombinations((uint)r.Sequence.Length + 1, (uint)p.Depots.Count() + 1), p);
+            var combinedDepots = l[r.Sequence.Length + 1];//AssignDepotIds(Permuter.GenerateCombinations((uint)r.Sequence.Length + 1, (uint)p.Depots.Count() + 1), p);
             //Usuwanie kombinacji zaczynających się lub kończących się na "sztucznym" depocie (oznaczającym "nie jedź do depotu")
-            combinedDepots = combinedDepots.Where(depotArray => depotArray.First() != uint.MaxValue && depotArray.Last() != uint.MaxValue).ToArray();
+            //combinedDepots = combinedDepots.Where(depotArray => depotArray.First() != uint.MaxValue && depotArray.Last() != uint.MaxValue).ToArray();
             //Dodanie depotów do trasy
             return combinedDepots.Select(depotSequence => r.AddDepotsToRoute(depotSequence)).ToArray();
         }
@@ -132,10 +132,20 @@ namespace DVRP
         public override byte[][] DivideProblem(int threadCount)
         {
             var permutedClients = AssignClientIds(Permuter.GeneratePermutations((uint)ProblemInstance.Clients.Count()));
-            var divides = Permuter.GenerateBooleanCombination((uint)permutedClients.Length, (uint)ProblemInstance.Vehicles.Count);
+            var divides = Permuter.GenerateBooleanCombination((uint)ProblemInstance.Clients.Count, (uint)ProblemInstance.Vehicles.Count);
             var RouteClients = DivideClients(permutedClients, divides).ToList();
             var combinedDestinations = new List<Route[]>();
-            combinedDestinations = RouteClients.Select(routes => routes.Select(r => r.GenerateAndAddDepotsToRoute(ProblemInstance)).Select(lll => lll.ToArray()).ToList()).Aggregate(combinedDestinations, (current, l) => current.Union(l).ToList());
+
+            var list =new List<uint[][]>();
+            list.Add(null); //wartownik
+            for (int i = 1; i < ProblemInstance.Clients.Count + 2; i++)
+            {
+                list.Add(AssignDepotIds(
+                    Permuter.GenerateCombinations((uint) i, (uint) ProblemInstance.Depots.Count() + 1)));
+                list[i] = list[i].Where(depotArray => depotArray.First() != uint.MaxValue && depotArray.Last() != uint.MaxValue).ToArray();
+            }
+
+            combinedDestinations = RouteClients.Select(routes => routes.Select(r => r.GenerateAndAddDepotsToRoute(ProblemInstance, list)).Select(lll => lll.ToArray()).ToList()).Aggregate(combinedDestinations, (current, l) => current.Union(l).ToList());
             //Powyższe wygenerowane resharperem z poniższego gdzie combinedDestinations to ll:
             //foreach (Route[] routes in RouteClients)
             //{
