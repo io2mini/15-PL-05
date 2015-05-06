@@ -56,6 +56,10 @@
       <Project>{7b733aa3-d074-497d-b2c8-ad4690084fc2}</Project>
       <Name>ComputationalClient</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DVRP\DVRP.csproj">
+      <Project>{30acef69-2e2b-4e38-9256-8e4d458db15e}</Project>
+      <Name>DVRP</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

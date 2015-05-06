@@ -115,5 +115,56 @@ namespace DVRP
                 return ms.ToArray();
             }
         }
+
+
+        private static readonly char[] WHITESPACES = { ' ', '\t', '\n' };
+        public static Problem CreateProblemInstanceFromFile(Uri fileUri)
+        {
+            // Oczytaj parametry z pliku
+            string[] problemFileLines = File.ReadAllLines(fileUri.AbsolutePath);
+            Dictionary<uint, Vehicle> vehicles = new Dictionary<uint, Vehicle>();
+            Dictionary<uint, Client> clients = new Dictionary<uint, Client>();
+            Dictionary<uint, Depot> depots = new Dictionary<uint, Depot>();
+
+            Dictionary<uint, Location> locations = new Dictionary<uint, Location>();
+            Dictionary<uint, double> demands = new Dictionary<uint, double>();
+
+            string name;
+            int num_depots, num_capacities, num_visits, num_locations, num_vehicles, capacities;
+
+            for (int i = 0; i < problemFileLines.Length; i++)
+            {
+                switch (problemFileLines[i])
+                {
+                    case "DEPOTS":
+                        do
+                        {
+                            i++;
+                            uint id = Convert.ToUInt32(problemFileLines[i].Trim());
+                            depots.Add(id, new Depot(id));
+                        } while (!problemFileLines[i + 1].Equals("DEMAND_SECTION"));
+                        break;
+                    case "DEMAND_SECTION":
+                        do
+                        {
+                            i++;
+                            string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
+                            uint id = Convert.ToUInt32(line[0]);
+                            demands.Add(id, Convert.ToDouble(line[1]));
+                        } while (!problemFileLines[i + 1].Equals("LOCATION_COORD_SECTION"));
+                        break;
+                    case "LOCATION_COORD_SECTION":
+                        do
+                        {
+                            i++;
+                            string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
+                            locations.Add(Convert.ToUInt32(line[0]), new Location(Convert.ToDouble(line[1]),Convert.ToDouble([line[2]]));
+                        } while (!problemFileLines[i + 1].Equals("DEPOT_LOCATION_SECTION"));
+                        break;
+                }
+            }
+
+            return new Problem();
+        }
     }
 }
