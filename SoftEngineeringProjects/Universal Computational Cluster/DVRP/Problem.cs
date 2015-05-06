@@ -127,7 +127,7 @@ namespace DVRP
             Dictionary<uint, Depot> depots = new Dictionary<uint, Depot>();
 
             Dictionary<uint, Location> locations = new Dictionary<uint, Location>();
-            Dictionary<uint, >
+            Dictionary<uint, double> demands = new Dictionary<uint, double>();
 
             string name;
             int num_depots, num_capacities, num_visits, num_locations, num_vehicles, capacities;
@@ -150,7 +150,7 @@ namespace DVRP
                             i++;
                             string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
                             uint id = Convert.ToUInt32(line[0]);
-                            clients.Add(id, new Client(id, Convert.ToDouble(line[1])));
+                            demands.Add(id, Convert.ToDouble(line[1]));
                         } while (!problemFileLines[i + 1].Equals("LOCATION_COORD_SECTION"));
                         break;
                     case "LOCATION_COORD_SECTION":
