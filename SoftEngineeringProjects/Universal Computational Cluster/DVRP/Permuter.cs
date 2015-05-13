@@ -153,7 +153,7 @@ namespace DVRP
             }
             return Result.ToArray();
         }
-        public void FillBracketsSingle(int i, List<List<uint>> Brackets, int[] bracketCapacities,ref List<uint[][]> result, int idCount)
+        public static void FillBracketsSingle(int i, List<List<uint>> Brackets, int[] bracketCapacities,ref List<uint[][]> result, int idCount)
         {
             if (i >= idCount)
             {
@@ -172,7 +172,7 @@ namespace DVRP
                 }
             }
         }
-        public List<uint[][][]> GenerateAndFillBrackets(int divideCount, int desiredSum)
+        public static List<uint[][][]> GenerateAndFillBrackets(int divideCount, int desiredSum)
         {
             var bracketCapacities = GenerateLengthBrackets(divideCount, desiredSum);
             var bracketAssignments = new List<uint[][][]>();
@@ -187,7 +187,7 @@ namespace DVRP
             //TODO: use PermuteAll
             return bracketAssignments;
         }
-        public void FillBracketLevelRecursively(ref List<uint[][]> Result,List<List<uint>> Brackets, int i, int bracketsize, uint[] array)
+        public static void FillBracketLevelRecursively(ref List<uint[][]> Result,List<List<uint>> Brackets, int i, int bracketsize, uint[] array)
         {
             if(i==array.Length)
             {
@@ -210,7 +210,7 @@ namespace DVRP
                 Brackets[j].RemoveAt(Brackets[j].Count - 1);            
             }
         }
-        public uint[][][] PermuteAll(uint[] array,int bracketsize,int bracketcount)
+        public static uint[][][] PermuteAll(uint[] array,int bracketsize,int bracketcount)
         {
            //TODO: fill in function
             List<uint[][]> Result = new List<uint[][]>();
@@ -224,7 +224,7 @@ namespace DVRP
             FillBracketLevelRecursively(ref Result, Brackets, 0, bracketsize, array);
             return Result.ToArray();
         }
-        public uint[][] Permute(uint[] array)
+        public static uint[][] Permute(uint[] array)
         {
             var indexPermutations = GeneratePermutationsRecursively((uint)array.Length);
             for (int i = 0; i < indexPermutations.GetLength(0); i++)
