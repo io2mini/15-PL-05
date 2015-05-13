@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DVRP.Objects;
+using System;
 using System.Collections.Generic;
 
 namespace DVRP
@@ -131,6 +132,7 @@ namespace DVRP
                 }
                 for (int j = 0; j < l.Count; j++)
                 {
+                    //>:[
                     for (int k = l[j].Count - 1; k >= 0 && l[j][k + 1] > l[j][k]; k--)
                     {
                         actList.Clear();
@@ -172,9 +174,9 @@ namespace DVRP
                 }
             }
         }
-        public static List<uint[][][]> GenerateAndFillBrackets(int divideCount, int desiredSum)
+        public static List<uint[]> GenerateAndFillBrackets(int divideCount, int desiredSum,int[][] lengthBrackets)
         {
-            var bracketCapacities = GenerateLengthBrackets(divideCount, desiredSum);
+            var bracketCapacities = lengthBrackets;
             var bracketAssignments = new List<uint[][][]>();
             foreach (var arr in bracketCapacities)
             {
@@ -185,6 +187,39 @@ namespace DVRP
                 bracketAssignments.Add(bracketAssignment.ToArray());
             }
             //TODO: use PermuteAll
+            //Wszystkie permutacje indeksów wewnątrz bracketów
+            List<uint[][][]> Results = new List<uint[][][]>();
+            List<uint[][]> Routes = new List<uint[][]>();
+            for (int i = 0; i < bracketAssignments.Count; i++)
+            {
+                //Wszystkie podziały na brackety
+                for (int j = 0; j < bracketAssignments[i].Length; j++)
+                {
+                    //Pojedynczy podział na brackety
+                    for (int k = 0; k < bracketAssignments[i][j].Length; k++)
+                    {
+                        //Brackety pojedynczej długości
+                        Results.Add(PermuteAll(bracketAssignments[i][j][k], k, lengthBrackets[k].Length));
+
+                        //Przydzielone indeksy do bracketów jednej długości
+                        //Route dla pojedynczego samochodu
+
+                       
+                    }
+                    for (int k = 0; k < lengthBrackets.Length; k++)
+                    {
+                        for (int l = 0; l < Results[k][i][j].Length; l++)
+                        {
+                            //TODO: ALL - procedura łączaca zpermutowane id
+                        }
+                    }
+                    //wypełnione brackety do konwersji na route
+                    //zestaw route'ów dla zestawu samochodów (pojedynczy przypadek rozwiązujący problem)
+                }
+                //Wszystkie zestawy bracketów
+            }
+            //Wszystkie route'y
+
             return bracketAssignments;
         }
         public static void FillBracketLevelRecursively(ref List<uint[][]> Result,List<List<uint>> Brackets, int i, int bracketsize, uint[] array)
@@ -202,23 +237,22 @@ namespace DVRP
                
                 for (int k = 0; k < Brackets[j].Count; k++)
                 {
-                    if (Brackets[j][k] < int.MaxValue) continue;
+                    if (Brackets[j][k] < uint.MaxValue) continue;
                     Brackets[j][k] = array[i];
                     FillBracketLevelRecursively(ref Result, Brackets, i + 1, bracketsize, array);
-                    Brackets[j][k] = int.MaxValue;
+                    Brackets[j][k] = uint.MaxValue;
                 }
                 Brackets[j].RemoveAt(Brackets[j].Count - 1);            
             }
         }
         public static uint[][][] PermuteAll(uint[] array,int bracketsize,int bracketcount)
-        {
-           //TODO: fill in function
+        { 
             List<uint[][]> Result = new List<uint[][]>();
             List<List<uint>> Brackets = new List<List<uint>>();
             for (int i = 0; i < bracketcount; i++)
             {
                 Brackets.Add(new List<uint>());
-                for (int j = 0; j < bracketsize; j++) Brackets[i].Add(int.MaxValue);
+                for (int j = 0; j < bracketsize; j++) Brackets[i].Add(uint.MaxValue);
             }
             
             FillBracketLevelRecursively(ref Result, Brackets, 0, bracketsize, array);
