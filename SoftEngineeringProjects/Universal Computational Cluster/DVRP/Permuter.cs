@@ -1,6 +1,7 @@
 ﻿using DVRP.Objects;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DVRP
 {
@@ -99,6 +100,37 @@ namespace DVRP
             return l.ToArray();
         }
 
+        private static List<List<uint[]>> AttachPermutations(List<uint[]> current, uint[][][] result)
+        {
+            var target = new List<List<uint[]>>();
+            for (var i = 0; i < result.GetLength(0); i++)
+            {
+                var list = current.ToList();
+                list.AddRange(result[i]);
+                target.Add(list);
+
+            }
+            return target;
+        }
+
+        private static List<uint[][]> MergePermutations(List<uint[][][]> results, int index, List<List<uint[]>> current)
+        {
+            while (true)
+            {
+                if (index == results.Count)
+                {
+                    return current.Select(array => array.ToArray()).ToList();
+                }
+                List<List<uint[]>> newCurrent = new List<List<uint[]>>();
+                foreach (var array in current)
+                {
+                    newCurrent.AddRange(AttachPermutations(array, results[index]));
+                }
+                index = index + 1;
+                current = newCurrent;
+            }
+        }
+
         private static void GenerateBooleanCombinationRecursively(int actualIndex, bool[] tab, uint howManyDivides, uint actualdivides, ref List<bool[]> resultList)
         {
             if (actualIndex == tab.Length || actualdivides==howManyDivides)
@@ -174,7 +206,7 @@ namespace DVRP
                 }
             }
         }
-        public static List<uint[]> GenerateAndFillBrackets(int divideCount, int desiredSum,int[][] lengthBrackets)
+        public static List<uint[][]> GenerateAndFillBrackets(int divideCount, int desiredSum,int[][] lengthBrackets)
         {
             var bracketCapacities = lengthBrackets;
             var bracketAssignments = new List<uint[][][]>();
@@ -211,6 +243,7 @@ namespace DVRP
                         for (int l = 0; l < Results[k][i][j].Length; l++)
                         {
                             //TODO: ALL - procedura łączaca zpermutowane id
+                            Routes.AddRange(MergePermutations(Results,0,new List<List<uint[]>>{new List<uint[]>()}));
                         }
                     }
                     //wypełnione brackety do konwersji na route
@@ -220,7 +253,7 @@ namespace DVRP
             }
             //Wszystkie route'y
 
-            return bracketAssignments;
+            return Routes;
         }
         public static void FillBracketLevelRecursively(ref List<uint[][]> Result,List<List<uint>> Brackets, int i, int bracketsize, uint[] array)
         {
