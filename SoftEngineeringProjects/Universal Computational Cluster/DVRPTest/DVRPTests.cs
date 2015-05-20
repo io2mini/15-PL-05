@@ -4,6 +4,7 @@ using System.IO;
 using DVRP;
 using DVRP.Objects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading;
 
 namespace DVRPTest
 {
@@ -56,13 +57,26 @@ namespace DVRPTest
             DVRP.Problem p = DVRP.Problem.CreateProblemInstanceFromFile(problemFileUri);
             DVRP.TaskSolver ts = new DVRP.TaskSolver(p.Serialize());
             var ttb = ts.DivideProblem(8);
-            List<byte[]> solutions = new List<byte[]>();
+            byte[][] solutions = new byte[ttb.GetLength(0) - 1][];
+            List<Thread> threads = new List<Thread>();
+            Mutex WaitForThread = new Mutex();
             for (int i = 1; i < ttb.GetLength(0); i++)
             {
-                DVRP.TaskSolver tsn = new TaskSolver(ttb[0]);
-                solutions.Add(tsn.Solve(ttb[i], new TimeSpan()));
+                threads.Add(new Thread((object o) =>
+                {
+                    
+                    DVRP.TaskSolver tsn = new TaskSolver(ttb[0]);
+                    WaitForThread.WaitOne();
+                    solutions[((int)o)-1] = (tsn.Solve(ttb[(int)o], new TimeSpan()));
+                    WaitForThread.ReleaseMutex();
+                }));
             }
-            var ms = ts.MergeSolution(solutions.ToArray());
+            for(int i=1;i<threads.Count+1;i++)
+            {
+                threads[i-1].Start(i);
+            }
+            foreach (var I in threads) I.Join();
+            var ms = ts.MergeSolution(solutions);
             var s = Solution.Deserialize(ms);
             var cost = s.Cost;
         }

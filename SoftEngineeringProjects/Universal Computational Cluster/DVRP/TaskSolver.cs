@@ -122,6 +122,16 @@ namespace DVRP
         public override byte[] Solve(byte[] partialData, TimeSpan timeout)
         {
             //TODO: handle timeout
+            
+            var maxEnd = ProblemInstance.Depots.Max<Depot>((depot=>(depot.EndTime.Ticks)));
+            foreach (var C in ProblemInstance.Clients)
+            {
+                if (C.StartTime < new TimeSpan((long)(ProblemInstance.CutOff * (double)maxEnd)))
+                {
+                    C.CutOff = true;
+                }
+            }
+
             var task = Task.Deserialize(partialData);
             var routes = GeneratePermutedClients(task.Brackets);
             double bestCost = double.MaxValue;

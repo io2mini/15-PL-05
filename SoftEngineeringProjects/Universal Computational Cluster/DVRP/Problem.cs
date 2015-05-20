@@ -17,7 +17,7 @@ namespace DVRP
         public List<Client> Clients { get; private set; }
         // bases
         public List<Depot> Depots { get; private set; }
-
+        public double CutOff { get; set; }
         // Pytanie - to mają być common ^, czy pchamy to wszyskim w ramach jednego problemu ->, a TN ma to puste?
         private int[][] _clientsOrder; /// Generowane dla kazdego podproblemu
         /// 
@@ -63,12 +63,13 @@ namespace DVRP
             throw new KeyNotFoundException();
         }
 
-        public Problem(List<Vehicle> fleet, List<Client> clients, List<Depot> depots, int[][] clientsOrder)
+        public Problem(List<Vehicle> fleet, List<Client> clients, List<Depot> depots, int[][] clientsOrder,double cutOff =0.5)
         {
             Fleet = fleet;
             Clients = clients;
             Depots = depots;
             _clientsOrder = clientsOrder;
+            CutOff = cutOff;
         }
 
         public Problem()

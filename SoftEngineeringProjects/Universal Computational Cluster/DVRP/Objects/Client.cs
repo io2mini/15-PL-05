@@ -8,6 +8,15 @@ namespace DVRP.Objects
         public uint Id { get; private set; }
         public Location Location { get; private set; }
         public TimeSpan StartTime { get; private set; }
+        public TimeSpan RealStartTime
+        {
+            get
+            {
+                return CutOff ? new TimeSpan() : StartTime;
+            }
+        }
+        public Boolean CutOff {get;set;} 
+        
         public TimeSpan EndTime { get; private set; }
         //max time needed for transport
         public double Unld { get; private set; }
@@ -22,6 +31,7 @@ namespace DVRP.Objects
             Unld = unld;
             Size = size;
             Id = id;
+            CutOff = false;
         }
     }
 }
