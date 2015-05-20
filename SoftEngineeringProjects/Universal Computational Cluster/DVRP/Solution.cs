@@ -10,9 +10,10 @@ namespace DVRP
         // cost of 
         private readonly List<Route> _vehicleLocationList;
 
-        public Solution(List<Route> vehicleLocationList)
+        public Solution(List<Route> vehicleLocationList, double cost)
         {
             _vehicleLocationList = vehicleLocationList;
+            Cost = cost;
         }
 
         public double Cost { get; private set; }

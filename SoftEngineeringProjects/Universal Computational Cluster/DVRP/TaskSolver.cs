@@ -28,15 +28,15 @@ namespace DVRP
                     //if(c.StartTime>actualTime || c.EndTime<actualTime) return double.MaxValue; //wersja bez czekania
 
                     //Wersja z czekaniem na otwarcie:
-                    if (c.EndTime < actualTime)
-                    {
-                        return double.MaxValue;
-                    }
-                    if (c.StartTime > actualTime) actualTime = c.StartTime;
+                    //if (c.EndTime < actualTime)
+                    //{
+                    //   return double.MaxValue;
+                    //}
+                    //if (c.StartTime > actualTime) actualTime = c.StartTime;
                     //koniec wersji z czekaniem na otwarcie
 
                     actualTime += TimeSpan.FromMinutes(c.Unld);
-                    //if(c.StartTime>actualTime || c.EndTime<actualTime) return double.MaxValue; TODO: sprawdzić czy cały rozładunek musi się zmieścić w oknie czasowym
+                    if(c.StartTime>actualTime || c.EndTime<actualTime) return double.MaxValue; //TODO: sprawdzić czy cały rozładunek musi się zmieścić w oknie czasowym
                     load += c.Size;
                     if (load < 0)
                     {
@@ -46,14 +46,14 @@ namespace DVRP
                 if (p.IsDepot(r.Sequence[i]))
                 {
                     var d = p.GetDepot(r.Sequence[i]);
-                    //if(d.StartTime>actualTime || d.EndTime<actualTime) return double.MaxValue; //wersja bez czekania
+                    if(d.StartTime>actualTime || d.EndTime<actualTime) return double.MaxValue; //wersja bez czekania
 
                     //Wersja z czekaniem na otwarcie:
-                    if (d.EndTime < actualTime)
-                    {
-                        return double.MaxValue;
-                    }
-                    if (d.StartTime > actualTime) actualTime = d.StartTime;
+                    //if (d.EndTime < actualTime)
+                    //{
+                    //    return double.MaxValue;
+                    //}
+                    //if (d.StartTime > actualTime) actualTime = d.StartTime;
                     //koniec wersji z czekaniem na otwarcie
 
                     load = p.Fleet[0].Capacity;
@@ -124,18 +124,18 @@ namespace DVRP
             //TODO: handle timeout
             var task = Task.Deserialize(partialData);
             var routes = GeneratePermutedClients(task.Brackets);
-            double cost = double.MaxValue;
+            double bestCost = double.MaxValue;
             Route[] bestSequence = null;
             foreach (var sequence in routes)
             {
-                var costPrim = sequence.Sum(route => route.CalculteRouteCost(ProblemInstance, cost));
-                if (costPrim < cost)
+                var currentCost = sequence.Sum(route => route.CalculteRouteCost(ProblemInstance, bestCost));
+                if (currentCost < bestCost)
                 {
-                    cost = costPrim;
+                    bestCost = currentCost;
                     bestSequence = sequence;
                 }
             }
-            var s = new Solution(bestSequence != null ? bestSequence.ToList() : null);
+            var s = new Solution(bestSequence != null ? bestSequence.ToList() : null, bestCost);
             return s.Serialize();
         }
 
