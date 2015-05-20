@@ -11,15 +11,15 @@ namespace DVRP
         /// </summary>
         /// <param name="problem">Problem do rozwiązania</param>
         /// <param name="routes">Tablica tras do sprawdzenia</param>
-        public Task(Route[][] routes)
+        public Task(int[][] brackets)
         {
-            Routes = routes;
+            Brackets = brackets;
         }
 
         /// <summary>
         ///     Sekwencje do sprawdzenia
         /// </summary>
-        public Route[][] Routes { get; private set; }
+        public int[][] Brackets { get; private set; }
 
         public static Task Deserialize(byte[] byteArray)
         {

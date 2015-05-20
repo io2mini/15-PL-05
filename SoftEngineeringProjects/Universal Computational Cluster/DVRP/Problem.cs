@@ -122,7 +122,7 @@ namespace DVRP
         public static Problem CreateProblemInstanceFromFile(Uri fileUri)
         {
             // Oczytaj parametry z pliku
-            string[] problemFileLines = File.ReadAllLines(fileUri.AbsolutePath);
+            string[] problemFileLines = File.ReadAllLines(fileUri.IsAbsoluteUri?fileUri.AbsolutePath:fileUri.LocalPath);
 
             Dictionary<uint, Location> locations = new Dictionary<uint, Location>();
             Dictionary<uint, double> demands = new Dictionary<uint, double>();

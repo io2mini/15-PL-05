@@ -27,13 +27,13 @@ namespace DVRP
                     var c = p.GetClient(r.Sequence[i]);
                     //if(c.StartTime>actualTime || c.EndTime<actualTime) return double.MaxValue; //wersja bez czekania
 
-                        //Wersja z czekaniem na otwarcie:
+                    //Wersja z czekaniem na otwarcie:
                     if (c.EndTime < actualTime)
                     {
                         return double.MaxValue;
                     }
-                        if (c.StartTime > actualTime) actualTime = c.StartTime;
-                        //koniec wersji z czekaniem na otwarcie
+                    if (c.StartTime > actualTime) actualTime = c.StartTime;
+                    //koniec wersji z czekaniem na otwarcie
 
                     actualTime += TimeSpan.FromMinutes(c.Unld);
                     //if(c.StartTime>actualTime || c.EndTime<actualTime) return double.MaxValue; TODO: sprawdzić czy cały rozładunek musi się zmieścić w oknie czasowym
@@ -43,18 +43,18 @@ namespace DVRP
                         return double.MaxValue;
                     }
                 }
-                if(p.IsDepot(r.Sequence[i]))
+                if (p.IsDepot(r.Sequence[i]))
                 {
                     var d = p.GetDepot(r.Sequence[i]);
                     //if(d.StartTime>actualTime || d.EndTime<actualTime) return double.MaxValue; //wersja bez czekania
 
-                        //Wersja z czekaniem na otwarcie:
+                    //Wersja z czekaniem na otwarcie:
                     if (d.EndTime < actualTime)
                     {
                         return double.MaxValue;
                     }
-                        if (d.StartTime > actualTime) actualTime = d.StartTime;
-                        //koniec wersji z czekaniem na otwarcie
+                    if (d.StartTime > actualTime) actualTime = d.StartTime;
+                    //koniec wersji z czekaniem na otwarcie
 
                     load = p.Fleet[0].Capacity;
                     //Zakładamy, że pobyt w depocie trwa 0 czasu;
@@ -69,12 +69,12 @@ namespace DVRP
 
         private static Route AddDepotsToRoute(this Route r, uint[] depotSequence)
         {
-            var l = new List<uint> {depotSequence[0]};
-            for(int i=0; i<r.Sequence.Length; i++)
+            var l = new List<uint> { depotSequence[0] };
+            for (int i = 0; i < r.Sequence.Length; i++)
             {
                 l.Add(r.Sequence[i]);
-                if (depotSequence[i + 1] != uint.MaxValue) 
-                l.Add(depotSequence[i + 1]);
+                if (depotSequence[i + 1] != uint.MaxValue)
+                    l.Add(depotSequence[i + 1]);
             }
             //zwrócenie listy z usuniętym "sztucznym" depotem (oznaczającym "nie jedź do depotu")
             return new Route(l.ToArray());
@@ -96,7 +96,7 @@ namespace DVRP
             {
                 for (int j = 0; j < tab[i].Length; j++)
                 {
-                    tab[i][j] = tab[i][j] == p.Depots.Count() ? uint.MaxValue : p.Depots[(int) tab[i][j]].Id;
+                    tab[i][j] = tab[i][j] == p.Depots.Count() ? uint.MaxValue : p.Depots[(int)tab[i][j]].Id;
                 }
             }
             return tab;
@@ -113,18 +113,20 @@ namespace DVRP
 
         public Problem ProblemInstance { get; private set; }
 
-        public TaskSolver(byte[] problemData) : base(problemData)
+        public TaskSolver(byte[] problemData)
+            : base(problemData)
         {
-             ProblemInstance = Problem.Deserialize(problemData);
+            ProblemInstance = Problem.Deserialize(problemData);
         }
 
         public override byte[] Solve(byte[] partialData, TimeSpan timeout)
         {
             //TODO: handle timeout
             var task = Task.Deserialize(partialData);
+            var routes = GeneratePermutedClients(task.Brackets);
             double cost = double.MaxValue;
             Route[] bestSequence = null;
-            foreach (var sequence in task.Routes)
+            foreach (var sequence in routes)
             {
                 var costPrim = sequence.Sum(route => route.CalculteRouteCost(ProblemInstance, cost));
                 if (costPrim < cost)
@@ -144,65 +146,85 @@ namespace DVRP
 
         public override byte[][] DivideProblem(int threadCount)
         {
-            var permutedClients = AssignClientIds(Permuter.GeneratePermutations((uint)ProblemInstance.Clients.Count()));
-            var divides = Permuter.GenerateBooleanCombination((uint)ProblemInstance.Clients.Count, (uint)ProblemInstance.Vehicles.Count);
-            var RouteClients = DivideClients(permutedClients, divides).ToList();
-            var combinedDestinations = new List<Route[]>();
-
-            var list =new List<uint[][]>();
-            list.Add(null); //wartownik
-            for (int i = 1; i < ProblemInstance.Clients.Count + 2; i++)
+            var brackets = Permuter.GenerateLengthBrackets(ProblemInstance.Vehicles.Count, ProblemInstance.Clients.Count);
+            var seqCount = ((double)brackets.GetLength(0) / (double)threadCount);
+            var tasksForNodes = new List<byte[]> { ProblemInstance.Serialize() };
+            // Common data przechowywane w zerowym indeksie
+            var actualNodeIndex = 1f;
+            var sequences = new List<int[]>();
+            for (int i = 0; i < brackets.GetLength(0); i++)
             {
-                list.Add(AssignDepotIds(
-                    Permuter.GenerateCombinations((uint) i, (uint) ProblemInstance.Depots.Count() + 1)));
-                list[i] = list[i].Where(depotArray => depotArray.First() != uint.MaxValue && depotArray.Last() != uint.MaxValue).ToArray();
-            }
-
-            combinedDestinations = RouteClients.Select(routes => routes.Select(r => r.GenerateAndAddDepotsToRoute(ProblemInstance, list)).Select(lll => lll.ToArray()).ToList()).Aggregate(combinedDestinations, (current, l) => current.Union(l).ToList());
-            //Powyższe wygenerowane resharperem z poniższego gdzie combinedDestinations to ll:
-            //foreach (Route[] routes in RouteClients)
-            //{
-            //    var l = new List<Route[]>();
-            //    foreach (Route r in routes)
-            //    {
-            //        var lll = r.GenerateAndAddDepotsToRoute(_problem);
-            //        l.Add(lll.ToArray());
-            //    }
-            //    ll = ll.Union(l).ToList();
-            //}
-
-            // Extra depot means Depot where path cost = 0
-            // Dzielenie na taski
-            var seqCount = (double)combinedDestinations.Count/(double)threadCount;
-            var actualNodeIndex = 1;
-            var sequences = new List<Route[]>();
-            var tasksForNodes = new List<byte[]>();
-            tasksForNodes.Add(ProblemInstance.Serialize()); // Common data przechowywane w zerowym indeksie
-            for (int i = 0; i < combinedDestinations.Count; i++)
-            {
-                if (i > actualNodeIndex*seqCount)
+                if (i == (int)((actualNodeIndex * seqCount) - 1))
                 {
                     actualNodeIndex++;
                     var t = new Task(sequences.ToArray());
                     tasksForNodes.Add(t.Serialize());
                     sequences.Clear();
                 }
-                sequences.Add(combinedDestinations[i]);
+                sequences.Add(brackets[i]);
             }
             return tasksForNodes.ToArray();
         }
-
-        private Route[][] DivideClients(uint[][] permutedClients, bool[][] divides)
+        public Route[][] GeneratePermutedClients(int[][] brackets)
         {
-            List<Route[]> l = new List<Route[]>();
-            for (int i = 0; i < permutedClients.GetLength(0); i++)
+            var permutedClients = Permuter.GenerateAndFillBrackets(ProblemInstance.Vehicles.Count,
+                ProblemInstance.Clients.Count, brackets);
+            var RouteClients = DivideClients(permutedClients).ToList();
+            var combinedDestinations = new List<Route[]>();
+
+            var list = new List<uint[][]> { null };
+            //wartownik
+            for (int i = 1; i < ProblemInstance.Clients.Count + 2; i++)
             {
-                for (int j = 0; j < divides.GetLength(0); j++)
-                {
-                    l.Add(CombineClientDivide(permutedClients[i], divides[j]));
-                }
+                list.Add(AssignDepotIds(
+                    Permuter.GenerateCombinations((uint)i, (uint)ProblemInstance.Depots.Count() + 1)));
+                list[i] = list[i].Where(depotArray => depotArray.First() != uint.MaxValue && depotArray.Last() != uint.MaxValue).ToArray();
             }
-            return l.ToArray();
+
+            // combinedDestinations = RouteClients.Select(routes => routes.Select(r => r.GenerateAndAddDepotsToRoute(ProblemInstance, list)).Select(lll => lll.ToArray()).ToList()).Aggregate(combinedDestinations, (current, l) => current.Union(l).ToList());
+            //Powyższe wygenerowane resharperem z poniższego gdzie combinedDestinations to ll:
+            foreach (Route[] routes in RouteClients)
+            {
+                List<Route[]> current = new List<Route[]>();
+                var l = new List<Route>();
+                foreach (Route r in routes)
+                {
+                    var lll = r.GenerateAndAddDepotsToRoute(ProblemInstance, list);
+                    current = CombineRoutes(current, lll);
+                }
+                combinedDestinations.AddRange(current);
+            }
+
+            // Extra depot means Depot where path cost = 0
+            // Dzielenie na taski
+            return combinedDestinations.ToArray();
+        }
+
+        private List<Route[]> CombineRoutes(List<Route[]> current, Route[] toAdd)
+        {
+            List<Route[]> target = new List<Route[]>();
+            
+            foreach (var r in current)
+            {
+
+                foreach (var tA in toAdd)
+                {
+                    var r1 = new List<Route>();
+                    r1.AddRange(r);
+                    r1.Add(tA);
+                    target.Add(r1.ToArray());
+                }
+
+            }
+            if (current.Count == 0)
+            {
+                target.AddRange(toAdd.Select(tA => new List<Route> {tA}).Select(r1 => r1.ToArray()));
+            }
+            return target;
+        }
+        private Route[][] DivideClients(List<uint[][]> permutedClients)
+        {
+            return permutedClients.Select(array => AssignClientIds(array)).Select(A => A.Select(ar2 => new Route(ar2)).ToArray()).ToArray();
         }
 
         private Route[] CombineClientDivide(uint[] permutedClient, bool[] bools)
@@ -258,12 +280,22 @@ namespace DVRP
 
         private uint[][] AssignClientIds(uint[][] p)
         {
+            uint[][] result = new uint[p.GetLength(0)][];
             for (int i = 0; i < p.GetLength(0); i++)
+            {
+                result[i] = new uint[p[i].Length];
                 for (int j = 0; j < p[i].Length; j++)
                 {
-                    p[i][j] = ProblemInstance.Clients[(int)p[i][j]].Id;
+                    int t = (int)p[i][j];
+                    if (t >= ProblemInstance.Clients.Count || t < 0)
+                    {
+                        t++;
+                    }
+                    result[i][j] = ProblemInstance.Clients[(int)p[i][j]].Id;
                 }
-            return p;
+
+            }
+            return result;
         }
 
         private List<uint> Combine(uint[] depots, uint[] clients)
@@ -273,7 +305,7 @@ namespace DVRP
             for (int i = 0; i < clients.Length; i++)
             {
                 l.Add(clients[i]);
-                l.Add(depots[i+1]);
+                l.Add(depots[i + 1]);
             }
             return l;
         }
@@ -283,13 +315,13 @@ namespace DVRP
             if (byteSolutions == null) throw new ArgumentNullException();
             Solution solution = null;
             double cost = Double.MaxValue;
-            foreach(byte[] byteArray in byteSolutions)
+            foreach (byte[] byteArray in byteSolutions)
             {
-                Solution solution_prim = Solution.Deserialize(byteArray);
-                if(solution_prim.Cost < cost)
+                Solution solutionPrim = Solution.Deserialize(byteArray);
+                if (solutionPrim.Cost < cost)
                 {
-                    cost = solution_prim.Cost;
-                    solution = solution_prim;
+                    cost = solutionPrim.Cost;
+                    solution = solutionPrim;
                 }
             }
             if (solution == null) throw new SolutionNotFoundException();
