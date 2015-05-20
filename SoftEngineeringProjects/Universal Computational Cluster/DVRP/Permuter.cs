@@ -183,7 +183,7 @@ namespace DVRP
             var result = new List<int[]>();
             foreach (var intlist in l)
             {
-                var s = new int[divideCount + 1];
+                var s = new int[desiredSum + 1];
                 for (int i = 0; i < intlist.Count - 1; i++)
                 {
                     s[intlist[i]]++;

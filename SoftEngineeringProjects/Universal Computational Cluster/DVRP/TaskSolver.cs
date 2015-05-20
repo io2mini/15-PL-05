@@ -154,6 +154,7 @@ namespace DVRP
             var sequences = new List<int[]>();
             for (int i = 0; i < brackets.GetLength(0); i++)
             {
+                sequences.Add(brackets[i]);
                 if (i == (int)((actualNodeIndex * seqCount) - 1))
                 {
                     actualNodeIndex++;
@@ -161,7 +162,7 @@ namespace DVRP
                     tasksForNodes.Add(t.Serialize());
                     sequences.Clear();
                 }
-                sequences.Add(brackets[i]);
+               
             }
             return tasksForNodes.ToArray();
         }

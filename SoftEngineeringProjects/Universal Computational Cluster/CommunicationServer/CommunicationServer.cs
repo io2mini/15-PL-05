@@ -43,6 +43,7 @@ namespace Common.Components
 
         public CommunicationServer()
         {
+            CommunicationInfos = new List<CommunicationInfo>();
             // TODO: Complete member initialization
         }
 
