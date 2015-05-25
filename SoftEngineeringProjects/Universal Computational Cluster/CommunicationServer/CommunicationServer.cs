@@ -426,27 +426,23 @@ namespace Common.Components
             //TODO: sprawdzenie, czy już nie jest zarejestrowany
             var id = _firstFreeComponentId++;
             Console.WriteLine(Resources.CommunicationServer_MsgHandler_Register_, id);
-            
+            GenerateBackupCommunicationServerList();
+            List<RegisterResponseBackupCommunicationServer> backupsForSend = new List<RegisterResponseBackupCommunicationServer>();
+            for(int i = 0; i< BackupCommunicationServers.Count; i++)
+            {
+                backupsForSend.Add(new RegisterResponseBackupCommunicationServer
+                    {
+                        address = BackupCommunicationServers[i].Item1,
+                        port = BackupCommunicationServers[i].Item2,
+                        portSpecified = true
+                    });
+            }
             var response = new RegisterResponse
             {
                 Id = id,
                 Timeout = (uint)CommunicationServerInfo.Time,
-                BackupCommunicationServers = new RegisterResponseBackupCommunicationServers
-                {
-                    BackupCommunicationServer =
-                        new RegisterResponseBackupCommunicationServersBackupCommunicationServer()
-                }
+                BackupCommunicationServers = backupsForSend.ToArray()
             };
-            if (BackupServer != null)
-            {
-                response.BackupCommunicationServers.BackupCommunicationServer.address =
-                    BackupServer.address;
-                response.BackupCommunicationServers.BackupCommunicationServer.port =
-                    BackupServer.port;
-                response.BackupCommunicationServers.BackupCommunicationServer.portSpecified =
-                    BackupServer.portSpecified;
-            }
-
             var timer = RegisterComponent(socket, id, ParseType(register.Type), register.SolvableProblems);
             SendMessageToComponent(id, response);
 
@@ -528,16 +524,39 @@ namespace Common.Components
         }
 
         /// <summary>
+        /// Utwórz listę par <host, port> reprezentujących backupCommunicationServers
+        /// </summary>
+        private void GenerateBackupCommunicationServerList()
+        {
+            ulong[] backupServersIds = _componentTypes.Keys.Where
+                (x => (_componentTypes[x] == SystemComponentType.CommunicationServer
+                    && _idToSocket.ContainsKey(x) && _socketToId.ContainsKey(_idToSocket[x])))
+                    .ToArray<ulong>();
+            BackupCommunicationServers.Clear();
+            for (int i = 0; i < backupServersIds.Length; i++)
+            {
+                Socket backupServer = _idToSocket[backupServersIds[i]];
+                IPEndPoint ipEndPoint = (IPEndPoint)backupServer.RemoteEndPoint;
+                IPHostEntry hostEntry = Dns.GetHostEntry(ipEndPoint.Address);
+                string hostName = hostEntry.HostName;
+                ushort port = (ushort)ipEndPoint.Port;
+                BackupCommunicationServers.Add(new Tuple<string, ushort>(hostName, port));
+            }
+        }
+
+        /// <summary>
         ///     Metoda generująca nooperation message do odesłania do komponentu.
         /// </summary>
         /// <returns>NoOperation message zawierający dane o backupach.</returns>
         private NoOperation GenerateNoOperationMessage()
         {
+
+            GenerateBackupCommunicationServerList();
             var noop = new NoOperation
             {
                 BackupCommunicationServers = new NoOperationBackupCommunicationServers
                 {
-                    BackupCommunicationServer = BackupServer
+                    BackupCommunicationServer = null
                 }
             };
             return noop;

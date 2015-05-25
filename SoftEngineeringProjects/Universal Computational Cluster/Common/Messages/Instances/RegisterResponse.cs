@@ -1,18 +1,16 @@
-﻿using System;
-using System.CodeDom.Compiler;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿
+using Common.Messages;
 using System.Xml.Serialization;
 
 namespace Common.Messages
 {
-
-    [GeneratedCode("xsd", "4.0.30319.18020")]
-    [Serializable()]
-    [DebuggerStepThrough()]
-    [DesignerCategory("code")]
-    [XmlType(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    [XmlRoot(Namespace = "http://www.mini.pw.edu.pl/ucc/", IsNullable = false)]
+    /// <uwagi/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.18020")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.mini.pw.edu.pl/ucc/", IsNullable = false)]
     public partial class RegisterResponse : Message
     {
 
@@ -20,8 +18,9 @@ namespace Common.Messages
 
         private uint timeoutField;
 
-        private RegisterResponseBackupCommunicationServers backupCommunicationServersField;
+        private RegisterResponseBackupCommunicationServer[] backupCommunicationServersField;
 
+        /// <uwagi/>
         public ulong Id
         {
             get
@@ -34,6 +33,7 @@ namespace Common.Messages
             }
         }
 
+        /// <uwagi/>
         public uint Timeout
         {
             get
@@ -46,7 +46,9 @@ namespace Common.Messages
             }
         }
 
-        public RegisterResponseBackupCommunicationServers BackupCommunicationServers
+        /// <uwagi/>
+        [System.Xml.Serialization.XmlArrayItemAttribute("BackupCommunicationServer", IsNullable = false)]
+        public RegisterResponseBackupCommunicationServer[] BackupCommunicationServers
         {
             get
             {
@@ -59,35 +61,13 @@ namespace Common.Messages
         }
     }
 
-    [GeneratedCode("xsd", "4.0.30319.18020")]
-    [Serializable()]
-    [DebuggerStepThrough()]
-    [DesignerCategory("code")]
-    [XmlType(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    public partial class RegisterResponseBackupCommunicationServers
-    {
-
-        private RegisterResponseBackupCommunicationServersBackupCommunicationServer backupCommunicationServerField;
-
-        public RegisterResponseBackupCommunicationServersBackupCommunicationServer BackupCommunicationServer
-        {
-            get
-            {
-                return this.backupCommunicationServerField;
-            }
-            set
-            {
-                this.backupCommunicationServerField = value;
-            }
-        }
-    }
-
-    [GeneratedCode("xsd", "4.0.30319.18020")]
-    [Serializable()]
-    [DebuggerStepThrough()]
-    [DesignerCategory("code")]
-    [XmlType(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    public partial class RegisterResponseBackupCommunicationServersBackupCommunicationServer
+    /// <uwagi/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.18020")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
+    public partial class RegisterResponseBackupCommunicationServer
     {
 
         private string addressField;
@@ -96,7 +76,8 @@ namespace Common.Messages
 
         private bool portFieldSpecified;
 
-        [XmlAttribute(DataType = "anyURI")]
+        /// <uwagi/>
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "anyURI")]
         public string address
         {
             get
@@ -109,7 +90,8 @@ namespace Common.Messages
             }
         }
 
-        [XmlAttribute()]
+        /// <uwagi/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
         public ushort port
         {
             get
@@ -122,7 +104,8 @@ namespace Common.Messages
             }
         }
 
-        [XmlIgnore()]
+        /// <uwagi/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
         public bool portSpecified
         {
             get

@@ -28,13 +28,14 @@ namespace Common
 
     public abstract class SystemComponent
     {
-        protected NoOperationBackupCommunicationServersBackupCommunicationServer BackupServer;
+        // reprezentuje informacje o aktualnym primary communication server
         public CommunicationInfo CommunicationServerInfo { get; set; }
         public SystemComponentType DeviceType { get; protected set; }
         protected byte PararellThreads;
         protected string[] SolvableProblems;
         protected TcpClient TcpClient;
         protected ThreadInfo ThreadInfo;
+        protected List<Tuple<string, ushort>> BackupCommunicationServers;
 
         protected SystemComponent()
         {
@@ -43,7 +44,7 @@ namespace Common
              * TODO: Initialize Thread Array
              */
             ThreadInfo = new ThreadInfo(PararellThreads, this);
-            // ReSharper disable once DoNotCallOverridableMethodsInConstructor
+            BackupCommunicationServers = new List<Tuple<String,ushort>>();
             Initialize();
         }
 
@@ -242,6 +243,19 @@ namespace Common
         {
             Console.WriteLine(Resources.SystemComponent_MsgHandler_RegisterResponse_, message.Id);
             CommunicationServerInfo.Time = message.Timeout;
+            BackupCommunicationServers.Clear();
+            if(message.BackupCommunicationServers != null)
+            {
+                RegisterResponseBackupCommunicationServer[] bServers = message.BackupCommunicationServers;
+                for(int i = 0; i< bServers.Length; i++)
+                {
+                    if (bServers[i].portSpecified)
+                    {
+                        BackupCommunicationServers.Add(new Tuple<string, ushort>
+                        (bServers[i].address, bServers[i].port));
+                    }
+                }
+            }
             Id = message.Id;
             try
             {
@@ -278,7 +292,8 @@ namespace Common
         protected void MsgHandler_NoOperation(NoOperation message)
         {
             Console.WriteLine(Resources.SystemComponent_MsgHandler_NoOperation_NoOperation_Message);
-            BackupServer = message.BackupCommunicationServers.BackupCommunicationServer;
+            BackupCommunicationServers.Clear();
+            // TO DO: wpisać do listy socketów dane o backup communication serverach 
         }
 
         /// <summary>
