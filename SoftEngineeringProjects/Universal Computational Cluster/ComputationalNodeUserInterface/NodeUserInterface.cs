@@ -19,8 +19,8 @@ namespace Common.UserInterface
                 newLine = Console.ReadLine();
                 try
                 {
-                    computationalNode.Info = ParametersParser.ReadParameters(newLine,
-                        SystemComponentType.ComputationalNode);
+                    computationalNode.CommunicationServerInfo = ParametersParser.ReadParameters(newLine,
+                        SystemComponentType.ComputationalNode)[0];
                     hasData = true;
                 }
                 catch (ParsingArgumentException)

@@ -16,8 +16,8 @@ namespace TaskManagerTest
         {
             var taskManager = new TaskManager();
             var parametersLine = "-port 8080 -ala 122";
-            taskManager.Info = ParametersParser.ReadParameters(parametersLine,
-                SystemComponentType.TaskManager);
+            taskManager.CommunicationServerInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.TaskManager)[0];
         }
 
         [TestMethod]
@@ -25,10 +25,10 @@ namespace TaskManagerTest
         {
             var taskManager = new TaskManager();
             var parametersLine = "-port 8080 -address 127.0.0.1";
-            taskManager.Info = ParametersParser.ReadParameters(parametersLine,
-                SystemComponentType.TaskManager);
-            Assert.AreEqual(taskManager.Info.CommunicationServerPort, 8080);
-            Assert.AreEqual(taskManager.Info.CommunicationServerAddress, new Uri("http://127.0.0.1"));
+            taskManager.CommunicationServerInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.TaskManager)[0];
+            Assert.AreEqual(taskManager.CommunicationServerInfo.CommunicationServerPort, 8080);
+            Assert.AreEqual(taskManager.CommunicationServerInfo.CommunicationServerAddress, new Uri("http://127.0.0.1"));
         }
 
         [TestMethod]
@@ -37,9 +37,9 @@ namespace TaskManagerTest
         {
             var taskManager = new TaskManager();
             taskManager.IsWorking = true;
-            taskManager.Info = new CommunicationInfo();
-            taskManager.Info.CommunicationServerAddress = new Uri("http://127.0.0.2");
-            taskManager.Info.CommunicationServerPort = 8080;
+            taskManager.CommunicationServerInfo = new CommunicationInfo();
+            taskManager.CommunicationServerInfo.CommunicationServerAddress = new Uri("http://127.0.0.2");
+            taskManager.CommunicationServerInfo.CommunicationServerPort = 8080;
             taskManager.Start();
         }
     }

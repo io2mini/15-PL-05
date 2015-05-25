@@ -19,7 +19,9 @@ namespace Common.Components
         private readonly bool _isPrimary;
         private ulong _firstFreeComponentId;
         private ulong _firstFreeProblemId;
+        // wszystkie adresy, na których nasłuchuje server, to są jego adresy fizyczne
         public List<CommunicationInfo> CommunicationInfos;
+        public CommunicationInfo MyCommunicationInfo { get; set; }
 
         public CommunicationServer(Dictionary<ulong, SystemComponentType> componentTypes,
             Dictionary<ulong, List<string>> solvableProblemTypes, bool primary = true)
@@ -91,7 +93,7 @@ namespace Common.Components
         /// </summary>
         public override void Start()
         {
-            InitializeMessageQueue(Info.CommunicationServerPort);
+            InitializeMessageQueue(CommunicationServerInfo.CommunicationServerPort);
             while (IsWorking)
             {
             }
@@ -395,7 +397,7 @@ namespace Common.Components
             var response = new RegisterResponse
             {
                 Id = id,
-                Timeout = (uint)Info.Time,
+                Timeout = (uint)CommunicationServerInfo.Time,
                 BackupCommunicationServers = new RegisterResponseBackupCommunicationServers
                 {
                     BackupCommunicationServer =
@@ -435,7 +437,7 @@ namespace Common.Components
                 if (!_timerStoppers[id]) Deregister(id);
                 else _timerStoppers[id] = false;
             };
-            timer.Interval = TimeoutModifier * (uint)Info.Time;
+            timer.Interval = TimeoutModifier * (uint)CommunicationServerInfo.Time;
             _timers.Add(id, timer);
             _componentTypes.Add(id, type);
             return timer;
@@ -550,7 +552,7 @@ namespace Common.Components
             var local = new CommunicationInfo
             {
                 CommunicationServerAddress = new Uri("http://127.0.0.1/"),
-                CommunicationServerPort = Info.CommunicationServerPort
+                CommunicationServerPort = CommunicationServerInfo.CommunicationServerPort
             };
             CommunicationInfos.Add(local);
             foreach (var ip in host.AddressList)
@@ -564,7 +566,7 @@ namespace Common.Components
                 localIp = "http://" + localIp + "/";
                 var c = new CommunicationInfo
                 {
-                    CommunicationServerPort = Info.CommunicationServerPort,
+                    CommunicationServerPort = CommunicationServerInfo.CommunicationServerPort,
                     CommunicationServerAddress = new Uri(localIp)
                 };
                 CommunicationInfos.Add(c);

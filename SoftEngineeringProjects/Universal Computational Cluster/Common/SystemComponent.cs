@@ -28,7 +28,7 @@ namespace Common
     public abstract class SystemComponent
     {
         protected NoOperationBackupCommunicationServersBackupCommunicationServer BackupServer;
-        public CommunicationInfo Info { get; set; }
+        public CommunicationInfo CommunicationServerInfo { get; set; }
         public SystemComponentType DeviceType { get; protected set; }
         protected byte PararellThreads;
         protected string[] SolvableProblems;
@@ -125,8 +125,8 @@ namespace Common
         protected void ReceiveResponse()
         {
             if (!TcpClient.Connected)
-                TcpClient.Connect(Info.CommunicationServerAddress.Host,
-                    Info.CommunicationServerPort);
+                TcpClient.Connect(CommunicationServerInfo.CommunicationServerAddress.Host,
+                    CommunicationServerInfo.CommunicationServerPort);
             var stream = TcpClient.GetStream();
             var byteArray = new byte[1024];
             try
@@ -239,7 +239,7 @@ namespace Common
         protected void MsgHandler_RegisterResponse(RegisterResponse message)
         {
             Console.WriteLine(Resources.SystemComponent_MsgHandler_RegisterResponse_, message.Id);
-            Info.Time = message.Timeout;
+            CommunicationServerInfo.Time = message.Timeout;
             Id = message.Id;
             try
             {
@@ -320,7 +320,7 @@ namespace Common
         public virtual void SaveConfig(string path)
         {
             var xmlSerializer = new XmlSerializer(typeof (CommunicationInfo));
-            xmlSerializer.Serialize(new FileStream(path, FileMode.Create), Info);
+            xmlSerializer.Serialize(new FileStream(path, FileMode.Create), CommunicationServerInfo);
         }
 
         /// <summary>
@@ -332,7 +332,7 @@ namespace Common
             var xmlDeSerializer = new XmlSerializer(typeof (CommunicationInfo));
             try
             {
-                Info = (CommunicationInfo) xmlDeSerializer.Deserialize(new FileStream(path, FileMode.Open));
+                CommunicationServerInfo = (CommunicationInfo) xmlDeSerializer.Deserialize(new FileStream(path, FileMode.Open));
             }
             catch (FileNotFoundException e)
             {
@@ -351,13 +351,13 @@ namespace Common
         {
             try
             {
-                TcpClient = new TcpClient(Info.CommunicationServerAddress.Host,
-                    Info.CommunicationServerPort);
+                TcpClient = new TcpClient(CommunicationServerInfo.CommunicationServerAddress.Host,
+                    CommunicationServerInfo.CommunicationServerPort);
             }
             catch (SocketException e)
             {
                 var message = string.Format("Problems with connecting to Communication Server host: {0} ; port: {1}",
-                    Info.CommunicationServerAddress.Host, Info.CommunicationServerPort);
+                    CommunicationServerInfo.CommunicationServerAddress.Host, CommunicationServerInfo.CommunicationServerPort);
                 throw new ConnectionException(message, e);
             }
         }
@@ -374,8 +374,8 @@ namespace Common
                 //Console.WriteLine(message);
                 if (!TcpClient.Connected)
                 {
-                    TcpClient.Connect(Info.CommunicationServerAddress.Host,
-                        Info.CommunicationServerPort);
+                    TcpClient.Connect(CommunicationServerInfo.CommunicationServerAddress.Host,
+                        CommunicationServerInfo.CommunicationServerPort);
                 }
                 var stream = TcpClient.GetStream();
                 var writer = new StreamWriter(stream, Encoding.UTF8) {AutoFlush = false};

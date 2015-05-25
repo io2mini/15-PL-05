@@ -3,6 +3,7 @@ using Common.Components;
 using Common.Configuration;
 using Common.Exceptions;
 using Common.Properties;
+using System.Collections.Generic;
 
 namespace Common.UserInterface
 {
@@ -30,8 +31,17 @@ namespace Common.UserInterface
                 }
                 try
                 {
-                    communicationServer.Info = ParametersParser.ReadParameters(newLine,
+                    List<CommunicationInfo> communicationInfos = ParametersParser.ReadParameters(newLine,
                         SystemComponentType.CommunicationServer);
+                    if (communicationInfos.Capacity > 1)
+                    {
+                        communicationServer.CommunicationServerInfo = communicationInfos[1];
+                        communicationServer.MyCommunicationInfo = communicationInfos[0];
+                    }
+                    else
+                    {
+                        communicationServer.CommunicationServerInfo = communicationInfos[0];
+                    }
                     communicationServer.InitializeIpList();
                     hasBeenRead = true;
                 }
@@ -43,7 +53,7 @@ namespace Common.UserInterface
             communicationServer.Start();
 
             // Osbluga komendy zakonczenia programu
-            
+
         }
     }
 }

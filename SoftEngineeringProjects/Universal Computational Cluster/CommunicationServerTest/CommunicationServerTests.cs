@@ -15,8 +15,8 @@ namespace CommunicationServerTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -ala 122";
-            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
-                SystemComponentType.CommunicationServer);
+            communicationServer.CommunicationServerInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.CommunicationServer)[0];
         }
 
         [TestMethod]
@@ -24,10 +24,10 @@ namespace CommunicationServerTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -t 2";
-            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
-                SystemComponentType.CommunicationServer);
-            Assert.AreEqual(communicationServer.Info.CommunicationServerPort, 8080);
-            Assert.AreEqual(communicationServer.Info.Time, (ulong) 2);
+            communicationServer.CommunicationServerInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.CommunicationServer)[0];
+            Assert.AreEqual(communicationServer.CommunicationServerInfo.CommunicationServerPort, 8080);
+            Assert.AreEqual(communicationServer.CommunicationServerInfo.Time, (ulong) 2);
         }
 
         [TestMethod]
@@ -35,8 +35,8 @@ namespace CommunicationServerTest
         {
             var communicationServer = new CommunicationServer();
             var parametersLine = "-port 8080 -t 2";
-            communicationServer.Info = ParametersParser.ReadParameters(parametersLine,
-                SystemComponentType.CommunicationServer);
+            communicationServer.CommunicationServerInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.CommunicationServer)[0];
             communicationServer.IsWorking = true;
             communicationServer.InitializeIpList();
             communicationServer.Start();

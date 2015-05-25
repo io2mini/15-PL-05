@@ -2,6 +2,7 @@
 using System.IO;
 using Common.Components;
 using Common.Configuration;
+using Common.Exceptions;
 
 namespace Common.UserInterface
 {
@@ -16,9 +17,16 @@ namespace Common.UserInterface
             while (computationalClient.IsWorking && !hasBeenRead)
             {
                 newLine = Console.ReadLine();
-                computationalClient.Info = ParametersParser.ReadParameters(newLine,
-                    SystemComponentType.ComputationalClient);
-                hasBeenRead = true;
+                try
+                {
+                    computationalClient.CommunicationServerInfo = ParametersParser.ReadParameters(newLine,
+    SystemComponentType.ComputationalClient)[0];
+                    hasBeenRead = true;
+                }
+                catch (ParsingArgumentException e)
+                {
+                    Console.WriteLine("Wrong Arguments: " + e.Message);
+                }
             }
 
             // Rozpocznij pobieranie informacje o plikach do wczytania

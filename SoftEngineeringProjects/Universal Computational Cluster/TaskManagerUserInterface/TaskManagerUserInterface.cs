@@ -19,8 +19,8 @@ namespace Common.UserInterface
                 newLine = Console.ReadLine();
                 try
                 {
-                    taskManager.Info = ParametersParser.ReadParameters(newLine,
-                        SystemComponentType.TaskManager);
+                    taskManager.CommunicationServerInfo = ParametersParser.ReadParameters(newLine,
+                        SystemComponentType.TaskManager)[0];
                     hasReadData = true;
                 }
                 catch (ParsingArgumentException)

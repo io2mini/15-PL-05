@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using Common.Exceptions;
+using System.Collections.Generic;
 
 namespace Common.Configuration
 {
@@ -16,21 +17,21 @@ namespace Common.Configuration
         private static readonly string ipRegex =
             @"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
 
-        public static CommunicationInfo ReadParameters(string s, SystemComponentType type)
+        public static List<CommunicationInfo> ReadParameters(string s, SystemComponentType type)
         {
             if (s == null) return null;
             var parameters = s.Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
-            var cInfo = new CommunicationInfo();
+            List<CommunicationInfo> cInfo = new List<CommunicationInfo>();
             switch (type)
             {
                 case SystemComponentType.CommunicationServer:
                     if (parameters.Contains(BACKUP_PARAMETER))
                     {
                         type = SystemComponentType.BackupCommunicationServer;
-                        if (parameters.Length != 7)
+                        if (parameters.Length != 9)
                         {
-                            var message = "Wrong number of arguments passed, give -address [address] -port [port] -backup"
-                                          + "-t [timeout]";
+                            var message = "Wrong number of arguments passed, give -port [my_port] -backup -t [timeout] "
+                                          + "-address [address] -port [port]";
                             throw new ParsingArgumentException(message);
                         }
                     }
@@ -53,6 +54,7 @@ namespace Common.Configuration
             }
             for (var i = 0; i < parameters.Length; i++)
             {
+                bool isSetUp = false;
                 switch (type)
                 {
                     case SystemComponentType.TaskManager:
@@ -68,15 +70,16 @@ namespace Common.Configuration
                         ParseArgumentsForCommunicationServer(parameters, ref i, ref cInfo);
                         break;
                     case SystemComponentType.BackupCommunicationServer:
-                        ParseArgumentsForBackupCommunicationServer(parameters, ref i, ref cInfo);
+                        ParseArgumentsForBackupCommunicationServer(parameters, ref i, ref isSetUp, ref cInfo);
                         break;
                 }
             }
             return cInfo;
         }
 
-        private static void ParseArgumentsForComputation(string[] parameters, ref int i, ref CommunicationInfo cInfo)
+        private static void ParseArgumentsForComputation(string[] parameters, ref int i, ref List<CommunicationInfo> cInfo)
         {
+            if (cInfo.Capacity == 0) cInfo.Add(new CommunicationInfo());
             if (parameters[i] == ADDRESS_PARAMETER && i < parameters.Length - 1)
             {
                 try
@@ -85,7 +88,7 @@ namespace Common.Configuration
                     {
                         parameters[i] = "http://" + parameters[i] + "/";
                     }
-                    cInfo.CommunicationServerAddress = new Uri(parameters[i]);
+                    cInfo[0].CommunicationServerAddress = new Uri(parameters[i]);
                 }
                 catch (UriFormatException e)
                 {
@@ -98,7 +101,7 @@ namespace Common.Configuration
                 try
                 {
                     var port = uint.Parse(parameters[++i]);
-                    cInfo.CommunicationServerPort = (ushort) port;
+                    cInfo[0].CommunicationServerPort = (ushort)port;
                 }
                 catch (UriFormatException e)
                 {
@@ -114,14 +117,15 @@ namespace Common.Configuration
         }
 
         private static void ParseArgumentsForCommunicationServer(string[] parameters, ref int i,
-            ref CommunicationInfo cInfo)
+            ref List<CommunicationInfo> cInfo)
         {
+            if (cInfo.Capacity == 0) cInfo.Add(new CommunicationInfo());
             if (parameters[i] == TIME_PARAMETER && i < parameters.Length - 1)
             {
                 try
                 {
                     var time = ulong.Parse(parameters[++i]);
-                    cInfo.Time = time;
+                    cInfo[0].Time = time;
                 }
                 catch (UriFormatException e)
                 {
@@ -134,7 +138,7 @@ namespace Common.Configuration
                 try
                 {
                     var port = uint.Parse(parameters[++i]);
-                    cInfo.CommunicationServerPort = (ushort) port;
+                    cInfo[0].CommunicationServerPort = (ushort) port;
                 }
                 catch (UriFormatException e)
                 {
@@ -149,15 +153,22 @@ namespace Common.Configuration
             }
         }
 
-        private static void ParseArgumentsForBackupCommunicationServer(string[] parameters, ref int i,
-            ref CommunicationInfo cInfo)
+        private static void ParseArgumentsForBackupCommunicationServer(string[] parameters, ref int i, ref bool portSetUp,
+            ref List<CommunicationInfo> cInfo)
         {
+            if (cInfo.Capacity == 0)
+            {
+                // first CommunicationInfo is ours
+                cInfo.Add(new CommunicationInfo());
+                // second CommunicationInfo ic Primary CS
+                cInfo.Add(new CommunicationInfo());
+            }
             if (parameters[i] == TIME_PARAMETER && i < parameters.Length - 1)
             {
                 try
                 {
                     var time = ulong.Parse(parameters[++i]);
-                    cInfo.Time = time;
+                    cInfo[0].Time = time;
                 }
                 catch (UriFormatException e)
                 {
@@ -169,7 +180,7 @@ namespace Common.Configuration
             {
                 try
                 {
-                    cInfo.CommunicationServerAddress = new Uri(parameters[++i]);
+                    cInfo[1].CommunicationServerAddress = new Uri(parameters[++i]);
                 }
                 catch (UriFormatException e)
                 {
@@ -182,7 +193,15 @@ namespace Common.Configuration
                 try
                 {
                     var port = uint.Parse(parameters[++i]);
-                    cInfo.CommunicationServerPort = (ushort) port;
+                    if(portSetUp)
+                    {
+                        cInfo[1].CommunicationServerPort = (ushort)port;
+                    }
+                    else
+                    {
+                        portSetUp = true;
+                        cInfo[0].CommunicationServerPort = (ushort)port;
+                    }
                 }
                 catch (UriFormatException e)
                 {
@@ -192,7 +211,7 @@ namespace Common.Configuration
             }
             else if (parameters[i] == BACKUP_PARAMETER)
             {
-                cInfo.IsBackup = true;
+                cInfo[0].IsBackup = true;
             }
             else
             {

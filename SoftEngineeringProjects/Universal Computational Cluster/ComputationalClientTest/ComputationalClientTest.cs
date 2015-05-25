@@ -16,8 +16,8 @@ namespace ComputationalClientTest
         {
             var computationalClient = new ComputationalClient();
             var parametersLine = "-port 8080 -ala 122";
-            computationalClient.Info = ParametersParser.ReadParameters(parametersLine,
-                SystemComponentType.ComputationalNode);
+            computationalClient.CommunicationServerInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.ComputationalNode)[0];
         }
 
         [TestMethod]
@@ -25,10 +25,10 @@ namespace ComputationalClientTest
         {
             var computationalClient = new ComputationalClient();
             var parametersLine = "-port 8080 -address 127.0.0.1";
-            computationalClient.Info = ParametersParser.ReadParameters(parametersLine,
-                SystemComponentType.ComputationalClient);
-            Assert.AreEqual(computationalClient.Info.CommunicationServerPort, 8080);
-            Assert.AreEqual(computationalClient.Info.CommunicationServerAddress,
+            computationalClient.CommunicationServerInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.ComputationalClient)[0];
+            Assert.AreEqual(computationalClient.CommunicationServerInfo.CommunicationServerPort, 8080);
+            Assert.AreEqual(computationalClient.CommunicationServerInfo.CommunicationServerAddress,
                 new Uri("http://127.0.0.1"));
         }
 
@@ -38,9 +38,9 @@ namespace ComputationalClientTest
         {
             var computationalClient = new ComputationalClient();
             computationalClient.IsWorking = true;
-            computationalClient.Info = new CommunicationInfo();
-            computationalClient.Info.CommunicationServerAddress = new Uri("http://127.0.0.2");
-            computationalClient.Info.CommunicationServerPort = 8080;
+            computationalClient.CommunicationServerInfo = new CommunicationInfo();
+            computationalClient.CommunicationServerInfo.CommunicationServerAddress = new Uri("http://127.0.0.2");
+            computationalClient.CommunicationServerInfo.CommunicationServerPort = 8080;
             computationalClient.Start();
         }
     }

@@ -16,8 +16,8 @@ namespace ComputationalNodeTest
         {
             var computationalNode = new ComputationalNode();
             var parametersLine = "-port 8080 -ala 122";
-            computationalNode.Info = ParametersParser.ReadParameters(parametersLine,
-                SystemComponentType.ComputationalNode);
+            computationalNode.CommunicationServerInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.ComputationalNode)[0];
         }
 
         [TestMethod]
@@ -25,10 +25,10 @@ namespace ComputationalNodeTest
         {
             var computationalNode = new ComputationalNode();
             var parametersLine = "-port 8080 -address 127.0.0.1";
-            computationalNode.Info = ParametersParser.ReadParameters(parametersLine,
-                SystemComponentType.ComputationalNode);
-            Assert.AreEqual(computationalNode.Info.CommunicationServerPort, 8080);
-            Assert.AreEqual(computationalNode.Info.CommunicationServerAddress, new Uri("http://127.0.0.1"));
+            computationalNode.CommunicationServerInfo = ParametersParser.ReadParameters(parametersLine,
+                SystemComponentType.ComputationalNode)[0];
+            Assert.AreEqual(computationalNode.CommunicationServerInfo.CommunicationServerPort, 8080);
+            Assert.AreEqual(computationalNode.CommunicationServerInfo.CommunicationServerAddress, new Uri("http://127.0.0.1"));
         }
 
         [TestMethod]
@@ -37,9 +37,9 @@ namespace ComputationalNodeTest
         {
             var computationalNode = new ComputationalNode();
             computationalNode.IsWorking = true;
-            computationalNode.Info = new CommunicationInfo();
-            computationalNode.Info.CommunicationServerAddress = new Uri("http://127.0.0.2");
-            computationalNode.Info.CommunicationServerPort = 8080;
+            computationalNode.CommunicationServerInfo = new CommunicationInfo();
+            computationalNode.CommunicationServerInfo.CommunicationServerAddress = new Uri("http://127.0.0.2");
+            computationalNode.CommunicationServerInfo.CommunicationServerPort = 8080;
             computationalNode.Start();
         }
     }
