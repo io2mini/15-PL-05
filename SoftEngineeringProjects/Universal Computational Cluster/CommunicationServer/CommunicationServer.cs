@@ -16,21 +16,43 @@ namespace Common.Components
 {
     public class CommunicationServer : SystemComponent
     {
-        private readonly bool _isPrimary;
+        #region Constants
+
+        private const int TimeoutModifier = 3000;
+
+        private const string Register = "Register",
+            Status = "Status",
+            SolveRequest = "SolveRequest",
+            PartialProblems = "PartialProblems",
+            SolutionRequest = "SolutionRequest";
+
+        #endregion
+
+        public bool IsPrimary { get; set; }
         private ulong _firstFreeComponentId;
         private ulong _firstFreeProblemId;
         // wszystkie adresy, na których nasłuchuje server, to są jego adresy fizyczne
         public List<CommunicationInfo> CommunicationInfos;
         public CommunicationInfo MyCommunicationInfo { get; set; }
 
-        public CommunicationServer(Dictionary<ulong, SystemComponentType> componentTypes,
-            Dictionary<ulong, List<string>> solvableProblemTypes, bool primary = true)
+        #region ComunicationData
+
+        private readonly Dictionary<ulong, StatusThread[]> _threadStates;
+        private readonly Dictionary<ulong, bool> _timerStoppers;
+        private readonly Dictionary<ulong, Timer> _timers;
+        private readonly Dictionary<ulong, Socket> _idToSocket;
+        private readonly Dictionary<Socket, ulong> _socketToId;
+        private readonly Dictionary<ulong, byte[]> _problems;
+        private readonly Dictionary<ulong, SolvePartialProblems> _savedPartialProblems;
+        private readonly Dictionary<ulong, SystemComponentType> _componentTypes;
+        private readonly Dictionary<ulong, List<string>> _solvableProblemTypes;
+
+        #endregion
+        public CommunicationServer()
         {
-            _componentTypes = componentTypes;
-            _solvableProblemTypes = solvableProblemTypes;
-            _isPrimary = primary;
-            _firstFreeProblemId = _firstFreeComponentId = 0;
             CommunicationInfos = new List<CommunicationInfo>();
+            DeviceType = SystemComponentType.CommunicationServer;
+            _firstFreeProblemId = _firstFreeComponentId = 0;
             _timers = new Dictionary<ulong, Timer>();
             _timerStoppers = new Dictionary<ulong, bool>();
             _idToSocket = new Dictionary<ulong, Socket>();
@@ -38,15 +60,10 @@ namespace Common.Components
             _problems = new Dictionary<ulong, byte[]>();
             _threadStates = new Dictionary<ulong, StatusThread[]>();
             _savedPartialProblems = new Dictionary<ulong, SolvePartialProblems>();
-            DeviceType = SystemComponentType.CommunicationServer;
+            _componentTypes = new Dictionary<ulong, SystemComponentType>();
+            _solvableProblemTypes = new Dictionary<ulong, List<string>>();
             SolvableProblems = new[] { "DVRP" };
             PararellThreads = 1;
-        }
-
-        public CommunicationServer()
-        {
-            CommunicationInfos = new List<CommunicationInfo>();
-            // TODO: Complete member initialization
         }
 
         /// <summary>
@@ -93,37 +110,21 @@ namespace Common.Components
         /// </summary>
         public override void Start()
         {
-            InitializeMessageQueue(CommunicationServerInfo.CommunicationServerPort);
+            if (IsPrimary)
+            {
+                InitializeMessageQueue(CommunicationServerInfo.CommunicationServerPort);
+            }
+            else
+            {
+                // jesteśmy backupem
+                InitializeConnection();
+                SendRegisterMessage();
+                ReceiveResponse();
+            }
             while (IsWorking)
             {
             }
         }
-
-        #region Constants
-
-        private const int TimeoutModifier = 3000;
-
-        private const string Register = "Register",
-            Status = "Status",
-            SolveRequest = "SolveRequest",
-            PartialProblems = "PartialProblems",
-            SolutionRequest = "SolutionRequest";
-
-        #endregion
-
-        #region ComunicationData
-
-        private readonly Dictionary<ulong, StatusThread[]> _threadStates;
-        private readonly Dictionary<ulong, bool> _timerStoppers;
-        private readonly Dictionary<ulong, Timer> _timers;
-        private readonly Dictionary<ulong, Socket> _idToSocket;
-        private readonly Dictionary<Socket, ulong> _socketToId;
-        private readonly Dictionary<ulong, byte[]> _problems;
-        private readonly Dictionary<ulong, SolvePartialProblems> _savedPartialProblems;
-        private readonly Dictionary<ulong, SystemComponentType> _componentTypes;
-        private readonly Dictionary<ulong, List<string>> _solvableProblemTypes;
-
-        #endregion
 
         #region InnerDataFunctions
 
@@ -350,7 +351,7 @@ namespace Common.Components
         /// <param name="message">Otrzymany komunikat o błędzie</param>
         protected override void MsgHandler_Error(Error message)
         {
-            if (_isPrimary && message.ErrorType == ErrorErrorType.ExceptionOccured) throw new NotImplementedException();
+            if (IsPrimary && message.ErrorType == ErrorErrorType.ExceptionOccured) throw new NotImplementedException();
             base.MsgHandler_Error(message);
             //TODO: Handle Exception
         }
@@ -375,12 +376,45 @@ namespace Common.Components
         }
 
         /// <summary>
+        /// Metoda inicjalizująca połączenie buckupa do serwera
+        /// </summary>
+        protected override void InitializeConnection()
+        {
+            try
+            {
+                //TcpClient = new TcpClient(CommunicationServerInfo.CommunicationServerAddress.Host,
+                //    CommunicationServerInfo.CommunicationServerPort);
+                IPAddress localIpAddress = null;
+                if(IPAddress.TryParse("127.0.0.1", out localIpAddress))
+                {
+                    IPEndPoint ipLocalEndPoint = new IPEndPoint(localIpAddress, MyCommunicationInfo.CommunicationServerPort);
+                    TcpClient = new TcpClient(ipLocalEndPoint);
+                    IPAddress remoteIpAddress = null;
+                    if (IPAddress.TryParse(CommunicationServerInfo.CommunicationServerAddress.Host, out remoteIpAddress))
+                    {
+                        IPEndPoint remoteEndpoint = new IPEndPoint(remoteIpAddress,
+                        CommunicationServerInfo.CommunicationServerPort);
+                        TcpClient.Connect(remoteEndpoint);
+                    }
+                }
+            }
+            catch (SocketException e)
+            {
+                var message = string.Format("Problems with connecting to Communication Server host: {0} ; port: {1}",
+                    CommunicationServerInfo.CommunicationServerAddress.Host, CommunicationServerInfo.CommunicationServerPort);
+                throw new ConnectionException(message, e);
+            }
+        }
+
+        /// <summary>
         ///     Metoda obsługująca otrzymaną Register message.
         /// </summary>
         /// <param name="register">Otrzymana wiadomość.</param>
         /// <param name="socket">Socket na którym ją otrzymaliśmy.</param>
         protected void MsgHandler_Register(Register register, Socket socket)
         {
+            // rejestruje komponenty tylko primary
+            if (!IsPrimary) return;
             if (register.DeregisterSpecified)
             {
                 if (register.Deregister)
@@ -390,10 +424,9 @@ namespace Common.Components
                 }
             }
             //TODO: sprawdzenie, czy już nie jest zarejestrowany
-
             var id = _firstFreeComponentId++;
             Console.WriteLine(Resources.CommunicationServer_MsgHandler_Register_, id);
-            var timer = RegisterComponent(socket, id, ParseType(register.Type), register.SolvableProblems);
+            
             var response = new RegisterResponse
             {
                 Id = id,
@@ -413,7 +446,10 @@ namespace Common.Components
                 response.BackupCommunicationServers.BackupCommunicationServer.portSpecified =
                     BackupServer.portSpecified;
             }
+
+            var timer = RegisterComponent(socket, id, ParseType(register.Type), register.SolvableProblems);
             SendMessageToComponent(id, response);
+
             timer.Enabled = true;
             timer.Start();
             timer.AutoReset = true;
@@ -439,7 +475,6 @@ namespace Common.Components
             };
             timer.Interval = TimeoutModifier * (uint)CommunicationServerInfo.Time;
             _timers.Add(id, timer);
-            _componentTypes.Add(id, type);
             return timer;
         }
 

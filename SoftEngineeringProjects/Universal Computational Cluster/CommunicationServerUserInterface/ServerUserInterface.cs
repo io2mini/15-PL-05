@@ -33,14 +33,17 @@ namespace Common.UserInterface
                 {
                     List<CommunicationInfo> communicationInfos = ParametersParser.ReadParameters(newLine,
                         SystemComponentType.CommunicationServer);
-                    if (communicationInfos.Capacity > 1)
+                    if (communicationInfos.Count > 1)
                     {
                         communicationServer.CommunicationServerInfo = communicationInfos[1];
                         communicationServer.MyCommunicationInfo = communicationInfos[0];
+                        communicationServer.IsPrimary = false;
                     }
                     else
                     {
                         communicationServer.CommunicationServerInfo = communicationInfos[0];
+                        communicationServer.MyCommunicationInfo = communicationInfos[0];
+                        communicationServer.IsPrimary = true;
                     }
                     communicationServer.InitializeIpList();
                     hasBeenRead = true;

@@ -13,6 +13,7 @@ using Common.Exceptions;
 using Common.Messages;
 using Common.Messages.Generators;
 using Common.Properties;
+using System.Net;
 
 namespace Common
 {
@@ -24,7 +25,7 @@ namespace Common
         ComputationalNode,
         TaskManager
     }
-   
+
     public abstract class SystemComponent
     {
         protected NoOperationBackupCommunicationServersBackupCommunicationServer BackupServer;
@@ -34,13 +35,14 @@ namespace Common
         protected string[] SolvableProblems;
         protected TcpClient TcpClient;
         protected ThreadInfo ThreadInfo;
-        
+
         protected SystemComponent()
         {
             IsWorking = true;
             /*
              * TODO: Initialize Thread Array
              */
+            ThreadInfo = new ThreadInfo(PararellThreads, this);
             // ReSharper disable once DoNotCallOverridableMethodsInConstructor
             Initialize();
         }
@@ -96,7 +98,7 @@ namespace Common
         ///     Metoda mająca na celu wysłanie odpowiedniego komnuniktatu w zalezności od urządzenia,
         ///     na którym jest wywoływana.
         /// </summary>
-        private void SendRegisterMessage()
+        protected void SendRegisterMessage()
         {
             var msg = RegisterGenerator.Generate(DeviceType, SolvableProblems, PararellThreads);
             try
@@ -187,16 +189,16 @@ namespace Common
             switch (key)
             {
                 case RegisterResponse:
-                    MsgHandler_RegisterResponse((RegisterResponse) message);
+                    MsgHandler_RegisterResponse((RegisterResponse)message);
                     return;
                 case NoOperation:
-                    MsgHandler_NoOperation((NoOperation) message);
+                    MsgHandler_NoOperation((NoOperation)message);
                     return;
                 case Error:
-                    MsgHandler_Error((Error) message);
+                    MsgHandler_Error((Error)message);
                     return;
                 case Solution:
-                    MsgHandler_Solution((Solutions) message);
+                    MsgHandler_Solution((Solutions)message);
                     return;
                 default:
                     throw new InvalidOperationException("Unknown msg key"); //TODO: własny wyjątek;
@@ -217,17 +219,17 @@ namespace Common
             switch (message.ErrorType)
             {
                 case ErrorErrorType.UnknownSender:
-                {
-                    StatusReporter.Dispose();
-                    SendRegisterMessage();
-                    break;
-                }
+                    {
+                        StatusReporter.Dispose();
+                        SendRegisterMessage();
+                        break;
+                    }
                 case ErrorErrorType.InvalidOperation:
-                {
-                    //TODO:switch to idle/partially idle state
-                    ThreadInfo.SetStateAll(StatusThreadState.Idle);
-                    break;
-                }
+                    {
+                        //TODO:switch to idle/partially idle state
+                        ThreadInfo.SetStateAll(StatusThreadState.Idle);
+                        break;
+                    }
             }
         }
 
@@ -246,12 +248,13 @@ namespace Common
                 StatusReporter = new Timer(
                     o =>
                     {
+
                         Console.WriteLine(Resources.SystemComponent_MsgHandler_RegisterResponse_Sending_Status);
                         SendMessage(GenerateStatus());
                         var thread = new Thread(ReceiveResponse);
                         thread.IsBackground = true;
                         thread.Start();
-                    }, null, 0, (int) message.Timeout*MilisecondsMultiplier);
+                    }, null, 0, (int)message.Timeout * MilisecondsMultiplier);
             }
             catch (InvalidIdException)
             {
@@ -292,7 +295,7 @@ namespace Common
             }
             catch (XmlException)
             {
-               //TODO: Log warning
+                //TODO: Log warning
                 return;
             }
             foreach (var key in SchemaTypes.Keys)
@@ -319,7 +322,7 @@ namespace Common
         /// <param name="path">Ścieżka pliku</param>
         public virtual void SaveConfig(string path)
         {
-            var xmlSerializer = new XmlSerializer(typeof (CommunicationInfo));
+            var xmlSerializer = new XmlSerializer(typeof(CommunicationInfo));
             xmlSerializer.Serialize(new FileStream(path, FileMode.Create), CommunicationServerInfo);
         }
 
@@ -329,10 +332,10 @@ namespace Common
         /// <param name="path">Ścieżka pliku</param>
         public virtual void LoadConfig(string path)
         {
-            var xmlDeSerializer = new XmlSerializer(typeof (CommunicationInfo));
+            var xmlDeSerializer = new XmlSerializer(typeof(CommunicationInfo));
             try
             {
-                CommunicationServerInfo = (CommunicationInfo) xmlDeSerializer.Deserialize(new FileStream(path, FileMode.Open));
+                CommunicationServerInfo = (CommunicationInfo)xmlDeSerializer.Deserialize(new FileStream(path, FileMode.Open));
             }
             catch (FileNotFoundException e)
             {
@@ -347,12 +350,13 @@ namespace Common
         /// <summary>
         ///     Metoda inicjalizująca połączenie do serwera
         /// </summary>
-        protected void InitializeConnection()
+        protected virtual void InitializeConnection()
         {
             try
             {
                 TcpClient = new TcpClient(CommunicationServerInfo.CommunicationServerAddress.Host,
                     CommunicationServerInfo.CommunicationServerPort);
+
             }
             catch (SocketException e)
             {
@@ -378,7 +382,7 @@ namespace Common
                         CommunicationServerInfo.CommunicationServerPort);
                 }
                 var stream = TcpClient.GetStream();
-                var writer = new StreamWriter(stream, Encoding.UTF8) {AutoFlush = false};
+                var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = false };
                 writer.Write(message);
                 writer.Flush();
             }

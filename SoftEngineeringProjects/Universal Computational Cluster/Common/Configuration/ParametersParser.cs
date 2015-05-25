@@ -52,9 +52,9 @@ namespace Common.Configuration
                     }
                     break;
             }
+            bool isSetUp = false;
             for (var i = 0; i < parameters.Length; i++)
             {
-                bool isSetUp = false;
                 switch (type)
                 {
                     case SystemComponentType.TaskManager:
@@ -79,7 +79,7 @@ namespace Common.Configuration
 
         private static void ParseArgumentsForComputation(string[] parameters, ref int i, ref List<CommunicationInfo> cInfo)
         {
-            if (cInfo.Capacity == 0) cInfo.Add(new CommunicationInfo());
+            if (cInfo.Count == 0) cInfo.Add(new CommunicationInfo());
             if (parameters[i] == ADDRESS_PARAMETER && i < parameters.Length - 1)
             {
                 try
@@ -119,7 +119,7 @@ namespace Common.Configuration
         private static void ParseArgumentsForCommunicationServer(string[] parameters, ref int i,
             ref List<CommunicationInfo> cInfo)
         {
-            if (cInfo.Capacity == 0) cInfo.Add(new CommunicationInfo());
+            if (cInfo.Count == 0) cInfo.Add(new CommunicationInfo());
             if (parameters[i] == TIME_PARAMETER && i < parameters.Length - 1)
             {
                 try
@@ -156,7 +156,7 @@ namespace Common.Configuration
         private static void ParseArgumentsForBackupCommunicationServer(string[] parameters, ref int i, ref bool portSetUp,
             ref List<CommunicationInfo> cInfo)
         {
-            if (cInfo.Capacity == 0)
+            if (cInfo.Count == 0)
             {
                 // first CommunicationInfo is ours
                 cInfo.Add(new CommunicationInfo());
