@@ -44,7 +44,7 @@ namespace Common
              * TODO: Initialize Thread Array
              */
             ThreadInfo = new ThreadInfo(PararellThreads, this);
-            BackupCommunicationServers = new List<Tuple<String,ushort>>();
+            BackupCommunicationServers = new List<Tuple<String, ushort>>();
             Initialize();
         }
 
@@ -244,10 +244,10 @@ namespace Common
             Console.WriteLine(Resources.SystemComponent_MsgHandler_RegisterResponse_, message.Id);
             CommunicationServerInfo.Time = message.Timeout;
             BackupCommunicationServers.Clear();
-            if(message.BackupCommunicationServers != null)
+            if (message.BackupCommunicationServers != null)
             {
                 RegisterResponseBackupCommunicationServer[] bServers = message.BackupCommunicationServers;
-                for(int i = 0; i< bServers.Length; i++)
+                for (int i = 0; i < bServers.Length; i++)
                 {
                     if (bServers[i].portSpecified)
                     {
@@ -293,7 +293,18 @@ namespace Common
         {
             Console.WriteLine(Resources.SystemComponent_MsgHandler_NoOperation_NoOperation_Message);
             BackupCommunicationServers.Clear();
-            // TO DO: wpisać do listy socketów dane o backup communication serverach 
+            if (message.BackupCommunicationServers != null)
+            {
+                NoOperationBackupCommunicationServer[] bServers = message.BackupCommunicationServers;
+                for (int i = 0; i < bServers.Length; i++)
+                {
+                    if (bServers[i].portSpecified)
+                    {
+                        BackupCommunicationServers.Add(new Tuple<string, ushort>
+                        (bServers[i].address, bServers[i].port));
+                    }
+                }
+            }
         }
 
         /// <summary>

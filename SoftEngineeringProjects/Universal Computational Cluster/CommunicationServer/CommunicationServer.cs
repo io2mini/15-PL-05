@@ -385,7 +385,7 @@ namespace Common.Components
                 //TcpClient = new TcpClient(CommunicationServerInfo.CommunicationServerAddress.Host,
                 //    CommunicationServerInfo.CommunicationServerPort);
                 IPAddress localIpAddress = null;
-                if(IPAddress.TryParse("127.0.0.1", out localIpAddress))
+                if (IPAddress.TryParse("127.0.0.1", out localIpAddress))
                 {
                     IPEndPoint ipLocalEndPoint = new IPEndPoint(localIpAddress, MyCommunicationInfo.CommunicationServerPort);
                     TcpClient = new TcpClient(ipLocalEndPoint);
@@ -428,7 +428,7 @@ namespace Common.Components
             Console.WriteLine(Resources.CommunicationServer_MsgHandler_Register_, id);
             GenerateBackupCommunicationServerList();
             List<RegisterResponseBackupCommunicationServer> backupsForSend = new List<RegisterResponseBackupCommunicationServer>();
-            for(int i = 0; i< BackupCommunicationServers.Count; i++)
+            for (int i = 0; i < BackupCommunicationServers.Count; i++)
             {
                 backupsForSend.Add(new RegisterResponseBackupCommunicationServer
                     {
@@ -552,12 +552,19 @@ namespace Common.Components
         {
 
             GenerateBackupCommunicationServerList();
+            List<NoOperationBackupCommunicationServer> backupServers = new List<NoOperationBackupCommunicationServer>();
+            for (int i = 0; i < BackupCommunicationServers.Count; i++)
+            {
+                backupServers.Add(new NoOperationBackupCommunicationServer
+                    {
+                        address = BackupCommunicationServers[i].Item1,
+                        port = BackupCommunicationServers[i].Item2,
+                        portSpecified = true
+                    });
+            }
             var noop = new NoOperation
             {
-                BackupCommunicationServers = new NoOperationBackupCommunicationServers
-                {
-                    BackupCommunicationServer = null
-                }
+                BackupCommunicationServers = backupServers.ToArray()
             };
             return noop;
         }

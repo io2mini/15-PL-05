@@ -7,7 +7,7 @@
         <xs:element name="BackupCommunicationServers">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="BackupCommunicationServer" minOccurs="0">
+              <xs:element name="BackupCommunicationServer" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                   <!-- server address -->
                   <xs:attribute name="address" type="xs:anyURI" />
