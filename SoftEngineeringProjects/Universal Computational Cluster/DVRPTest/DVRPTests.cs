@@ -59,16 +59,17 @@ namespace DVRPTest
             var ttb = ts.DivideProblem(8);
             byte[][] solutions = new byte[ttb.GetLength(0) - 1][];
             List<Thread> threads = new List<Thread>();
-            Mutex WaitForThread = new Mutex();
+            Mutex waitForThread = new Mutex();
+            
             for (int i = 1; i < ttb.GetLength(0); i++)
             {
                 threads.Add(new Thread((object o) =>
                 {
                     
                     DVRP.TaskSolver tsn = new TaskSolver(ttb[0]);
-                    WaitForThread.WaitOne();
+                    waitForThread.WaitOne();
                     solutions[((int)o)-1] = (tsn.Solve(ttb[(int)o], new TimeSpan()));
-                    WaitForThread.ReleaseMutex();
+                    waitForThread.ReleaseMutex();
                 }));
             }
             for(int i=1;i<threads.Count+1;i++)

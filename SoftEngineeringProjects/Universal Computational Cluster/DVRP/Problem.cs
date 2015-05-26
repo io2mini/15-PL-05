@@ -133,7 +133,7 @@ namespace DVRP
             Dictionary<uint, Tuple<TimeSpan, TimeSpan>> depotTimesWindows = new Dictionary<uint, Tuple<TimeSpan, TimeSpan>>();
             Dictionary<uint, TimeSpan> timesAvivals = new Dictionary<uint, TimeSpan>();
             Dictionary<uint, double> unld = new Dictionary<uint, double>();
-
+            double cutoff = 0.5;
             int numberOfVehicles = 0;
             int vehiclesCapaticies = 0;
 
@@ -214,18 +214,30 @@ namespace DVRP
             {
                 depots.Add(new Depot(locations[depotsIds[i]], depotTimesWindows[depotsIds[i]].Item1, depotTimesWindows[depotsIds[i]].Item2, depotsIds[i]));
             }
-
+            var maxEnd = depots.Max<Depot>((depot => (depot.EndTime.Ticks)));
+         
             for (int i = 0; i < clientsIds.Count; i++)
             {
-                clients.Add(new Client(locations[clientsIds[i]], timesAvivals[clientsIds[i]], new TimeSpan(0, 560, 0), unld[clientsIds[i]], demands[clientsIds[i]], clientsIds[i]));
-            }
+                clients.Add(new Client(locations[clientsIds[i]], timesAvivals[clientsIds[i]], new TimeSpan(maxEnd), unld[clientsIds[i]], demands[clientsIds[i]], clientsIds[i]));
 
+            }
+            foreach (var C in clients)
+            {
+              
+                
+                var T = new TimeSpan((long) (cutoff*(double) maxEnd));
+                if (C.StartTime >= T)
+                {
+                
+                    C.CutOff = true;
+                }
+            }
             for (int i = 0; i < numberOfVehicles; i++)
             {
                 vehicles.Add(new Vehicle(new Location(0, 0), vehiclesCapaticies, 1));
             }
 
-            return new Problem(vehicles, clients, depots, null);
+            return new Problem(vehicles, clients, depots, null,cutoff);
         }
     }
 }
