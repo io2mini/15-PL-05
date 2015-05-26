@@ -149,7 +149,7 @@ namespace DVRP
                         {
                             i++;
                             depotsIds.Add(Convert.ToUInt32(problemFileLines[i].Trim()));
-                        } while (!problemFileLines[i + 1].Equals("DEMAND_SECTION"));
+                        } while (!problemFileLines[i + 1].Any(Char.IsLetter));
                         break;
                     case "DEMAND_SECTION":
                         do
@@ -158,7 +158,7 @@ namespace DVRP
                             string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
                             clientsIds.Add(Convert.ToUInt32(line[0]));
                             demands.Add(Convert.ToUInt32(line[0]), Convert.ToDouble(line[1]));
-                        } while (!problemFileLines[i + 1].Equals("LOCATION_COORD_SECTION"));
+                        } while (!problemFileLines[i + 1].Any(Char.IsLetter));
                         break;
                     case "LOCATION_COORD_SECTION":
                         do
@@ -166,7 +166,7 @@ namespace DVRP
                             i++;
                             string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
                             locations.Add(Convert.ToUInt32(line[0]), new Location(Convert.ToDouble(line[1]),Convert.ToDouble(line[2])));
-                        } while (!problemFileLines[i + 1].Equals("DEPOT_LOCATION_SECTION"));
+                        } while (!problemFileLines[i + 1].Any(Char.IsLetter));
                         break;
                     case "DURATION_SECTION":
                         do
@@ -174,7 +174,7 @@ namespace DVRP
                             i++;
                             string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
                             unld.Add(Convert.ToUInt32(line[0]), Convert.ToDouble(line[1]));
-                        } while (!problemFileLines[i + 1].Equals("DEPOT_TIME_WINDOW_SECTION"));
+                        } while (!problemFileLines[i + 1].Any(Char.IsLetter));
                         break;
                     case "DEPOT_TIME_WINDOW_SECTION":
                         do
@@ -182,7 +182,7 @@ namespace DVRP
                             i++;
                             string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
                             depotTimesWindows.Add(Convert.ToUInt32(line[0]), new Tuple<TimeSpan, TimeSpan>(new TimeSpan(0,Convert.ToInt32(line[1]),0), new TimeSpan(0,Convert.ToInt32(line[2]),0)));
-                        } while (!problemFileLines[i + 1].Equals("COMMENT: TIMESTEP: 7"));
+                        } while (!problemFileLines[i + 1].Any(Char.IsLetter));
                         break;
                     case "TIME_AVAIL_SECTION":
                         do
@@ -190,7 +190,7 @@ namespace DVRP
                             i++;
                             string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
                             timesAvivals.Add(Convert.ToUInt32(line[0]), new TimeSpan(0,Convert.ToInt32(line[1]),0));
-                        } while (!problemFileLines[i + 1].Equals("EOF"));
+                        } while (!problemFileLines[i + 1].Any(Char.IsLetter));
                         break;
                 }
 

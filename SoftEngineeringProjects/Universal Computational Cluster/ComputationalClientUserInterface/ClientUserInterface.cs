@@ -19,8 +19,7 @@ namespace Common.UserInterface
                 newLine = Console.ReadLine();
                 try
                 {
-                    computationalClient.CommunicationServerInfo = ParametersParser.ReadParameters(newLine,
-    SystemComponentType.ComputationalClient)[0];
+                    computationalClient.CommunicationServerInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalClient)[0];
                     hasBeenRead = true;
                 }
                 catch (ParsingArgumentException e)
@@ -34,8 +33,6 @@ namespace Common.UserInterface
             var newProblem = new Problem();
             if (computationalClient.IsWorking && !existingProblem)
             {
-                Console.Error.WriteLine("Not implemented:");
-
                 // Podaj problem type
                 Console.WriteLine("Type problem type name:");
                 newLine = Console.ReadLine();
@@ -44,7 +41,6 @@ namespace Common.UserInterface
                 // Wczytanie instnacji prolemu
                 Console.WriteLine("Type path file of problem instance:");
                 newLine = Console.ReadLine();
-                // TODO: Szybki pars
                 // Utwórz nowe uri
                 var problemFileUri = new Uri(newLine);
                 // Utwórz nowy problem
@@ -60,8 +56,18 @@ namespace Common.UserInterface
                     newProblem.SolvingTimeOut = ulong.Parse(newLine.Trim());
                 }
             }
-            computationalClient.Start(newProblem, existingProblem);
-            Console.WriteLine("Computational Client ended successfully");
+            try
+            {
+                computationalClient.Start(newProblem, existingProblem);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Computational Client ended with problems.");
+                Console.ReadLine();
+                return;
+            }
+            Console.WriteLine("Computational Client ended successfully.");
         }
     }
 }
