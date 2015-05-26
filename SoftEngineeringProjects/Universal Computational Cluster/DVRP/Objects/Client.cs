@@ -23,7 +23,7 @@ namespace DVRP.Objects
         // size of transport
         public double Size { get; private set; }
 
-        public Client (Location location, TimeSpan startTime, TimeSpan endTime, double unld, double size, uint id )
+        public Client (Location location, TimeSpan startTime, TimeSpan endTime, double unld, double size, uint id,bool cutoff = false )
         {
             Location = location;
             StartTime = startTime;
@@ -31,7 +31,7 @@ namespace DVRP.Objects
             Unld = unld;
             Size = size;
             Id = id;
-            CutOff = false;
+            CutOff = cutoff;
         }
     }
 }
