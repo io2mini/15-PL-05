@@ -8,15 +8,14 @@ namespace DVRP
     public class Solution
     {
         // cost of 
-        private readonly List<Route> _vehicleLocationList;
+        public List<Route> VehicleLocationList { get; private set; }
+        public double Cost { get; private set; }
 
         public Solution(List<Route> vehicleLocationList, double cost)
         {
-            _vehicleLocationList = vehicleLocationList;
+            VehicleLocationList = vehicleLocationList;
             Cost = cost;
         }
-
-        public double Cost { get; private set; }
 
         //Czy z tego korzystamy?
         //public void CountCost(List<Location> locations)
