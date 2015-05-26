@@ -80,6 +80,12 @@ namespace Common.UserInterface
                 Console.ReadLine();
                 return;
             }
+
+            // Zawiśnij w oczekwianiu na odebranie rozwiązania
+            while (!computationalClient.HasFinalSolution)
+            {
+            }
+
             Console.WriteLine("Computational Client ended successfully.");
         }
     }

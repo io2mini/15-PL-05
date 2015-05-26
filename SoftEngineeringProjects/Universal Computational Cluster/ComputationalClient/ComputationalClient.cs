@@ -6,6 +6,7 @@ using Common.Exceptions;
 using Common.Messages;
 using Common.Messages.Generators;
 using Common.Properties;
+using DVRP;
 
 namespace Common.Components
 {
@@ -19,6 +20,7 @@ namespace Common.Components
         private ulong ProblemID;
         private Thread SolutionRequester;
         private bool ExistingProblem { get; set; }
+        public bool HasFinalSolution { get; private set; }
 
         public void SendSolveRequestMessage(Problem problem)
         {
@@ -102,9 +104,45 @@ namespace Common.Components
             }
         }
 
+        /// <summary>
+        /// Metoda odbierająca odpowiedź na solution request - odpowiedzią jest Solution
+        /// </summary>
+        /// <param name="solutions"></param>
+        protected override void MsgHandler_Solution(Solutions solutions)
+        {
+            foreach (var solutionsSolution in solutions.Solutions1)
+            {
+                Console.WriteLine(solutionsSolution.Type.ToString());
+
+                if (solutionsSolution.TimeoutOccured)
+                {
+                    Console.WriteLine("Solution wasn't found because of TimeOut parameter.");
+                    HasFinalSolution = true;
+                    break;
+                }
+
+                if (solutionsSolution.Type != SolutionsSolutionType.Final) 
+                    continue;
+
+                Console.WriteLine("Here is your final solution:");
+                Solution solution = DVRP.Solution.Deserialize(solutionsSolution.Data);
+                Console.WriteLine("Final cost: {0}", solution.Cost);
+                Console.WriteLine("Route:");
+                for (int i = 0; i < solution.VehicleLocationList.Count; i++)
+                {
+                    Console.Write("{0}  ", solution.VehicleLocationList[i]);
+                }
+                Console.WriteLine("\nFinding this solution takes approximately: {0}", solutionsSolution.ComputationsTime);
+
+                HasFinalSolution = true;
+                break;
+            }
+        }
+
         protected void MsgHandler_SolveRequestResponse(SolveRequestResponse solveRequestResponse, Socket socket)
         {
             ProblemID = solveRequestResponse.Id;
+            ExistingProblem = true;
             AskForSolutions();
         }
 

@@ -214,6 +214,7 @@ namespace Common
         protected virtual void MsgHandler_Solution(Solutions solutions)
         {
             throw new NotImplementedException();
+            // TODO: Implementacja statru obliczen na danym komponencie
         }
 
         /// <summary>
