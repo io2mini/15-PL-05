@@ -14,28 +14,25 @@ namespace Common.UserInterface
             Console.WriteLine("Computational Client started successfully");
             string newLine;
             var hasBeenRead = false;
-            while (computationalClient.IsWorking && !hasBeenRead)
-            {
-                newLine = Console.ReadLine();
-                try
-                {
-                    computationalClient.CommunicationServerInfo = ParametersParser.ReadParameters(newLine,
-    SystemComponentType.ComputationalClient)[0];
-                    hasBeenRead = true;
-                }
-                catch (ParsingArgumentException e)
-                {
-                    Console.WriteLine("Wrong Arguments: " + e.Message);
-                }
-            }
+            //while (computationalClient.IsWorking && !hasBeenRead)
+            //{
+            //    newLine = Console.ReadLine();
+            //    try
+            //    {
+            //        computationalClient.CommunicationServerInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalClient)[0];
+            //        hasBeenRead = true;
+            //    }
+            //    catch (ParsingArgumentException e)
+            //    {
+            //        Console.WriteLine("Wrong Arguments: " + e.Message);
+            //    }
+            //}
 
             // Rozpocznij pobieranie informacje o plikach do wczytania
             var existingProblem = computationalClient.ProblemExists();
             var newProblem = new Problem();
             if (computationalClient.IsWorking && !existingProblem)
             {
-                Console.Error.WriteLine("Not implemented:");
-
                 // Podaj problem type
                 Console.WriteLine("Type problem type name:");
                 newLine = Console.ReadLine();
@@ -44,7 +41,6 @@ namespace Common.UserInterface
                 // Wczytanie instnacji prolemu
                 Console.WriteLine("Type path file of problem instance:");
                 newLine = Console.ReadLine();
-                // TODO: Szybki pars
                 // Utwórz nowe uri
                 var problemFileUri = new Uri(newLine);
                 // Utwórz nowy problem
