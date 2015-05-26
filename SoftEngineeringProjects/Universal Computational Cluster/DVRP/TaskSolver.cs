@@ -36,7 +36,11 @@ namespace DVRP
                     //koniec wersji z czekaniem na otwarcie
 
                     actualTime += TimeSpan.FromMinutes(c.Unld);
-                    if(c.StartTime>actualTime || c.EndTime<actualTime) return double.MaxValue; //TODO: sprawdzić czy cały rozładunek musi się zmieścić w oknie czasowym
+                    if (c.RealStartTime > actualTime || c.EndTime < actualTime)
+                    {
+
+                        return double.MaxValue; //TODO: sprawdzić czy cały rozładunek musi się zmieścić w oknie czasowym
+                    }
                     load += c.Size;
                     if (load < 0)
                     {
@@ -46,7 +50,10 @@ namespace DVRP
                 if (p.IsDepot(r.Sequence[i]))
                 {
                     var d = p.GetDepot(r.Sequence[i]);
-                    if(d.StartTime>actualTime || d.EndTime<actualTime) return double.MaxValue; //wersja bez czekania
+                    if (d.StartTime > actualTime || d.EndTime < actualTime)
+                    {
+                        return double.MaxValue; //wersja bez czekania
+                    }
 
                     //Wersja z czekaniem na otwarcie:
                     //if (d.EndTime < actualTime)
@@ -122,15 +129,7 @@ namespace DVRP
         public override byte[] Solve(byte[] partialData, TimeSpan timeout)
         {
             //TODO: handle timeout
-            
-            var maxEnd = ProblemInstance.Depots.Max<Depot>((depot=>(depot.EndTime.Ticks)));
-            foreach (var C in ProblemInstance.Clients)
-            {
-                if (C.StartTime < new TimeSpan((long)(ProblemInstance.CutOff * (double)maxEnd)))
-                {
-                    C.CutOff = true;
-                }
-            }
+
 
             var task = Task.Deserialize(partialData);
             var routes = GeneratePermutedClients(task.Brackets);
@@ -172,7 +171,7 @@ namespace DVRP
                     tasksForNodes.Add(t.Serialize());
                     sequences.Clear();
                 }
-               
+
             }
             return tasksForNodes.ToArray();
         }
@@ -214,7 +213,7 @@ namespace DVRP
         private List<Route[]> CombineRoutes(List<Route[]> current, Route[] toAdd)
         {
             List<Route[]> target = new List<Route[]>();
-            
+
             foreach (var r in current)
             {
 
@@ -229,7 +228,7 @@ namespace DVRP
             }
             if (current.Count == 0)
             {
-                target.AddRange(toAdd.Select(tA => new List<Route> {tA}).Select(r1 => r1.ToArray()));
+                target.AddRange(toAdd.Select(tA => new List<Route> { tA }).Select(r1 => r1.ToArray()));
             }
             return target;
         }
@@ -298,10 +297,7 @@ namespace DVRP
                 for (int j = 0; j < p[i].Length; j++)
                 {
                     int t = (int)p[i][j];
-                    if (t >= ProblemInstance.Clients.Count || t < 0)
-                    {
-                        t++;
-                    }
+
                     result[i][j] = ProblemInstance.Clients[(int)p[i][j]].Id;
                 }
 

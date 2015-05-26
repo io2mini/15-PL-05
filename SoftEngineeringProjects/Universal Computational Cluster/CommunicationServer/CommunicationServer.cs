@@ -345,22 +345,23 @@ namespace Common.Components
             /*
              * TODO:
              * 4. If specified, handle solve timeout.
+             * 5. If there's no valid TMs ot nodes, wait for them
              */
             _problems.Add(problemId, solveRequest.Data);
 
             var response = new SolveRequestResponse { Id = problemId };
+            Console.WriteLine("Sending SolveRequestResponse"); //Nie posiadamy socketa clienta, czy tak powinno być?
             SendMessageToComponent(socket, response);
-
+            var tmId = GetTm(solveRequest.ProblemType);
             var msg = new DivideProblem
             {
                 Data = solveRequest.Data,
                 Id = problemId,
                 ProblemType = solveRequest.ProblemType,
-                ComputationalNodes = GetAvailableThreads(solveRequest.ProblemType)
+                ComputationalNodes = GetAvailableThreads(solveRequest.ProblemType),
+                NodeID=tmId
             };
-            var tmId = GetTm(solveRequest.ProblemType);
-            msg.NodeID = tmId;
-
+            Console.WriteLine("Sending DivideProblem to " + tmId);
             SendMessageToComponent(tmId, msg);
 
             //TODO:Handle timeout if specified
