@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using Common.Components;
 using Common.Configuration;
 using Common.Exceptions;
@@ -68,6 +69,7 @@ namespace Common.UserInterface
                 return;
             }
             Console.WriteLine("Computational Client ended successfully.");
+            Thread.Sleep(10000);
         }
     }
 }

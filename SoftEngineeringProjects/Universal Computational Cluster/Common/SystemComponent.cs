@@ -389,6 +389,8 @@ namespace Common
             {
                 TcpClient = new TcpClient(CommunicationServerInfo.CommunicationServerAddress.Host,
                     CommunicationServerInfo.CommunicationServerPort);
+                TcpClient.ReceiveBufferSize = 10000;
+                TcpClient.SendBufferSize = 10000;
 
             }
             catch (SocketException e)
