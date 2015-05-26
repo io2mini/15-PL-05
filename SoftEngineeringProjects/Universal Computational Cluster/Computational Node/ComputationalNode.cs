@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Security;
 using Common.Exceptions;
 using Common.Messages;
+using Common.Messages.Generators;
 using Common.Properties;
 using DVRP;
 using TaskSolver = UCCTaskSolver.TaskSolver;
@@ -64,15 +65,25 @@ namespace Common.Components
         {
             if (ThreadInfo.Threads.All(t => t.SolutionData != null))
             {
-                int index;
+                int index = 0;
+                double minCost = Double.MaxValue;
+
                 // Wszyscy gotowi - odbierz dane
                 for (int i = 0; i < ThreadInfo.Threads.Count; i++)
                 {
-                    //DVRP.Solution.Deserialize()
+                    Solution s = (DVRP.Solution)DVRP.Solution.Deserialize(ThreadInfo.Threads[i].SolutionData);
+                    if (s.Cost < minCost)
+                    {
+                        index = i;
+                        minCost = s.Cost;
+                    }
                 }
 
-                var solution = new Solutions();
-                
+                var solution = SolutionGenerator.Generate(ThreadInfo.Threads[index].CommonData,
+                    ThreadInfo.Threads[index].ProblemInstanceId, ThreadInfo.Threads[index].ProblemType,
+                    new SolutionsSolution[] {new SolutionsSolution() {//TODO: Dodać
+                    } });
+
             }
             else
             {
