@@ -36,10 +36,6 @@ namespace Common.Components
             SchemaTypes.Add(SolvePartialProblems, new Tuple<string, Type>(Resources.PartialProblems, typeof(SolvePartialProblems)));
         }
 
-        private void ThreadStateChangedHandler(object sender, ThreadStateChangedEventArgs e)
-        {
-
-        }
         protected override void HandleMessage(Message message, string key, Socket socket)
         {
             try
@@ -52,7 +48,9 @@ namespace Common.Components
                     case SolutionRequest:
                         MsgHandler_SolutionRequest((SolutionRequest)message);
                         break;
-
+                    default:
+                        base.HandleMessage(message, key, socket);
+                        return;
                 }
             }
             catch (NotEnoughIdleThreadsException e)

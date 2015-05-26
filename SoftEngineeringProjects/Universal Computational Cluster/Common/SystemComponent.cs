@@ -75,9 +75,10 @@ namespace Common
         /// </summary>
         public virtual void Start()
         {
-            InitializeConnection();
+            InitializeConnection(); //TODO: sypie się przy nieudanej próbie
             SendRegisterMessage();
             ReceiveResponse();
+
         }
 
         protected SystemComponentType ParseType(string s)
@@ -146,7 +147,7 @@ namespace Common
                 return;
             }
             var message = Message.Sanitize(byteArray);
-            //Console.WriteLine(message);
+            //Console.WriteLine("Received "+message.GetType());
             Validate(message, null); //Uważać z nullem w klasach dziedziczących
         }
 
@@ -336,7 +337,9 @@ namespace Common
                 message.Validate(schemas, (o, e) => { errorOccured = true; });
                 if (!errorOccured)
                 {
-                    HandleMessage(Message.ParseXML(SchemaTypes[key].Item2, xml), key, socket);
+                    var parsedMsg = Message.ParseXML(SchemaTypes[key].Item2, xml);
+                    Console.WriteLine("Received "+parsedMsg.GetType());
+                    HandleMessage(parsedMsg, key, socket);
                     break;
                 }
             }
