@@ -36,6 +36,9 @@ namespace Common
         protected TcpClient TcpClient;
         protected ThreadInfo ThreadInfo;
         protected List<Tuple<string, ushort>> BackupCommunicationServers;
+        // musi się tutaj znajodwać bo mamy po części obslugę buckupa gdy prmary cs się posypie w tej klasie
+        public CommunicationInfo MyCommunicationInfo { get; set; }
+
 
         protected SystemComponent()
         {
@@ -43,6 +46,7 @@ namespace Common
             /*
              * TODO: Initialize Thread Array
              */
+            PararellThreads = 1;
             ThreadInfo = new ThreadInfo(PararellThreads, this);
             BackupCommunicationServers = new List<Tuple<String, ushort>>();
             Initialize();
@@ -408,9 +412,33 @@ namespace Common
                         CommunicationServerInfo.CommunicationServerPort);
                 }
                 var stream = TcpClient.GetStream();
-                var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = false };
+                var writer = new StreamWriter(stream, Encoding.UTF8) {AutoFlush = false};
                 writer.Write(message);
                 writer.Flush();
+            }
+            catch (IOException)
+            {
+                // disconnected from primary CS, set buckup as primary
+                if (BackupCommunicationServers.Count > 0)
+                {
+                    CommunicationServerInfo.CommunicationServerPort = BackupCommunicationServers[0].Item2;
+                    CommunicationServerInfo.CommunicationServerAddress = new Uri(BackupCommunicationServers[0].Item1);
+                    // zarejestruj się ponownie u innego cs'a
+                    if (DeviceType.Equals(SystemComponentType.CommunicationServer)
+                        && MyCommunicationInfo.CommunicationServerAddress == CommunicationServerInfo.CommunicationServerAddress
+                        && MyCommunicationInfo.CommunicationServerPort == CommunicationServerInfo.CommunicationServerPort)
+                    {
+                        // jeżeli jesteś backupem, który powinien być teraz Cs'em nie wysyłaj do siebie wiadomości
+                        // czekaj aż ktoś spróbuje coś do Ciebie wysłać wtedy automatycznie zamienisz się na primary CS
+                        // jeżeli jesteś nie wykorzystywanem backupem zarejestruj się
+                        MyCommunicationInfo.IsBackup = false;
+                        CommunicationServerInfo.IsBackup = false;
+                    }
+                    else
+                    {
+                        SendRegisterMessage();
+                    }
+                }
             }
             catch (Exception e)
             {

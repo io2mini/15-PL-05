@@ -33,7 +33,6 @@ namespace Common.Components
         private ulong _firstFreeProblemId;
         // wszystkie adresy, na których nasłuchuje server, to są jego adresy fizyczne
         public List<CommunicationInfo> CommunicationInfos;
-        public CommunicationInfo MyCommunicationInfo { get; set; }
 
         #region ComunicationData
 
@@ -63,7 +62,6 @@ namespace Common.Components
             _componentTypes = new Dictionary<ulong, SystemComponentType>();
             _solvableProblemTypes = new Dictionary<ulong, List<string>>();
             SolvableProblems = new[] { "DVRP" };
-            PararellThreads = 1;
         }
 
         /// <summary>
@@ -214,6 +212,21 @@ namespace Common.Components
             return l;
         }
 
+        private void ChangeServerFromBuckupToPrimary()
+        {
+            MyCommunicationInfo.IsBackup = false;
+            CommunicationServerInfo = MyCommunicationInfo;
+            IsPrimary = true;
+            Console.WriteLine("Server is now primary not backup");
+            InitializeMessageQueue(CommunicationServerInfo.CommunicationServerPort);
+            if (BackupCommunicationServers != null && BackupCommunicationServers.Count > 0)
+            {
+                BackupCommunicationServers.RemoveAll(x =>
+                    (x.Item1 == CommunicationServerInfo.CommunicationServerAddress.Host
+                     && x.Item2 == CommunicationServerInfo.CommunicationServerPort));
+            }
+        }
+
         #endregion
 
         #region MessageGenerationAndHandling
@@ -229,18 +242,23 @@ namespace Common.Components
             switch (key)
             {
                 case Register:
+                    if (!IsPrimary) ChangeServerFromBuckupToPrimary();
                     MsgHandler_Register((Register)message, socket);
                     return;
                 case Status:
+                    if (!IsPrimary) ChangeServerFromBuckupToPrimary();
                     MsgHandler_Status((Status)message, socket);
                     return;
                 case SolveRequest:
+                    if (!IsPrimary) ChangeServerFromBuckupToPrimary();
                     MsgHandler_SolveRequest((SolveRequest)message, socket);
                     return;
                 case PartialProblems:
+                    if (!IsPrimary) ChangeServerFromBuckupToPrimary();
                     MsgHandler_PartialProblems((SolvePartialProblems)message, socket);
                     return;
                 case SolutionRequest:
+                    if (!IsPrimary) ChangeServerFromBuckupToPrimary();
                     MsgHandler_SolutionRequest((SolutionRequest)message, socket);
                     return;
                 default:

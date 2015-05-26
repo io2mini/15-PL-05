@@ -17,7 +17,7 @@ namespace Common.Messages.Generators
             var result = new Status
             {
                 Id = componentId,
-                Threads = threads.Select(Generate).ToArray()
+                Threads = threads.Select(Generate).ToArray(),
             };
             return result;
         }
