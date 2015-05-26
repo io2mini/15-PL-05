@@ -7,7 +7,8 @@ using System.Security;
 using Common.Exceptions;
 using Common.Messages;
 using Common.Properties;
-using UCCTaskSolver;
+using DVRP;
+using TaskSolver = UCCTaskSolver.TaskSolver;
 
 // ReSharper disable once CheckNamespace
 namespace Common.Components
@@ -61,7 +62,22 @@ namespace Common.Components
 
         private void MsgHandler_SolutionRequest(global::SolutionRequest solutionRequest)
         {
-            throw new NotImplementedException();
+            if (ThreadInfo.Threads.All(t => t.SolutionData != null))
+            {
+                int index;
+                // Wszyscy gotowi - odbierz dane
+                for (int i = 0; i < ThreadInfo.Threads.Count; i++)
+                {
+                    //DVRP.Solution.Deserialize()
+                }
+
+                var solution = new Solutions();
+                
+            }
+            else
+            {
+                
+            }
         }
 
         public void MsgHandler_SolvePartialProblems(SolvePartialProblems partialProblems)

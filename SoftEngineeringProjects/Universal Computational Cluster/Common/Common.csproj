@@ -57,6 +57,7 @@
     <Compile Include="Messages\Generators\ErrorGenerator.cs" />
     <Compile Include="Messages\Generators\RegisterGenerator.cs" />
     <Compile Include="Messages\Generators\RegisterResponseGenerator.cs" />
+    <Compile Include="Messages\Generators\SolutionGenerator.cs" />
     <Compile Include="Messages\Generators\SolutionRequestGenerator.cs" />
     <Compile Include="Messages\Generators\SolveRequestGenerator.cs" />
     <Compile Include="Messages\Generators\StatusReportGenerator.cs" />
