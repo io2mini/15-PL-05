@@ -40,10 +40,23 @@ namespace Common.UserInterface
 
                 // Wczytanie instnacji prolemu
                 Console.WriteLine("Type path file of problem instance:");
-                newLine = Console.ReadLine();
                 // Utwórz nowe uri
-                var problemFileUri = new Uri(newLine);
-                // Utwórz nowy problem
+                Uri problemFileUri = null;
+                bool correctPath = false;
+                do
+                {
+                    newLine = Console.ReadLine();
+                    try
+                    {
+                        problemFileUri = new Uri(newLine);
+                        correctPath = true;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Path to file is incorrect, try again.");
+                    }
+                } while (!correctPath);
+                // Utwórz nowy problem 
                 DVRP.Problem p = DVRP.Problem.CreateProblemInstanceFromFile(problemFileUri);
                 newProblem.SerializedProblem = p.Serialize();
                 Console.WriteLine("OK. Problem instance is ready.");
