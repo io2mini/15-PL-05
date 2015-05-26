@@ -59,6 +59,7 @@ namespace Common.Components
                 {
                     SendMessage(SolutionRequestGenerator.Generate(ProblemID));
                     ReceiveResponse();
+                    Thread.Sleep(new TimeSpan(0,0,0,15));
                 }
             }
             catch (MessageNotSentException)
