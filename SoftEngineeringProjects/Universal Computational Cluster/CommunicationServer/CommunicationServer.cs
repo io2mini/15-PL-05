@@ -278,7 +278,7 @@ namespace Common.Components
         private void MsgHandler_SolutionRequest(SolutionRequest solutionRequest, Socket socket)
         {
             //TODO: send solutionMessage
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -651,7 +651,7 @@ namespace Common.Components
             var commInfo = (CommunicationInfo)communicationInfo;
             var ipAddress = IPAddress.Parse(commInfo.CommunicationServerAddress.Host);
             var tcpListener = new TcpListener(ipAddress, commInfo.CommunicationServerPort);
-
+            
             try
             {
                 tcpListener.Start();
@@ -659,6 +659,7 @@ namespace Common.Components
                 {
                     Console.WriteLine(Resources.CommunicationServer_StartListening_Started_listening_on___0_, commInfo.CommunicationServerAddress);
                     var socket = tcpListener.AcceptSocket();
+                    socket.ReceiveBufferSize = 10000;
                     Console.WriteLine(Resources.CommunicationServer_StartListening_Accepted_connection_from__0_, socket.RemoteEndPoint);
                     var thread = new Thread(ReceiveMessage) { IsBackground = true };
                     thread.Start(socket);
@@ -689,7 +690,7 @@ namespace Common.Components
             {
                 while (socket.IsBound)
                 {
-                    var byteArray = new byte[1024];
+                    var byteArray = new byte[10000];
 
                     Thread.Sleep(1000);
                     socket.Receive(byteArray);
