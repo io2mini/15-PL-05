@@ -56,8 +56,18 @@ namespace Common.UserInterface
                     newProblem.SolvingTimeOut = ulong.Parse(newLine.Trim());
                 }
             }
-            computationalClient.Start(newProblem, existingProblem);
-            Console.WriteLine("Computational Client ended successfully");
+            try
+            {
+                computationalClient.Start(newProblem, existingProblem);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Computational Client ended with problems.");
+                Console.ReadLine();
+                return;
+            }
+            Console.WriteLine("Computational Client ended successfully.");
         }
     }
 }
