@@ -47,6 +47,7 @@ namespace Common.Components
         private readonly Dictionary<ulong, List<string>> _solvableProblemTypes;
 
         #endregion
+
         public CommunicationServer()
         {
             CommunicationInfos = new List<CommunicationInfo>();
@@ -61,7 +62,7 @@ namespace Common.Components
             _savedPartialProblems = new Dictionary<ulong, SolvePartialProblems>();
             _componentTypes = new Dictionary<ulong, SystemComponentType>();
             _solvableProblemTypes = new Dictionary<ulong, List<string>>();
-            SolvableProblems = new[] { "DVRP" };
+            SolvableProblems = new[] { "DVRP" }; //To pole dotyczy node'ów, sprawdzić w dokumentacji czy trzeba je inicjalizować w CS
         }
 
         /// <summary>
@@ -239,10 +240,11 @@ namespace Common.Components
         /// <param name="socket">Socket z którego przyszła wiadomość.</param>
         protected override void HandleMessage(Message message, string key, Socket socket)
         {
+            //Tryb niekompatybilny
             switch (key)
             {
                 case Register:
-                    if (!IsPrimary) ChangeServerFromBuckupToPrimary();
+                    if (!IsPrimary) ChangeServerFromBuckupToPrimary(); //TODO: poprawić!!!!!!!!!!!!!!!
                     MsgHandler_Register((Register)message, socket);
                     return;
                 case Status:
@@ -265,6 +267,7 @@ namespace Common.Components
                     base.HandleMessage(message, key, socket);
                     return;
             }
+            //TODO: Zrobić tryb kompatybilny
         }
 
         /// <summary>
@@ -444,22 +447,15 @@ namespace Common.Components
             //TODO: sprawdzenie, czy już nie jest zarejestrowany
             var id = _firstFreeComponentId++;
             Console.WriteLine(Resources.CommunicationServer_MsgHandler_Register_, id);
-            GenerateBackupCommunicationServerList();
-            List<RegisterResponseBackupCommunicationServer> backupsForSend = new List<RegisterResponseBackupCommunicationServer>();
-            for (int i = 0; i < BackupCommunicationServers.Count; i++)
-            {
-                backupsForSend.Add(new RegisterResponseBackupCommunicationServer
-                    {
-                        address = BackupCommunicationServers[i].Item1,
-                        port = BackupCommunicationServers[i].Item2,
-                        portSpecified = true
-                    });
-            }
+            GenerateBackupCommunicationServerList(); //Czemu dzieje się to tutaj a nie wcześniej?
             var response = new RegisterResponse
             {
                 Id = id,
                 Timeout = (uint)CommunicationServerInfo.Time,
-                BackupCommunicationServers = backupsForSend.ToArray()
+                BackupCommunicationServers = BackupCommunicationServers.Select(t => new RegisterResponseBackupCommunicationServer
+                {
+                    address = t.Item1, port = t.Item2, portSpecified = true
+                }).ToArray()
             };
             var timer = RegisterComponent(socket, id, ParseType(register.Type), register.SolvableProblems);
             SendMessageToComponent(id, response);
@@ -474,7 +470,7 @@ namespace Common.Components
             _idToSocket.Add(id, socket);
             _socketToId.Add(socket, id);
             _componentTypes.Add(id, type);
-            _threadStates.Add(id, null);
+            _threadStates.Add(id, null); //Czy null jest dobrym state'm?
             if (SolvableProblems.Any())
             {
                 _solvableProblemTypes.Add(id, solvableProbs.ToList());
@@ -493,13 +489,13 @@ namespace Common.Components
         }
 
         /// <summary>
-        ///     Metoda zamykający juz nie uzywany soket
+        ///     Metoda zamykająca juz nie uzywany socket
         /// </summary>
-        /// <param name="socket">soket, który nalezy zamknąć</param>
+        /// <param name="socket">socket, który nalezy zamknąć</param>
         protected void CloseSocket(object socket)
         {
             Thread.Sleep(new TimeSpan(0, 0, 15, 0));
-            if (socket is Socket) (socket as Socket).Close();
+            if (socket is Socket) ((Socket)socket).Close(); //TODO: jeśli socket nie jest typu Socket rzuć wyjątkiem, wąchaj smar
         }
 
         /// <summary>
@@ -542,7 +538,7 @@ namespace Common.Components
         }
 
         /// <summary>
-        /// Utwórz listę par <host, port> reprezentujących backupCommunicationServers
+        /// Utwórz listę par [host, port] reprezentujących backupCommunicationServers
         /// </summary>
         private void GenerateBackupCommunicationServerList()
         {
@@ -570,20 +566,15 @@ namespace Common.Components
         {
 
             GenerateBackupCommunicationServerList();
-            List<NoOperationBackupCommunicationServer> backupServers = new List<NoOperationBackupCommunicationServer>();
-            for (int i = 0; i < BackupCommunicationServers.Count; i++)
-            {
-                backupServers.Add(new NoOperationBackupCommunicationServer
-                    {
-                        address = BackupCommunicationServers[i].Item1,
-                        port = BackupCommunicationServers[i].Item2,
-                        portSpecified = true
-                    });
-            }
+            //Tryb niekompatybilny
             var noop = new NoOperation
             {
-                BackupCommunicationServers = backupServers.ToArray()
+                BackupCommunicationServers = BackupCommunicationServers.Select(t => new NoOperationBackupCommunicationServer
+                {
+                    address = t.Item1, port = t.Item2, portSpecified = true
+                }).ToArray()
             };
+            //TODO: tryb kompatybilny
             return noop;
         }
 
