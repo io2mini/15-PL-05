@@ -14,19 +14,19 @@ namespace Common.UserInterface
             Console.WriteLine("Computational Client started successfully");
             string newLine;
             var hasBeenRead = false;
-            //while (computationalClient.IsWorking && !hasBeenRead)
-            //{
-            //    newLine = Console.ReadLine();
-            //    try
-            //    {
-            //        computationalClient.CommunicationServerInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalClient)[0];
-            //        hasBeenRead = true;
-            //    }
-            //    catch (ParsingArgumentException e)
-            //    {
-            //        Console.WriteLine("Wrong Arguments: " + e.Message);
-            //    }
-            //}
+            while (computationalClient.IsWorking && !hasBeenRead)
+            {
+                newLine = Console.ReadLine();
+                try
+                {
+                    computationalClient.CommunicationServerInfo = ParametersParser.ReadParameters(newLine, SystemComponentType.ComputationalClient)[0];
+                    hasBeenRead = true;
+                }
+                catch (ParsingArgumentException e)
+                {
+                    Console.WriteLine("Wrong Arguments: " + e.Message);
+                }
+            }
 
             // Rozpocznij pobieranie informacje o plikach do wczytania
             var existingProblem = computationalClient.ProblemExists();
