@@ -278,7 +278,7 @@ namespace Common.Components
         private void MsgHandler_SolutionRequest(SolutionRequest solutionRequest, Socket socket)
         {
             //TODO: send solutionMessage
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         /// <summary>

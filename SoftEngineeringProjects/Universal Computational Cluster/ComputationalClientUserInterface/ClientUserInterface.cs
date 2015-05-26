@@ -86,9 +86,8 @@ namespace Common.UserInterface
             while (!computationalClient.HasFinalSolution)
             {
             }
-
+            //TODO: wyświetl rozwiązanie
             Console.WriteLine("Computational Client ended successfully.");
-            Thread.Sleep(10000);
         }
     }
 }
