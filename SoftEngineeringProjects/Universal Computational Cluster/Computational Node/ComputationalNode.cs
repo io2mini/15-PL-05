@@ -89,7 +89,7 @@ namespace Common.Components
 
                 solution = SolutionGenerator.Generate(data.CommonData,
                     data.ProblemInstanceId, data.ProblemType,
-                    new SolutionsSolution[] { new SolutionsSolution() { Data = data.SolutionData, Type = SolutionsSolutionType.Final } });
+                    new SolutionsSolution[] { new SolutionsSolution() { Data = data.SolutionData, Type = SolutionsSolutionType.Partial } });
 
             }
             else
