@@ -77,8 +77,14 @@ namespace Common
         {
             InitializeConnection(); //TODO: sypie się przy nieudanej próbie
             SendRegisterMessage();
-            ReceiveResponse();
+            StartReceiveing();
 
+        }
+
+        protected void StartReceiveing()
+        {
+            Thread t = new Thread(ReceiveResponse);
+            t.Start();
         }
 
         protected SystemComponentType ParseType(string s)
@@ -137,15 +143,19 @@ namespace Common
                     CommunicationServerInfo.CommunicationServerPort);
             /// TODO: Timeout na receive 
             var stream = TcpClient.GetStream();
-            var byteArray = new byte[1024];
+            var byteArray = new byte[BufferSize];
             try
             {
-                stream.Read(byteArray, 0, 1024);
+                stream.Read(byteArray, 0, BufferSize);
             }
             catch (Exception)
             {
                 Console.WriteLine(Resources.SystemComponent_ReceiveResponse_Connection_was_killed_by_host);
                 return;
+            }
+            finally
+            {
+                StartReceiveing();
             }
             var message = Message.Sanitize(byteArray);
             //Console.WriteLine("Received "+message.GetType());
@@ -160,6 +170,7 @@ namespace Common
             Solution = "Solution";
 
         private const uint MilisecondsMultiplier = 1000;
+        protected const int BufferSize = 1048576;
         public const string Path = ""; //Scieżka do pliku konfiguracyjnego
 
         #endregion
@@ -391,8 +402,8 @@ namespace Common
             {
                 TcpClient = new TcpClient(CommunicationServerInfo.CommunicationServerAddress.Host,
                     CommunicationServerInfo.CommunicationServerPort);
-                TcpClient.ReceiveBufferSize = 10000;
-                TcpClient.SendBufferSize = 10000;
+                TcpClient.ReceiveBufferSize = BufferSize;
+                TcpClient.SendBufferSize = BufferSize;
 
             }
             catch (SocketException e)

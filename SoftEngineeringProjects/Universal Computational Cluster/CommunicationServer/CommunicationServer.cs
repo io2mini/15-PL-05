@@ -660,7 +660,7 @@ namespace Common.Components
                 {
                     Console.WriteLine(Resources.CommunicationServer_StartListening_Started_listening_on___0_, commInfo.CommunicationServerAddress);
                     var socket = tcpListener.AcceptSocket();
-                    socket.ReceiveBufferSize = 10000;
+                    socket.ReceiveBufferSize = BufferSize;
                     Console.WriteLine(Resources.CommunicationServer_StartListening_Accepted_connection_from__0_, socket.RemoteEndPoint);
                     var thread = new Thread(ReceiveMessage) { IsBackground = true };
                     thread.Start(socket);

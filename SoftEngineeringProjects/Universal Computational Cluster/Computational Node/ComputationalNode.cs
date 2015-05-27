@@ -63,6 +63,7 @@ namespace Common.Components
 
         private void MsgHandler_SolutionRequest(global::SolutionRequest solutionRequest)
         {
+            // TODO: Przenieść to do innego miejsca
             if (ThreadInfo.Threads.All(t => t.SolutionData != null))
             {
                 int index = 0;
@@ -79,15 +80,18 @@ namespace Common.Components
                     }
                 }
 
+                // TODO: Jak dla mnie to to nie bedzie dobrze działać
+
                 var solution = SolutionGenerator.Generate(ThreadInfo.Threads[index].CommonData,
                     ThreadInfo.Threads[index].ProblemInstanceId, ThreadInfo.Threads[index].ProblemType,
-                    new SolutionsSolution[] {new SolutionsSolution() {//TODO: Dodać
-                    } });
+                    new SolutionsSolution[] { new SolutionsSolution() { Data = ThreadInfo.Threads[index].SolutionData, Type = SolutionsSolutionType.Final } });
 
             }
             else
             {
-                
+                var solution = SolutionGenerator.Generate(null,
+                    ThreadInfo.Threads[0].ProblemInstanceId, ThreadInfo.Threads[0].ProblemType,
+                    new SolutionsSolution[] { new SolutionsSolution() { Type = SolutionsSolutionType.Final } });
             }
         }
 
