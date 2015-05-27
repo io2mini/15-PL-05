@@ -57,49 +57,7 @@ namespace Common.Components
             }
         }
 
-        private void PrepareSolutions(object ProblemID)
-        {
-            PrepareSolutions((ulong)ProblemID);
-        }
-        private void PrepareSolutions(ulong ProblemID)
-        {
-            // TODO: Przenieść to do innego miejsca
-            Solutions solution;
-            foreach (var ct in ThreadInfo.Threads.Where((s) => (s.ProblemInstanceIdSpecified == true && s.ProblemInstanceId == ProblemID)))
-            {
-                ct.Solver.Join();
-            }
-            if (ThreadInfo.Threads.All(t => t.SolutionData != null))
-            {
-                ComputationalThread data = null;
-                double minCost = Double.MaxValue;
 
-                // Wszyscy gotowi - odbierz dane
-                foreach (var ct in ThreadInfo.Threads.Where((s) => (s.ProblemInstanceIdSpecified == true && s.ProblemInstanceId == ProblemID)))
-                {
-                    Solution s = (DVRP.Solution)DVRP.Solution.Deserialize(ct.SolutionData);
-                    if (s.Cost < minCost)
-                    {
-                        data = ct;
-                        minCost = s.Cost;
-                    }
-                }
-
-                // TODO: Jak dla mnie to to nie bedzie dobrze działać
-
-                solution = SolutionGenerator.Generate(data.CommonData,
-                    data.ProblemInstanceId, data.ProblemType,
-                    new SolutionsSolution[] { new SolutionsSolution() { Data = data.SolutionData, Type = SolutionsSolutionType.Partial } });
-
-            }
-            else
-            {
-                solution = SolutionGenerator.Generate(null,
-                    ThreadInfo.Threads[0].ProblemInstanceId, ThreadInfo.Threads[0].ProblemType,
-                    new SolutionsSolution[] { new SolutionsSolution() { Type = SolutionsSolutionType.Final } });
-            }
-            SendMessage(solution);
-        }
         public void SendSolution(ComputationalThread ct)
         {
             Solution s = (DVRP.Solution)DVRP.Solution.Deserialize(ct.SolutionData);
@@ -112,7 +70,7 @@ namespace Common.Components
                 Data = ct.SolutionData,
                 TimeoutOccured = false
             }
-            }            )
+            })
             ;
             SendMessage(solution);
         }
