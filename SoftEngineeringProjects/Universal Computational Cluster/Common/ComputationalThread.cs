@@ -9,6 +9,7 @@ namespace Common
     /// <summary>
     ///     Klasa zawierająca parametry wątku obliczeniowego posiadanego przez Node lub TM
     /// </summary>
+    public delegate void SolutionCallback(ComputationalThread ct);
     public class ComputationalThread
     {
         public ulong ProblemInstanceId;
@@ -42,7 +43,8 @@ namespace Common
             }
         }
         public byte[] CommonData;
-        public void StartSolving(ulong problemInstanceId, string problemType, ulong taskId, TimeSpan timeout, byte[] commonData, byte[] data)
+    
+        public void StartSolving(ulong problemInstanceId, string problemType, ulong taskId, TimeSpan timeout, byte[] commonData, byte[] data,SolutionCallback solutionCallback)
         {
             ProblemInstanceId = problemInstanceId;
             ProblemInstanceIdSpecified = true;
@@ -53,17 +55,18 @@ namespace Common
             State = StatusThreadState.Busy;
             CommonData = commonData;
             SolutionData = null;
-            ThreadStart starter = () => Solve(data, timeout);
+            ThreadStart starter = () => Solve(data, timeout,solutionCallback);
             Solver = new Thread(starter);
             Solver.Start();
         }
-        private void Solve(byte[] data, TimeSpan timeout)
+        private void Solve(byte[] data, TimeSpan timeout,SolutionCallback s)
         {
-            SolutionCallback(TaskSolver.Solve(data, timeout));
+            SolutionCallback(TaskSolver.Solve(data, timeout),s);
         }
-        private void SolutionCallback(byte[] data)
+        private void SolutionCallback(byte[] data,SolutionCallback s)
         {
             SolutionData = data;
+            s(this);
         }
         public ComputationalThread()
         {

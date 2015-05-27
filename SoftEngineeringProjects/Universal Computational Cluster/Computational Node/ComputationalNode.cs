@@ -46,7 +46,7 @@ namespace Common.Components
                     case SolvePartialProblems:
                         MsgHandler_SolvePartialProblems((SolvePartialProblems)message);
                         break;
-                   default:
+                    default:
                         base.HandleMessage(message, key, socket);
                         return;
                 }
@@ -65,7 +65,7 @@ namespace Common.Components
         {
             // TODO: Przenieść to do innego miejsca
             Solutions solution;
-            foreach (var ct in ThreadInfo.Threads.Where((s)=>(s.ProblemInstanceIdSpecified ==true && s.ProblemInstanceId == ProblemID)))
+            foreach (var ct in ThreadInfo.Threads.Where((s) => (s.ProblemInstanceIdSpecified == true && s.ProblemInstanceId == ProblemID)))
             {
                 ct.Solver.Join();
             }
@@ -100,7 +100,22 @@ namespace Common.Components
             }
             SendMessage(solution);
         }
-
+        public void SendSolution(ComputationalThread ct)
+        {
+            Solution s = (DVRP.Solution)DVRP.Solution.Deserialize(ct.SolutionData);
+            var solution = SolutionGenerator.Generate(ct.CommonData, ct.ProblemInstanceId, ct.ProblemType, new[] {new SolutionsSolution()
+            {
+                TaskId = ct.TaskId,
+                TaskIdSpecified = true,
+                Type = SolutionsSolutionType.Partial,
+                ComputationsTime = (ulong)(DateTime.Now - ct.StateChange).Ticks,
+                Data = ct.SolutionData,
+                TimeoutOccured = false
+            }
+            }            )
+            ;
+            SendMessage(solution);
+        }
         public void MsgHandler_SolvePartialProblems(SolvePartialProblems partialProblems)
         {
             var list =
@@ -119,10 +134,9 @@ namespace Common.Components
                 list[i].TaskSolver = GetTaskSolver(partialProblems.ProblemType,
                     partialProblems.CommonData);
                 list[i].StartSolving(partialProblems.Id, partialProblems.ProblemType, partialProblems.PartialProblems[i].TaskId,
-                    new TimeSpan(0, 0, 0, 0, (int)partialProblems.SolvingTimeout), partialProblems.CommonData, partialProblems.PartialProblems[i].Data);
+                    new TimeSpan(0, 0, 0, 0, (int)partialProblems.SolvingTimeout), partialProblems.CommonData, partialProblems.PartialProblems[i].Data, SendSolution);
             }
-            Thread tt = new Thread(new ParameterizedThreadStart(PrepareSolutions));
-            tt.Start(partialProblems.Id);
+
             // TODO: implement state changes for threads
             // TODO: implement solving threads
             // TODO: save solutions
