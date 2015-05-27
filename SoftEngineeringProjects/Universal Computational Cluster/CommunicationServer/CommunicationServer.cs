@@ -44,6 +44,7 @@ namespace Common.Components
         private readonly Dictionary<Socket, ulong> _socketToId;
         private readonly Dictionary<ulong, byte[]> _problems;
         private readonly Dictionary<ulong, SolvePartialProblems> _savedPartialProblems;
+        private readonly Dictionary<Tuple<ulong, ulong>, SolutionsSolution> _savedSolutions; //Tuple<Id_problemu, Id_podproblemu>
         private readonly Dictionary<ulong, SystemComponentType> _componentTypes;
         private readonly Dictionary<ulong, List<string>> _solvableProblemTypes;
 
@@ -61,6 +62,7 @@ namespace Common.Components
             _problems = new Dictionary<ulong, byte[]>();
             _threadStates = new Dictionary<ulong, StatusThread[]>();
             _savedPartialProblems = new Dictionary<ulong, SolvePartialProblems>();
+            _savedSolutions = new Dictionary<Tuple<ulong, ulong>, SolutionsSolution>();
             _componentTypes = new Dictionary<ulong, SystemComponentType>();
             _solvableProblemTypes = new Dictionary<ulong, List<string>>();
             SolvableProblems = new[] { "DVRP" }; //To pole dotyczy node'ów, sprawdzić w dokumentacji czy trzeba je inicjalizować w CS
@@ -282,8 +284,32 @@ namespace Common.Components
         /// <param name="socket"></param>
         private void MsgHandler_Solutions(Solutions message, Socket socket)
         {
-            //TODO: zapisać rozwiązania
-            throw new NotImplementedException();
+            foreach (var s in message.Solutions1)
+            {
+                var actualKey = new Tuple<ulong,ulong>(message.Id, s.TaskId);
+                if(_savedSolutions.ContainsKey(actualKey))
+                    _savedSolutions.Remove(actualKey);
+                _savedSolutions.Add(actualKey, s);
+            }
+            if (AreAllSolutionsFinal(message.Id))
+            {
+                //TODO: Send solutions to TM
+            }
+        }
+
+        protected bool AreAllSolutionsFinal(ulong ProblemId)
+        {
+            bool AllFinal = true;
+            ulong c = 0;
+            foreach (var key in _savedSolutions.Keys)
+            {
+                if (key.Item1 == ProblemId)
+                {
+                    c++;
+                    AllFinal = AllFinal && _savedSolutions[key].Type == SolutionsSolutionType.Final;
+                }
+            }
+            return AllFinal && c > 0;
         }
 
         /// <summary>
@@ -293,8 +319,15 @@ namespace Common.Components
         /// <param name="socket"></param>
         private void MsgHandler_SolutionRequest(SolutionRequest solutionRequest, Socket socket)
         {
-            //TODO: send solutionMessage
-            //throw new NotImplementedException();
+            bool AllFinal = AreAllSolutionsFinal(solutionRequest.Id);
+            if (AllFinal)
+            {
+                //TODO: send final solution
+            }
+            else
+            {
+                //TODO: send solutions report
+            }
         }
 
         /// <summary>
@@ -311,7 +344,15 @@ namespace Common.Components
             {
                 for (var i = 0; i < nodes[id]; i++)
                 {
+                    var processing = solvePartialProblems.PartialProblems[ind];
                     solvePartialProblems.PartialProblems[ind].NodeID = id;
+                    var value = new SolutionsSolution();
+                    value.Data = null;
+                    value.TaskId = processing.TaskId;
+                    value.TaskIdSpecified = true;
+                    value.TimeoutOccured = false;
+                    value.Type = SolutionsSolutionType.Ongoing;
+                    _savedSolutions.Add(new Tuple<ulong, ulong>(solvePartialProblems.Id, solvePartialProblems.PartialProblems[ind].TaskId), value);
                     ind++;
                 }
             }
