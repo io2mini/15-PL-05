@@ -133,6 +133,10 @@ namespace DVRP
 
             var task = Task.Deserialize(partialData);
             var routes = GeneratePermutedClients(task.Brackets);
+            var L = routes.LongCount();
+            L++;
+            L--;
+           
             double bestCost = double.MaxValue;
             Route[] bestSequence = null;
             foreach (var sequence in routes)
@@ -175,7 +179,7 @@ namespace DVRP
             }
             return tasksForNodes.ToArray();
         }
-        public Route[][] GeneratePermutedClients(int[][] brackets)
+        public List<Route[]> GeneratePermutedClients(int[][] brackets)
         {
             var permutedClients = Permuter.GenerateAndFillBrackets(ProblemInstance.Vehicles.Count,
                 ProblemInstance.Clients.Count, brackets);
@@ -207,7 +211,7 @@ namespace DVRP
 
             // Extra depot means Depot where path cost = 0
             // Dzielenie na taski
-            return combinedDestinations.ToArray();
+            return combinedDestinations;
         }
 
         private List<Route[]> CombineRoutes(List<Route[]> current, Route[] toAdd)
