@@ -6,8 +6,10 @@ using System.Net.Sockets;
 using System.Security;
 using Common.Exceptions;
 using Common.Messages;
+using Common.Messages.Generators;
 using Common.Properties;
-using UCCTaskSolver;
+using DVRP;
+using TaskSolver = UCCTaskSolver.TaskSolver;
 
 // ReSharper disable once CheckNamespace
 namespace Common.Components
@@ -61,7 +63,32 @@ namespace Common.Components
 
         private void MsgHandler_SolutionRequest(global::SolutionRequest solutionRequest)
         {
-            throw new NotImplementedException();
+            if (ThreadInfo.Threads.All(t => t.SolutionData != null))
+            {
+                int index = 0;
+                double minCost = Double.MaxValue;
+
+                // Wszyscy gotowi - odbierz dane
+                for (int i = 0; i < ThreadInfo.Threads.Count; i++)
+                {
+                    Solution s = (DVRP.Solution)DVRP.Solution.Deserialize(ThreadInfo.Threads[i].SolutionData);
+                    if (s.Cost < minCost)
+                    {
+                        index = i;
+                        minCost = s.Cost;
+                    }
+                }
+
+                var solution = SolutionGenerator.Generate(ThreadInfo.Threads[index].CommonData,
+                    ThreadInfo.Threads[index].ProblemInstanceId, ThreadInfo.Threads[index].ProblemType,
+                    new SolutionsSolution[] {new SolutionsSolution() {//TODO: Dodać
+                    } });
+
+            }
+            else
+            {
+                
+            }
         }
 
         public void MsgHandler_SolvePartialProblems(SolvePartialProblems partialProblems)

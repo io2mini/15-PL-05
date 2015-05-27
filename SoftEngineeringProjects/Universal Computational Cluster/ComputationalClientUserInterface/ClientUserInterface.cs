@@ -83,7 +83,7 @@ namespace Common.UserInterface
             }
 
             // Zawiśnij w oczekwianiu na odebranie rozwiązania
-            while (!computationalClient.HasFinalSolution)
+            while (!computationalClient.HasFinalSolution) //TODO: naprawić ten busy waiting
             {
             }
             //TODO: wyświetl rozwiązanie

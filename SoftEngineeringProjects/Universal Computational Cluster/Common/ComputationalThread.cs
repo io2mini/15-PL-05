@@ -22,15 +22,35 @@ namespace Common
         public TaskSolver TaskSolver;
         public Thread Solver;
         public ThreadInfo Localisation;
-        public byte[] SolutionData;
+        private Mutex WaitForSolution;
+        private byte[] solutionData;
+
+        public byte[] SolutionData
+        {
+            get
+            {
+                if (WaitForSolution != null) WaitForSolution.WaitOne();
+                byte[] sd = solutionData;
+                if (WaitForSolution != null) WaitForSolution.ReleaseMutex();
+                return sd;
+            }
+            set
+            {
+                if (WaitForSolution != null) WaitForSolution.WaitOne();
+                solutionData = value;
+                if (WaitForSolution != null) WaitForSolution.ReleaseMutex();
+            }
+        }
         public byte[] CommonData;
-        public void StartSolving(ulong problemInstanceId, string problemType, ulong taskId, TimeSpan timeout,byte[] commonData, byte[] data)
+        public void StartSolving(ulong problemInstanceId, string problemType, ulong taskId, TimeSpan timeout, byte[] commonData, byte[] data)
         {
             ProblemInstanceId = problemInstanceId;
             ProblemInstanceIdSpecified = true;
             ProblemType = problemType;
+            WaitForSolution = new Mutex();
             TaskId = taskId;
             TaskIdSpecified = true;
+            State = StatusThreadState.Busy;
             CommonData = commonData;
             SolutionData = null;
             ThreadStart starter = () => Solve(data, timeout);

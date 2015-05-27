@@ -135,6 +135,7 @@ namespace Common
             if (!TcpClient.Connected)
                 TcpClient.Connect(CommunicationServerInfo.CommunicationServerAddress.Host,
                     CommunicationServerInfo.CommunicationServerPort);
+            /// TODO: Timeout na receive 
             var stream = TcpClient.GetStream();
             var byteArray = new byte[1024];
             try
