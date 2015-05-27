@@ -159,7 +159,7 @@ namespace Common
                 StartReceiveing();
             }
             var message = Message.Sanitize(byteArray);
-            Console.WriteLine("Received "+message.GetType());
+            //Console.WriteLine("Received "+message.GetType());
             Validate(message, null); //Uważać z nullem w klasach dziedziczących
         }
 
@@ -284,9 +284,6 @@ namespace Common
 
                         Console.WriteLine(Resources.SystemComponent_MsgHandler_RegisterResponse_Sending_Status);
                         SendMessage(GenerateStatus());
-                        var thread = new Thread(ReceiveResponse);
-                        thread.IsBackground = true;
-                        thread.Start();
                     }, null, 0, (int)message.Timeout * MilisecondsMultiplier);
             }
             catch (InvalidIdException)
@@ -430,6 +427,7 @@ namespace Common
                     TcpClient.Connect(CommunicationServerInfo.CommunicationServerAddress.Host,
                         CommunicationServerInfo.CommunicationServerPort);
                 }
+                Thread.Sleep(1000);
                 var stream = TcpClient.GetStream();
                 var receiver = TcpClient.Client;
 

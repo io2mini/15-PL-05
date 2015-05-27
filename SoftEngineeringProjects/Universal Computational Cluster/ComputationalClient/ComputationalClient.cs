@@ -49,6 +49,7 @@ namespace Common.Components
                 F.Close();
                 AskForSolutions();
             }
+            StartReceiveing();
         }
 
         private void SendSolutionRequest()
@@ -58,7 +59,6 @@ namespace Common.Components
                 while (IsWorking && ExistingProblem)
                 {
                     SendMessage(SolutionRequestGenerator.Generate(ProblemID));
-                    ReceiveResponse();
                     Thread.Sleep(new TimeSpan(0,0,0,15));
                 }
             }
@@ -87,9 +87,6 @@ namespace Common.Components
         private void CreateProblem(Problem path)
         {
             SendSolveRequestMessage(path);
-            var t = new Thread(ReceiveResponse);
-            t.IsBackground = true;
-            t.Start();
         }
 
         protected override void HandleMessage(Message message, string key, Socket socket)
