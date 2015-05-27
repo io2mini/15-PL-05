@@ -170,7 +170,7 @@ namespace Common
             Solution = "Solution";
 
         private const uint MilisecondsMultiplier = 1000;
-        protected const int BufferSize = 1048576;
+        protected const int BufferSize = 1024*1024*30;
         public const string Path = ""; //Scieżka do pliku konfiguracyjnego
 
         #endregion

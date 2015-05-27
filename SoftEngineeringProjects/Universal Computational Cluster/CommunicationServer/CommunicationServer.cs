@@ -116,9 +116,7 @@ namespace Common.Components
             else
             {
                 // jesteśmy backupem
-                InitializeConnection();
-                SendRegisterMessage();
-                ReceiveResponse();
+                base.Start();
             }
             while (IsWorking)
             {
@@ -691,7 +689,7 @@ namespace Common.Components
             {
                 while (socket.IsBound)
                 {
-                    var byteArray = new byte[10000];
+                    var byteArray = new byte[BufferSize];
 
                     Thread.Sleep(1000);
                     socket.Receive(byteArray);
