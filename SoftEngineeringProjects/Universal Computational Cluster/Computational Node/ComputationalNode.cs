@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Security;
+using System.Threading;
 using Common.Exceptions;
 using Common.Messages;
 using Common.Messages.Generators;
@@ -45,10 +46,7 @@ namespace Common.Components
                     case SolvePartialProblems:
                         MsgHandler_SolvePartialProblems((SolvePartialProblems)message);
                         break;
-                    case SolutionRequest:
-                        MsgHandler_SolutionRequest((SolutionRequest)message);
-                        break;
-                    default:
+                   default:
                         base.HandleMessage(message, key, socket);
                         return;
                 }
@@ -59,38 +57,48 @@ namespace Common.Components
             }
         }
 
-        private void MsgHandler_SolutionRequest(global::SolutionRequest solutionRequest)
+        private void PrepareSolutions(object ProblemID)
+        {
+            PrepareSolutions((ulong)ProblemID);
+        }
+        private void PrepareSolutions(ulong ProblemID)
         {
             // TODO: Przenieść to do innego miejsca
+            Solutions solution;
+            foreach (var ct in ThreadInfo.Threads.Where((s)=>(s.ProblemInstanceIdSpecified ==true && s.ProblemInstanceId == ProblemID)))
+            {
+                ct.Solver.Join();
+            }
             if (ThreadInfo.Threads.All(t => t.SolutionData != null))
             {
-                int index = 0;
+                ComputationalThread data = null;
                 double minCost = Double.MaxValue;
 
                 // Wszyscy gotowi - odbierz dane
-                for (int i = 0; i < ThreadInfo.Threads.Count; i++)
+                foreach (var ct in ThreadInfo.Threads.Where((s) => (s.ProblemInstanceIdSpecified == true && s.ProblemInstanceId == ProblemID)))
                 {
-                    Solution s = (DVRP.Solution)DVRP.Solution.Deserialize(ThreadInfo.Threads[i].SolutionData);
+                    Solution s = (DVRP.Solution)DVRP.Solution.Deserialize(ct.SolutionData);
                     if (s.Cost < minCost)
                     {
-                        index = i;
+                        data = ct;
                         minCost = s.Cost;
                     }
                 }
 
                 // TODO: Jak dla mnie to to nie bedzie dobrze działać
 
-                var solution = SolutionGenerator.Generate(ThreadInfo.Threads[index].CommonData,
-                    ThreadInfo.Threads[index].ProblemInstanceId, ThreadInfo.Threads[index].ProblemType,
-                    new SolutionsSolution[] { new SolutionsSolution() { Data = ThreadInfo.Threads[index].SolutionData, Type = SolutionsSolutionType.Final } });
+                solution = SolutionGenerator.Generate(data.CommonData,
+                    data.ProblemInstanceId, data.ProblemType,
+                    new SolutionsSolution[] { new SolutionsSolution() { Data = data.SolutionData, Type = SolutionsSolutionType.Final } });
 
             }
             else
             {
-                var solution = SolutionGenerator.Generate(null,
+                solution = SolutionGenerator.Generate(null,
                     ThreadInfo.Threads[0].ProblemInstanceId, ThreadInfo.Threads[0].ProblemType,
                     new SolutionsSolution[] { new SolutionsSolution() { Type = SolutionsSolutionType.Final } });
             }
+            SendMessage(solution);
         }
 
         public void MsgHandler_SolvePartialProblems(SolvePartialProblems partialProblems)
@@ -113,6 +121,8 @@ namespace Common.Components
                 list[i].StartSolving(partialProblems.Id, partialProblems.ProblemType, partialProblems.PartialProblems[i].TaskId,
                     new TimeSpan(0, 0, 0, 0, (int)partialProblems.SolvingTimeout), partialProblems.CommonData, partialProblems.PartialProblems[i].Data);
             }
+            Thread tt = new Thread(new ParameterizedThreadStart(PrepareSolutions));
+            tt.Start(partialProblems.Id);
             // TODO: implement state changes for threads
             // TODO: implement solving threads
             // TODO: save solutions
