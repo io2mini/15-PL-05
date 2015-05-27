@@ -24,7 +24,8 @@ namespace Common.Components
             Status = "Status",
             SolveRequest = "SolveRequest",
             PartialProblems = "PartialProblems",
-            SolutionRequest = "SolutionRequest";
+            SolutionRequest = "SolutionRequest",
+            Solutions = "Solution";
 
         #endregion
 
@@ -84,6 +85,8 @@ namespace Common.Components
             //SolutionRequest
             SchemaTypes.Add(SolutionRequest,
                 new Tuple<string, Type>(Resources.SolutionRequest, typeof(SolutionRequest)));
+            //Solutions
+            SchemaTypes.Add(Solutions, new Tuple<string, Type>(Resources.Solution,  typeof(Solutions)));
         }
 
         /// <summary>
@@ -261,11 +264,26 @@ namespace Common.Components
                     if (!IsPrimary) ChangeServerFromBuckupToPrimary();
                     MsgHandler_SolutionRequest((SolutionRequest)message, socket);
                     return;
+                case Solutions:
+                    if (!IsPrimary) ChangeServerFromBuckupToPrimary();
+                    MsgHandler_Solutions((Solutions)message, socket);
+                    return;
                 default:
                     base.HandleMessage(message, key, socket);
                     return;
             }
             //TODO: Zrobić tryb kompatybilny
+        }
+
+        /// <summary>
+        /// Metoda obsługując otrzymane rozwiązania
+        /// </summary>
+        /// <param name="solutionRequest"></param>
+        /// <param name="socket"></param>
+        private void MsgHandler_Solutions(Solutions message, Socket socket)
+        {
+            //TODO: zapisać rozwiązania
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -277,16 +295,6 @@ namespace Common.Components
         {
             //TODO: send solutionMessage
             //throw new NotImplementedException();
-        }
-
-        /// <summary>
-        ///     Obsługa otrzymanego komunikatu na temat rozwiązań
-        /// </summary>
-        /// <param name="solutions"></param>
-        protected override void MsgHandler_Solution(Solutions solutions)
-        {
-            //TODO: save solution
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -309,7 +317,7 @@ namespace Common.Components
             }
             if (ind < solvePartialProblems.PartialProblems.Count())
                 throw new Exception("Not enough nodes"); //TODO: handle exception; 
-            _savedPartialProblems.Add(solvePartialProblems.Id, solvePartialProblems);
+            _savedPartialProblems.Add(solvePartialProblems.Id, solvePartialProblems); //Przetrzymywany komunikat w kluczu problemu
 
             var toSend = new Dictionary<ulong, SolvePartialProblems>();
             foreach (var id in nodes.Keys)
