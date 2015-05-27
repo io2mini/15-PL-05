@@ -18,13 +18,13 @@ namespace Common.Components
     public class ComputationalNode : SolvingComponent
     {
         private const string SolvePartialProblems = "SolvePartialProblems", SolutionRequest = "SolutionRequest";
-        
+
         public ComputationalNode()
         {
             DeviceType = SystemComponentType.ComputationalNode;
-            SolvableProblems = new[] {"DVRP"};
+            SolvableProblems = new[] { "DVRP" };
             PararellThreads = 1; //TODO: load this from config
-           
+
         }
 
         protected override void Initialize()
@@ -43,7 +43,7 @@ namespace Common.Components
                 switch (key)
                 {
                     case SolvePartialProblems:
-                        MsgHandler_SolvePartialProblems((SolvePartialProblems) message);
+                        MsgHandler_SolvePartialProblems((SolvePartialProblems)message);
                         break;
                     case SolutionRequest:
                         MsgHandler_SolutionRequest((SolutionRequest)message);
@@ -98,7 +98,7 @@ namespace Common.Components
             var list =
                 ThreadInfo.Threads.FindAll(
                     ct => (ct.State == StatusThreadState.Idle));
-            if (list.Count < partialProblems.PartialProblems.Length-1)
+            if (list.Count < partialProblems.PartialProblems.Length - 1)
             {
                 throw new NotEnoughIdleThreadsException("Not enough idle threads for problem type");
             }
@@ -106,18 +106,18 @@ namespace Common.Components
             {
                 throw new InvalidIdException("Ivalid Node Id in Partial Problem");
             }
-            for(int i=0;i<partialProblems.PartialProblems.Length;i++)
+            for (int i = 0; i < partialProblems.PartialProblems.Length; i++)
             {
                 list[i].TaskSolver = GetTaskSolver(partialProblems.ProblemType,
-                    partialProblems.PartialProblems[0].Data);
-                list[i].StartSolving(partialProblems.Id,partialProblems.ProblemType,partialProblems.PartialProblems[i+1].TaskId,new TimeSpan(0,0,0,0,(int)partialProblems.SolvingTimeout),partialProblems.PartialProblems[0].Data,partialProblems.PartialProblems[i
-                    +1].Data);
+                    partialProblems.CommonData);
+                list[i].StartSolving(partialProblems.Id, partialProblems.ProblemType, partialProblems.PartialProblems[i].TaskId,
+                    new TimeSpan(0, 0, 0, 0, (int)partialProblems.SolvingTimeout), partialProblems.CommonData, partialProblems.PartialProblems[i].Data);
             }
             // TODO: implement state changes for threads
             // TODO: implement solving threads
             // TODO: save solutions
         }
 
-        
+
     }
 }

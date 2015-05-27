@@ -59,6 +59,7 @@ namespace Common.Components
             parts.CommonData = dataParts[0]; //TODO: check for null?
             //TODO: solving timeout?
             var l = new List<SolvePartialProblemsPartialProblem>((int) divideProblem.ComputationalNodes);
+            
             for (var i = 1; i < dataParts.Count(); i++)
             {
                 var spp = new SolvePartialProblemsPartialProblem
