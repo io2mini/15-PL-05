@@ -70,6 +70,9 @@
       <Project>{7b733aa3-d074-497d-b2c8-ad4690084fc2}</Project>
       <Name>ComputationalClient</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SolvingComponent\SolvingComponent.csproj">
+      <Project>{1FBD2164-117D-41B2-A96B-4B2D6DBDA56E}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Task Manager\Task Manager.csproj">
       <Project>{40beaa1f-12c4-4f6f-b9c9-e19e8633a164}</Project>
       <Name>Task Manager</Name>

@@ -15,7 +15,7 @@ using TaskSolver = UCCTaskSolver.TaskSolver;
 namespace Common.Components
 {
 
-    public class ComputationalNode : SystemComponent
+    public class ComputationalNode : SolvingComponent
     {
         private const string SolvePartialProblems = "SolvePartialProblems", SolutionRequest = "SolutionRequest";
         
@@ -24,9 +24,7 @@ namespace Common.Components
             DeviceType = SystemComponentType.ComputationalNode;
             SolvableProblems = new[] {"DVRP"};
             PararellThreads = 1; //TODO: load this from config
-            
-            TaskSolverFactories = new Dictionary<string, TaskSolverFactory>();
-            TaskSolverFactories.Add("DVRP",DVRP.TaskSolver.TaskSolverFactory);
+           
         }
 
         protected override void Initialize()
@@ -120,26 +118,6 @@ namespace Common.Components
             // TODO: save solutions
         }
 
-        public delegate TaskSolver TaskSolverFactory(byte[] data);
-
-        private Dictionary<string, TaskSolverFactory> TaskSolverFactories;
-        protected TaskSolver GetTaskSolver(string problemType, byte[] data)
-        {
-            /* TODO:
-             * 1. Initialize apropriate task solver based on problem type
-             * 2. If TM doesn't implement solving given problem type: throw exception
-             */
-            if (!SolvableProblems.Contains(problemType))
-            {
-                //TODO: exception message
-                throw new UnrecognizedProblemException();
-            }
-            if (!TaskSolverFactories.ContainsKey(problemType))
-            {
-                //TODO: exception message
-                throw new UnrecognizedProblemException();
-            }
-            return TaskSolverFactories[problemType](data);
-        }
+        
     }
 }

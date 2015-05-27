@@ -58,6 +58,10 @@
       <Project>{ac1302e2-f903-44d2-a0b9-eb65263dd10a}</Project>
       <Name>Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SolvingComponent\SolvingComponent.csproj">
+      <Project>{1FBD2164-117D-41B2-A96B-4B2D6DBDA56E}</Project>
+      <Name>SolvingComponent</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Task Manager\Task Manager.csproj">
       <Project>{40beaa1f-12c4-4f6f-b9c9-e19e8633a164}</Project>
       <Name>Task Manager</Name>
