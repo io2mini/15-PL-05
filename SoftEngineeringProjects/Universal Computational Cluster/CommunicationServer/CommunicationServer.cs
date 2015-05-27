@@ -286,18 +286,47 @@ namespace Common.Components
         {
             foreach (var s in message.Solutions1)
             {
-                var actualKey = new Tuple<ulong,ulong>(message.Id, s.TaskId);
-                if(_savedSolutions.ContainsKey(actualKey))
-                    _savedSolutions.Remove(actualKey);
-                _savedSolutions.Add(actualKey, s);
+                if (s.TaskIdSpecified)
+                {
+                    var actualKey = new Tuple<ulong, ulong>(message.Id, s.TaskId);
+                    if (_savedSolutions.ContainsKey(actualKey))
+                        _savedSolutions.Remove(actualKey);
+                    _savedSolutions.Add(actualKey, s);
+                }
+                else
+                {
+                    var l = new List<Tuple<ulong, ulong>>();
+                    foreach (var key in _savedSolutions.Keys)
+                    {
+                        if (key.Item1 == message.Id)
+                        {
+                            l.Add(key);
+                        }
+                    }
+                    foreach (var key in l)
+                    {
+                        _savedSolutions.Remove(key);
+                    }
+                    _savedSolutions.Add(new Tuple<ulong, ulong>(message.Id, 0), message.Solutions1[0]);
+                }
             }
-            if (AreAllSolutionsFinal(message.Id))
+            if (AreAllSolutionsOfType(message.Id, SolutionsSolutionType.Partial))
             {
-                //TODO: Send solutions to TM
+                var sol = new Messages.Solutions();
+                sol.Id = message.Id;
+                sol.ProblemType = message.ProblemType;
+                var l = new List<SolutionsSolution>();
+                foreach (var s in message.Solutions1)
+                {
+                    var actualKey = new Tuple<ulong, ulong>(message.Id, s.TaskId);
+                    l.Add(_savedSolutions[actualKey]);
+                }
+                sol.Solutions1 = l.ToArray();
+                SendMessageToComponent(_savedPartialProblems[message.Id].PartialProblems[0].NodeID, sol);
             }
         }
 
-        protected bool AreAllSolutionsFinal(ulong ProblemId)
+        protected bool AreAllSolutionsOfType(ulong ProblemId, SolutionsSolutionType type = SolutionsSolutionType.Final)
         {
             bool AllFinal = true;
             ulong c = 0;
@@ -306,7 +335,7 @@ namespace Common.Components
                 if (key.Item1 == ProblemId)
                 {
                     c++;
-                    AllFinal = AllFinal && _savedSolutions[key].Type == SolutionsSolutionType.Final;
+                    AllFinal = AllFinal && _savedSolutions[key].Type == type;
                 }
             }
             return AllFinal && c > 0;
@@ -319,14 +348,31 @@ namespace Common.Components
         /// <param name="socket"></param>
         private void MsgHandler_SolutionRequest(SolutionRequest solutionRequest, Socket socket)
         {
-            bool AllFinal = AreAllSolutionsFinal(solutionRequest.Id);
+            bool AllFinal = AreAllSolutionsOfType(solutionRequest.Id);
             if (AllFinal)
             {
-                //TODO: send final solution
+                var sol = new Solutions();
+                sol.Id = solutionRequest.Id;
+                sol.ProblemType = _savedPartialProblems[solutionRequest.Id].ProblemType;
+                sol.Solutions1 = new SolutionsSolution[] { _savedSolutions[new Tuple<ulong, ulong>(solutionRequest.Id, 0)] };
+                SendMessageToComponent(socket, sol);
             }
             else
             {
-                //TODO: send solutions report
+                var sol = new Solutions();
+                sol.Id = solutionRequest.Id;
+                if (!_savedPartialProblems.Keys.Contains(solutionRequest.Id)) return;
+                sol.ProblemType = _savedPartialProblems[solutionRequest.Id].ProblemType;
+                var l = new List<SolutionsSolution>();
+                foreach (var key in _savedSolutions.Keys)
+                {
+                    if (key.Item1 == solutionRequest.Id)
+                    {
+                        l.Add(_savedSolutions[key]);
+                    }
+                }
+                sol.Solutions1 = l.ToArray();
+                SendMessageToComponent(socket, sol);
             }
         }
 
@@ -340,6 +386,7 @@ namespace Common.Components
             var nodes = GetComputationNodes(solvePartialProblems.ProblemType,
                 solvePartialProblems.PartialProblems.Count());
             var ind = 0;
+            var TmId = _socketToId[socket];
             foreach (var id in nodes.Keys)
             {
                 for (var i = 0; i < nodes[id]; i++)
@@ -372,6 +419,10 @@ namespace Common.Components
                     CommonData = solvePartialProblems.CommonData,
                     PartialProblems = solvePartialProblems.PartialProblems.Where(spppp => spppp.NodeID == id).ToArray()
                 };
+                foreach (var spp in msg.PartialProblems)
+                {
+                    spp.NodeID = TmId;
+                }
                 toSend.Add(id, msg);
             }
 
