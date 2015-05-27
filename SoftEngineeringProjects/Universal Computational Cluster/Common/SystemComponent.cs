@@ -77,8 +77,14 @@ namespace Common
         {
             InitializeConnection(); //TODO: sypie się przy nieudanej próbie
             SendRegisterMessage();
-            ReceiveResponse();
+            StartReceiveing();
 
+        }
+
+        protected void StartReceiveing()
+        {
+            Thread t = new Thread(ReceiveResponse);
+            t.Start();
         }
 
         protected SystemComponentType ParseType(string s)
@@ -146,6 +152,10 @@ namespace Common
             {
                 Console.WriteLine(Resources.SystemComponent_ReceiveResponse_Connection_was_killed_by_host);
                 return;
+            }
+            finally
+            {
+                StartReceiveing();
             }
             var message = Message.Sanitize(byteArray);
             //Console.WriteLine("Received "+message.GetType());
