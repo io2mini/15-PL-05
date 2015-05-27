@@ -116,9 +116,7 @@ namespace Common.Components
             else
             {
                 // jesteśmy backupem
-                InitializeConnection();
-                SendRegisterMessage();
-                ReceiveResponse();
+                base.Start();
             }
             while (IsWorking)
             {
@@ -603,7 +601,7 @@ namespace Common.Components
             try
             {
                 Console.WriteLine(message.GetType().ToString());
-                var byteData = Encoding.ASCII.GetBytes(message.toString());
+                var byteData = Encoding.UTF8.GetBytes(message.toString());
                 receiver.BeginSend(byteData, 0, byteData.Length, 0,
                     SendCallback, receiver);
             }
@@ -691,7 +689,7 @@ namespace Common.Components
             {
                 while (socket.IsBound)
                 {
-                    var byteArray = new byte[10000];
+                    var byteArray = new byte[BufferSize];
 
                     Thread.Sleep(1000);
                     socket.Receive(byteArray);
