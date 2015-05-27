@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
 namespace Common.Messages
@@ -17,11 +18,17 @@ namespace Common.Messages
         {
             var message = Encoding.UTF8.GetString(byteArray);
             message = message.Trim('\0');
+            //message = message.Replace("\n", string.Empty);
+            //message = message.Replace("\r", string.Empty);
+            var rgx = new Regex(@">(\s*\n*\r*)*<");
+            message = rgx.Replace(message, "><");
+
             string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
             if (message.StartsWith(_byteOrderMarkUtf8))
             {
                 message = message.Replace(_byteOrderMarkUtf8, "");
             }
+            message = message.Replace("\0", string.Empty);
             return message;
         }
 

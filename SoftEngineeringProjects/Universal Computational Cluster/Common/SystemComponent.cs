@@ -146,7 +146,8 @@ namespace Common
             var byteArray = new byte[BufferSize];
             try
             {
-                stream.Read(byteArray, 0, BufferSize);
+                var length = stream.Read(byteArray, 0, BufferSize);
+                Console.WriteLine("Received: {0}", length);
             }
             catch (Exception)
             {
@@ -158,7 +159,7 @@ namespace Common
                 StartReceiveing();
             }
             var message = Message.Sanitize(byteArray);
-            //Console.WriteLine("Received "+message.GetType());
+            Console.WriteLine("Received "+message.GetType());
             Validate(message, null); //Uważać z nullem w klasach dziedziczących
         }
 
@@ -170,7 +171,7 @@ namespace Common
             Solution = "Solution";
 
         private const uint MilisecondsMultiplier = 1000;
-        protected const int BufferSize = 1024*1024*30;
+        protected const int BufferSize = 1024*1024*2;
         public const string Path = ""; //Scieżka do pliku konfiguracyjnego
 
         #endregion
@@ -439,9 +440,9 @@ namespace Common
                 //Workarnound end, zrobić pożądek
 
 
-                var writer = new StreamWriter(stream, Encoding.UTF8) {AutoFlush = false};
-                writer.Write(message);
-                writer.Flush();
+                //var writer = new StreamWriter(stream, Encoding.UTF8) {AutoFlush = false};
+                //writer.Write(message);
+                //writer.Flush();
             }
             catch (IOException)
             {
