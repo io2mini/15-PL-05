@@ -16,12 +16,12 @@ namespace Common.Messages
         public static string Sanitize(byte[] byteArray)
         {
             var message = Encoding.UTF8.GetString(byteArray);
+            message = message.Trim('\0');
             string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
             if (message.StartsWith(_byteOrderMarkUtf8))
             {
                 message = message.Replace(_byteOrderMarkUtf8, "");
             }
-            message = message.Replace("\0", string.Empty);
             return message;
         }
 
@@ -38,7 +38,7 @@ namespace Common.Messages
             return message;
         }
 
-        public String toString()
+        public override String ToString()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(this.GetType());
             StringWriter writer = new UTF8StringWriter();
