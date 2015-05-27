@@ -692,7 +692,8 @@ namespace Common.Components
                     var byteArray = new byte[BufferSize];
 
                     Thread.Sleep(1000);
-                    socket.Receive(byteArray);
+                    int length = socket.Receive(byteArray);
+                    Console.WriteLine("Received {0} bytes",length);
                     var message = Message.Sanitize(byteArray);
                     MessageQueue.Enqueue(new Tuple<string, Socket>(message, socket));
                     MessageQueueMutex.Set();
