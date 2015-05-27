@@ -430,6 +430,15 @@ namespace Common
                         CommunicationServerInfo.CommunicationServerPort);
                 }
                 var stream = TcpClient.GetStream();
+                var receiver = TcpClient.Client;
+
+                //Workaround
+                var byteData = Encoding.UTF8.GetBytes(message);
+                receiver.BeginSend(byteData, 0, byteData.Length, 0,
+                    SendCallback, receiver);
+                //Workarnound end, zrobić pożądek
+
+
                 var writer = new StreamWriter(stream, Encoding.UTF8) {AutoFlush = false};
                 writer.Write(message);
                 writer.Flush();
@@ -443,8 +452,11 @@ namespace Common
                     CommunicationServerInfo.CommunicationServerAddress = new Uri(BackupCommunicationServers[0].Item1);
                     // zarejestruj się ponownie u innego cs'a
                     if (DeviceType.Equals(SystemComponentType.CommunicationServer)
-                        && MyCommunicationInfo.CommunicationServerAddress == CommunicationServerInfo.CommunicationServerAddress
-                        && MyCommunicationInfo.CommunicationServerPort == CommunicationServerInfo.CommunicationServerPort)
+                        &&
+                        MyCommunicationInfo.CommunicationServerAddress ==
+                        CommunicationServerInfo.CommunicationServerAddress
+                        &&
+                        MyCommunicationInfo.CommunicationServerPort == CommunicationServerInfo.CommunicationServerPort)
                     {
                         // jeżeli jesteś backupem, który powinien być teraz Cs'em nie wysyłaj do siebie wiadomości
                         // czekaj aż ktoś spróbuje coś do Ciebie wysłać wtedy automatycznie zamienisz się na primary CS
@@ -462,6 +474,21 @@ namespace Common
             {
                 var message = "Unable to send message";
                 throw new MessageNotSentException(message, e);
+            }
+        }
+        //TODO: roboczo dodane, zrobić pożądek
+        private static void SendCallback(IAsyncResult ar)
+        {
+            try
+            {
+                var handler = (Socket)ar.AsyncState;
+                var bytesSent = handler.EndSend(ar);
+                // na potrzeby testów
+                Console.WriteLine(Resources.CommunicationServer_SendCallback_Sent__0__bytes_to_client_, bytesSent);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
             }
         }
 
