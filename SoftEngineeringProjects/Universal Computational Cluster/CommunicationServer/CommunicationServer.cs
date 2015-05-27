@@ -602,6 +602,7 @@ namespace Common.Components
             {
                 Console.WriteLine(message.GetType().ToString());
                 var byteData = Encoding.UTF8.GetBytes(message.ToString());
+                receiver.DontFragment = true;
                 receiver.BeginSend(byteData, 0, byteData.Length, 0,
                     SendCallback, receiver);
             }

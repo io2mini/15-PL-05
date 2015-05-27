@@ -430,7 +430,7 @@ namespace Common
                 Thread.Sleep(1000);
                 var stream = TcpClient.GetStream();
                 var receiver = TcpClient.Client;
-
+                receiver.DontFragment = true;
                 //Workaround
                 var byteData = Encoding.UTF8.GetBytes(message);
                 receiver.BeginSend(byteData, 0, byteData.Length, 0,
