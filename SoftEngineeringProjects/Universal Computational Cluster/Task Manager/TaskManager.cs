@@ -8,7 +8,7 @@ using DVRP;
 
 namespace Common.Components
 {
-    public class TaskManager : SystemComponent
+    public class TaskManager : SolvingComponent
     {
         private const string DivideProblem = "DivideProblem", SolutionRequest = "SolutionRequest";
 
@@ -74,13 +74,6 @@ namespace Common.Components
             SendMessage(parts);
         }
 
-        private TaskSolver GetTaskSolver(string problemType, byte[] data)
-        {
-            /* TODO:
-             * 1. Initialize apropriate task solver based on solution type
-             * 2. If TM doesn't implement solving given solution type: throw exception
-             */
-            throw new NotImplementedException();
-        }
+      
     }
 }
