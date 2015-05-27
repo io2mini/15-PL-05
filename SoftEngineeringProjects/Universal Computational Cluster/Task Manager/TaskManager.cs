@@ -23,7 +23,7 @@ namespace Common.Components
         {
             base.Initialize();
             //DivideProblem
-            SchemaTypes.Add(DivideProblem, new Tuple<string, Type>(Resources.Error, typeof (DivideProblem)));
+            SchemaTypes.Add(DivideProblem, new Tuple<string, Type>(Resources.DivideProblem, typeof (DivideProblem)));
             //SolutionRequest
             SchemaTypes.Add(SolutionRequest, new Tuple<string, Type>(Resources.SolutionRequest, typeof(SolutionRequest)));
         }
