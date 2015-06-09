@@ -57,7 +57,7 @@ namespace Common.Components
             s.Data = solution;
             s.ComputationsTime = (ulong)solutions.Solutions1.Max<SolutionsSolution>((d)=>((decimal)d.ComputationsTime));
            
-            s.TaskId = ulong.MaxValue;
+
              s.TaskIdSpecified = false;
             s.TimeoutOccured = false;
             s.Type = SolutionsSolutionType.Final;
