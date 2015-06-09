@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Security;
+using System.Threading;
 using Common.Exceptions;
 using Common.Messages;
 using Common.Messages.Generators;
@@ -45,9 +46,6 @@ namespace Common.Components
                     case SolvePartialProblems:
                         MsgHandler_SolvePartialProblems((SolvePartialProblems)message);
                         break;
-                    case SolutionRequest:
-                        MsgHandler_SolutionRequest((SolutionRequest)message);
-                        break;
                     default:
                         base.HandleMessage(message, key, socket);
                         return;
@@ -59,40 +57,23 @@ namespace Common.Components
             }
         }
 
-        private void MsgHandler_SolutionRequest(global::SolutionRequest solutionRequest)
+
+        public void SendSolution(ComputationalThread ct)
         {
-            // TODO: Przenieść to do innego miejsca
-            if (ThreadInfo.Threads.All(t => t.SolutionData != null))
+            Solution s = (DVRP.Solution)DVRP.Solution.Deserialize(ct.SolutionData);
+            var solution = SolutionGenerator.Generate(ct.CommonData, ct.ProblemInstanceId, ct.ProblemType, new[] {new SolutionsSolution()
             {
-                int index = 0;
-                double minCost = Double.MaxValue;
-
-                // Wszyscy gotowi - odbierz dane
-                for (int i = 0; i < ThreadInfo.Threads.Count; i++)
-                {
-                    Solution s = (DVRP.Solution)DVRP.Solution.Deserialize(ThreadInfo.Threads[i].SolutionData);
-                    if (s.Cost < minCost)
-                    {
-                        index = i;
-                        minCost = s.Cost;
-                    }
-                }
-
-                // TODO: Jak dla mnie to to nie bedzie dobrze działać
-
-                var solution = SolutionGenerator.Generate(ThreadInfo.Threads[index].CommonData,
-                    ThreadInfo.Threads[index].ProblemInstanceId, ThreadInfo.Threads[index].ProblemType,
-                    new SolutionsSolution[] { new SolutionsSolution() { Data = ThreadInfo.Threads[index].SolutionData, Type = SolutionsSolutionType.Final } });
-
+                TaskId = ct.TaskId,
+                TaskIdSpecified = true,
+                Type = SolutionsSolutionType.Partial,
+                ComputationsTime = (ulong)(DateTime.Now - ct.StateChange).Ticks,
+                Data = ct.SolutionData,
+                TimeoutOccured = false
             }
-            else
-            {
-                var solution = SolutionGenerator.Generate(null,
-                    ThreadInfo.Threads[0].ProblemInstanceId, ThreadInfo.Threads[0].ProblemType,
-                    new SolutionsSolution[] { new SolutionsSolution() { Type = SolutionsSolutionType.Final } });
-            }
+            })
+            ;
+            SendMessage(solution);
         }
-
         public void MsgHandler_SolvePartialProblems(SolvePartialProblems partialProblems)
         {
             var list =
@@ -111,8 +92,9 @@ namespace Common.Components
                 list[i].TaskSolver = GetTaskSolver(partialProblems.ProblemType,
                     partialProblems.CommonData);
                 list[i].StartSolving(partialProblems.Id, partialProblems.ProblemType, partialProblems.PartialProblems[i].TaskId,
-                    new TimeSpan(0, 0, 0, 0, (int)partialProblems.SolvingTimeout), partialProblems.CommonData, partialProblems.PartialProblems[i].Data);
+                    new TimeSpan(0, 0, 0, 0, (int)partialProblems.SolvingTimeout), partialProblems.CommonData, partialProblems.PartialProblems[i].Data, SendSolution);
             }
+
             // TODO: implement state changes for threads
             // TODO: implement solving threads
             // TODO: save solutions

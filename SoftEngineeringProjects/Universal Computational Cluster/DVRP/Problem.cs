@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -25,6 +26,137 @@ namespace DVRP
         //public List<Depot> Depots { get { return _depots; } }
         public List<Vehicle> Vehicles { get { return Fleet; } }
 
+        private List<int>[,] _depotDistances;
+
+        /// <summary>
+        /// Inicjalizuje pole, potrzebne do wykonywania funkcji znajdujących optymalny depot
+        /// </summary>
+        public void GenerateDepotDistances()
+        {
+            var n = Clients.Count;
+            _depotDistances = new List<int>[n,n];
+            for(int i=0; i < n; i++)
+                for (int j = i; j < n; j++)
+                {
+                    _depotDistances[i,j] = new List<int>();
+                    for (int k = 0; k < Depots.Count; k++)
+                    {
+                        _depotDistances[i,j].Add(k);
+                    }
+                    var j1 = j;
+                    var i1 = i;
+                    _depotDistances[i, j].Sort((x, y) =>
+                    {
+                        var px = Depots[x].Location;
+                        var py = Depots[y].Location;
+                        var distanceX = (Clients[i1].Location | px) + (px | Clients[j1].Location);
+                        var distanceY = (Clients[i1].Location | py) + (py | Clients[j1].Location);
+                        var com = distanceX.CompareTo(distanceY);
+                        return com == 0 ? Depots[x].StartTime.CompareTo(Depots[y].StartTime) : com;
+                    });
+                    _depotDistances[j, i] = _depotDistances[i, j];
+                }
+        }
+
+        /// <summary>
+        /// Znajduje listę depotów posortowaną względem odległości od klienta
+        /// </summary>
+        /// <param name="id">ID klienta</param>
+        /// <returns></returns>
+        public List<Depot> GetDepotList(uint id)
+        {
+            return GetDepotList(id, id);
+        }
+
+        /// <summary>
+        /// Znajduje listę depotów posortowaną względem sumy odległości od klientów
+        /// </summary>
+        /// <param name="clientId1">ID klienta z którego wyjeżdżamy</param>
+        /// <param name="clientId2">ID klienta do którego docieramy</param>
+        /// <returns></returns>
+        public List<Depot> GetDepotList(uint clientId1, uint clientId2)
+        {
+            if(!IsClient(clientId1) || !IsClient(clientId2)) throw new ArgumentException();
+            var ind1 = Clients.IndexOf(GetClient(clientId1));
+            var ind2 = Clients.IndexOf(GetClient(clientId2));
+            var indList = _depotDistances[ind1, ind2];
+            return indList.Select(index => Depots[index]).ToList();
+        }
+
+        /// <summary>
+        /// Znajduje optymalny depot dla podanego klienta
+        /// </summary>
+        /// <param name="clientId">ID klienta</param>
+        /// <param name="departure">Czas wyjazdu</param>
+        /// <param name="beforeClient">trye - depot poprzedza klienta, false - depot następuje po kliencie</param>
+        /// <returns>Optymalny depot</returns>
+        public Depot GetClosestValidDepot(uint clientId, TimeSpan departure, bool beforeClient = false)
+        {
+            var depotList = GetDepotList(clientId);
+            var client = GetClient(clientId);
+            return !beforeClient
+                ? (from depot in depotList
+                    let arrival = departure + TimeSpan.FromMinutes(client.Location | depot.Location)
+                    where arrival >= client.StartTime && arrival <= client.EndTime
+                    select depot).FirstOrDefault()
+                : (from depot in depotList
+                let arrival = departure + TimeSpan.FromMinutes(client.Location | depot.Location)
+                where arrival >= depot.StartTime && arrival <= depot.EndTime
+                select depot).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Znajduje optymalny depot początkowy względem pierwszego w kolejności klienta
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        public Depot GetClosestValidStartingDepotToClient(uint clientId)
+        {
+            var depotList = GetDepotList(clientId);
+            var client = GetClient(clientId);
+            return (from depot in depotList
+                    let departure = depot.StartTime
+                    let arrival = departure + TimeSpan.FromMinutes(client.Location | depot.Location)
+                    where arrival >= client.StartTime && arrival <= client.EndTime
+                    select depot).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Znajduje optymalny depot będący na drodze między dwoma klientami
+        /// </summary>
+        /// <param name="clientId1">ID pierwszego klienta</param>
+        /// <param name="clientId2">ID drugiego klienta</param>
+        /// <param name="departure">Czas wyjazdu od pierwszego klienta</param>
+        /// <returns>Optymalny depot pomiędzy podanymi klientami</returns>
+        public Depot GetClosestValidDepot(uint clientId1, uint clientId2, TimeSpan departure)
+        {
+            if (clientId1 == clientId2)
+                throw new ArgumentException("Try to use GetClosestValidDepot(Client, Timespan, bool)");
+            var depotList = GetDepotList(clientId1, clientId2);
+            var startClient = GetClient(clientId1);
+            var endclient = GetClient(clientId2);
+            //foreach (var depot in depotList)
+            //{
+            //    var arrival1 = departure + TimeSpan.FromMinutes(startClient.Location | depot.Location);
+            //    var arrival2 = arrival1 + TimeSpan.FromMinutes(depot.Location | endclient.Location);
+            //    if (arrival1 >= depot.StartTime && arrival1 <= depot.EndTime &&
+            //        arrival2 >= endclient.StartTime && arrival2 <= endclient.EndTime)
+            //        return depot;
+            //}
+            //return null;
+            //Poniższe robi to co powyższe:
+            return (from depot in depotList
+                    let arrival1 = departure + TimeSpan.FromMinutes(startClient.Location | depot.Location)
+                    let arrival2 = arrival1 + TimeSpan.FromMinutes(depot.Location | endclient.Location)
+                    where arrival1 >= depot.StartTime && arrival1 <= depot.EndTime && arrival2 >= endclient.StartTime && arrival2 <= endclient.EndTime
+                    select depot).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Znajduje pozycję obiektu (klienta lub depotu) o podanym ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public Location GetLocation(uint id)
         {
             var l = Clients.Select(client => new Tuple<uint, Location>(client.Id,client.Location)).Union(Depots.Select(depot => new Tuple<uint, Location>(depot.Id, depot.Location))).ToList();
@@ -56,7 +188,7 @@ namespace DVRP
 
         public Client GetClient(uint id)
         {
-            foreach (var client in Clients.Where(depot => depot.Id == id))
+            foreach (var client in Clients.Where(client => client.Id == id))
             {
                 return client;
             }

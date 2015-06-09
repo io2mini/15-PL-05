@@ -16,7 +16,7 @@ namespace Common.Components
     /// </summary>
     public class ComputationalClient : SystemComponent
     {
-        private const string SolveRequestResponse = "SolveRequestResponse";
+        private const string SolveRequestResponse = "SolveRequestResponse", Solutions = "Solution";
         private ulong ProblemID;
         private Thread SolutionRequester;
         private bool ExistingProblem { get; set; }
@@ -35,6 +35,8 @@ namespace Common.Components
             //SolveRequestResponse
             SchemaTypes.Add(SolveRequestResponse,
                 new Tuple<string, Type>(Resources.SolveRequestResponse, typeof (SolveRequestResponse)));
+            //Solutions
+            SchemaTypes.Add(Solutions, new Tuple<string, Type>(Resources.Solution, typeof(Solutions)));
         }
 
         public void Start(Problem problem, bool existingProblem)
@@ -96,6 +98,9 @@ namespace Common.Components
                 case SolveRequestResponse:
                     MsgHandler_SolveRequestResponse((SolveRequestResponse) message, socket);
                     return;
+                case Solutions:
+                    MsgHandler_Solutions((Solutions) message, socket);
+                    return;
                 default:
                     base.HandleMessage(message, key, socket);
                     return;
@@ -106,7 +111,7 @@ namespace Common.Components
         /// Metoda odbierająca odpowiedź na solution request - odpowiedzią jest Solution
         /// </summary>
         /// <param name="solutions"></param>
-        protected override void MsgHandler_Solution(Solutions solutions, Socket socket)
+        protected void MsgHandler_Solutions(Solutions solutions, Socket socket)
         {
             foreach (var solutionsSolution in solutions.Solutions1)
             {

@@ -64,8 +64,7 @@ namespace Common
             {
                 {RegisterResponse, new Tuple<string, Type>(Resources.RegisterResponse, typeof (RegisterResponse))},
                 {NoOperation, new Tuple<string, Type>(Resources.NoOperation, typeof (NoOperation))},
-                {Error, new Tuple<string, Type>(Resources.Error, typeof (Error))},
-                {Solution, new Tuple<string, Type>(Resources.Solution, typeof (Solutions))}
+                {Error, new Tuple<string, Type>(Resources.Error, typeof (Error))}
             };
         }
 
@@ -216,18 +215,9 @@ namespace Common
                 case Error:
                     MsgHandler_Error((Error)message);
                     return;
-                case Solution:
-                    MsgHandler_Solution((Solutions)message, socket);
-                    return;
                 default:
                     throw new InvalidOperationException("Unknown msg key"); //TODO: własny wyjątek;
             }
-        }
-
-        protected virtual void MsgHandler_Solution(Solutions solutions, Socket socket) //Wywoływane w TMie i w Cliencie, przenieść tam
-        {
-            throw new NotImplementedException();
-            // TODO: Implementacja statru obliczen na danym komponencie
         }
 
         /// <summary>
