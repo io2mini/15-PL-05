@@ -6,11 +6,19 @@ namespace DVRP.Objects
     public class Route
     {
         public uint[] Sequence { get; private set; }
+        public bool[] DepotAfter { get; private set; }
 
         public Route(uint[] sequence)
         {
             Sequence = sequence;
         }
+
+        public Route(uint[] sequence, bool[] depotAfter)
+            : this(sequence)
+        {
+            DepotAfter = depotAfter;
+        }
+
 
         public static Route Deserialize(byte[] byteArray)
         {
