@@ -281,6 +281,7 @@ namespace Common.Components
         /// Metoda obsługując otrzymane rozwiązania
         /// </summary>
         /// <param name="solutionRequest"></param>
+        /// <param name="message"></param>
         /// <param name="socket"></param>
         private void MsgHandler_Solutions(Solutions message, Socket socket)
         {
@@ -295,14 +296,7 @@ namespace Common.Components
                 }
                 else
                 {
-                    var l = new List<Tuple<ulong, ulong>>();
-                    foreach (var key in _savedSolutions.Keys)
-                    {
-                        if (key.Item1 == message.Id)
-                        {
-                            l.Add(key);
-                        }
-                    }
+                    var l = _savedSolutions.Keys.Where(key => key.Item1 == message.Id).ToList();
                     foreach (var key in l)
                     {
                         _savedSolutions.Remove(key);
@@ -312,33 +306,29 @@ namespace Common.Components
             }
             if (AreAllSolutionsOfType(message.Id, SolutionsSolutionType.Partial))
             {
-                var sol = new Messages.Solutions();
-                sol.Id = message.Id;
-                sol.ProblemType = message.ProblemType;
-                var l = new List<SolutionsSolution>();
-                foreach (var s in message.Solutions1)
+                var sol = new Messages.Solutions
                 {
-                    var actualKey = new Tuple<ulong, ulong>(message.Id, s.TaskId);
-                    l.Add(_savedSolutions[actualKey]);
-                }
-                sol.Solutions1 = l.ToArray();
+                    Id = message.Id,
+                    ProblemType = message.ProblemType,
+                    Solutions1 =
+                        message.Solutions1.Select(s => new Tuple<ulong, ulong>(message.Id, s.TaskId))
+                            .Select(actualKey => _savedSolutions[actualKey])
+                            .ToArray()
+                };
                 SendMessageToComponent(_savedPartialProblems[message.Id].PartialProblems[0].NodeID, sol);
             }
         }
 
-        protected bool AreAllSolutionsOfType(ulong ProblemId, SolutionsSolutionType type = SolutionsSolutionType.Final)
+        protected bool AreAllSolutionsOfType(ulong problemId, SolutionsSolutionType type = SolutionsSolutionType.Final)
         {
-            bool AllFinal = true;
+            bool allFinal = true;
             ulong c = 0;
-            foreach (var key in _savedSolutions.Keys)
+            foreach (var key in _savedSolutions.Keys.Where(key => key.Item1 == problemId))
             {
-                if (key.Item1 == ProblemId)
-                {
-                    c++;
-                    AllFinal = AllFinal && _savedSolutions[key].Type == type;
-                }
+                c++;
+                allFinal = allFinal && _savedSolutions[key].Type == type;
             }
-            return AllFinal && c > 0;
+            return allFinal && c > 0;
         }
 
         /// <summary>
@@ -348,30 +338,24 @@ namespace Common.Components
         /// <param name="socket"></param>
         private void MsgHandler_SolutionRequest(SolutionRequest solutionRequest, Socket socket)
         {
-            bool AllFinal = AreAllSolutionsOfType(solutionRequest.Id);
-            if (AllFinal)
+            bool allFinal = AreAllSolutionsOfType(solutionRequest.Id);
+            if (allFinal)
             {
-                var sol = new Solutions();
-                sol.Id = solutionRequest.Id;
-                sol.ProblemType = _savedPartialProblems[solutionRequest.Id].ProblemType;
-                sol.Solutions1 = new SolutionsSolution[] { _savedSolutions[new Tuple<ulong, ulong>(solutionRequest.Id, 0)] };
+                var sol = new Solutions
+                {
+                    Id = solutionRequest.Id,
+                    ProblemType = _savedPartialProblems[solutionRequest.Id].ProblemType,
+                    Solutions1 =
+                        new SolutionsSolution[] {_savedSolutions[new Tuple<ulong, ulong>(solutionRequest.Id, 0)]}
+                };
                 SendMessageToComponent(socket, sol);
             }
             else
             {
-                var sol = new Solutions();
-                sol.Id = solutionRequest.Id;
+                var sol = new Solutions {Id = solutionRequest.Id};
                 if (!_savedPartialProblems.Keys.Contains(solutionRequest.Id)) return;
                 sol.ProblemType = _savedPartialProblems[solutionRequest.Id].ProblemType;
-                var l = new List<SolutionsSolution>();
-                foreach (var key in _savedSolutions.Keys)
-                {
-                    if (key.Item1 == solutionRequest.Id)
-                    {
-                        l.Add(_savedSolutions[key]);
-                    }
-                }
-                sol.Solutions1 = l.ToArray();
+                sol.Solutions1 = (from key in _savedSolutions.Keys where key.Item1 == solutionRequest.Id select _savedSolutions[key]).ToArray();
                 SendMessageToComponent(socket, sol);
             }
         }
@@ -386,19 +370,21 @@ namespace Common.Components
             var nodes = GetComputationNodes(solvePartialProblems.ProblemType,
                 solvePartialProblems.PartialProblems.Count());
             var ind = 0;
-            var TmId = _socketToId[socket];
+            var tmId = _socketToId[socket];
             foreach (var id in nodes.Keys)
             {
                 for (var i = 0; i < nodes[id]; i++)
                 {
                     var processing = solvePartialProblems.PartialProblems[ind];
                     solvePartialProblems.PartialProblems[ind].NodeID = id;
-                    var value = new SolutionsSolution();
-                    value.Data = null;
-                    value.TaskId = processing.TaskId;
-                    value.TaskIdSpecified = true;
-                    value.TimeoutOccured = false;
-                    value.Type = SolutionsSolutionType.Ongoing;
+                    var value = new SolutionsSolution
+                    {
+                        Data = null,
+                        TaskId = processing.TaskId,
+                        TaskIdSpecified = true,
+                        TimeoutOccured = false,
+                        Type = SolutionsSolutionType.Ongoing
+                    };
                     _savedSolutions.Add(new Tuple<ulong, ulong>(solvePartialProblems.Id, solvePartialProblems.PartialProblems[ind].TaskId), value);
                     ind++;
                 }
@@ -421,7 +407,7 @@ namespace Common.Components
                 };
                 foreach (var spp in msg.PartialProblems)
                 {
-                    spp.NodeID = TmId;
+                    spp.NodeID = tmId;
                 }
                 toSend.Add(id, msg);
             }
