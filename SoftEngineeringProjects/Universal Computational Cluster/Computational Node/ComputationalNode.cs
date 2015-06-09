@@ -83,10 +83,6 @@ namespace Common.Components
             {
                 throw new NotEnoughIdleThreadsException("Not enough idle threads for problem type");
             }
-            if (partialProblems.PartialProblems.Any(t => t.NodeID != Id))
-            {
-                throw new InvalidIdException("Ivalid Node Id in Partial Problem");
-            }
             for (int i = 0; i < partialProblems.PartialProblems.Length; i++)
             {
                 list[i].TaskSolver = GetTaskSolver(partialProblems.ProblemType,
