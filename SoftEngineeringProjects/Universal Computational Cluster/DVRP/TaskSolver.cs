@@ -8,70 +8,53 @@ namespace DVRP
 {
     public static class DVRPExtensions
     {
-        public static double CalculteRouteCost(this Route r, Problem p, double bestCost = double.MaxValue)
+        public static Tuple<uint[], double> CalculteRouteCost(this Route r, Problem p, double bestCost = double.MaxValue)
         {
+            var failed = new Tuple<uint[], double>(null, double.MaxValue);
             //bool s1 = p.Depots.Aggregate(false, (current, depot) => current || depot.Id == r.Sequence[0]);
             //bool s2 = p.Depots.Aggregate(false, (current, depot) => current || depot.Id == r.Sequence[r.Sequence.Length - 1]);
             //if (!s1 || !s2) return double.MaxValue; //Żaden z końców sekwencji nie jest depotem
             //Powyższe nie wystąpi;
             double cost = 0;
             double load = p.Fleet[0].Capacity;
-            var actualTime = p.GetDepot(r.Sequence[0]).StartTime; //TODO: dodać czekanie na otwarcie domu/depotu?
-            for (int i = 1; i < r.Sequence.Length; i++)
+            var startDepot = p.GetClosestValidStartingDepotToClient(r.Sequence[0]);
+            if (startDepot == null) return failed;
+            var actualTime = startDepot.StartTime;
+            var prevLocation = startDepot.Location;
+            var visitList = new List<uint> {startDepot.Id};
+            for (int i = 0; i < r.Sequence.Length; i++)
             {
-                var dist = p.GetLocation(r.Sequence[i]) | p.GetLocation(r.Sequence[i - 1]);
+                var actClientId = r.Sequence[i];
+                var actClient = p.GetClient(actClientId);
+                var dist = prevLocation | actClient.Location;
                 cost += dist;
+                if (cost >= bestCost) return failed;
                 actualTime += TimeSpan.FromMinutes(dist);
-                if (p.IsClient(r.Sequence[i]))
+                actualTime += TimeSpan.FromMinutes(actClient.Unld);
+                load += actClient.Size;
+                if (actClient.RealStartTime > actualTime || actClient.EndTime < actualTime || load < 0)
                 {
-                    var c = p.GetClient(r.Sequence[i]);
-                    //if(c.StartTime>actualTime || c.EndTime<actualTime) return double.MaxValue; //wersja bez czekania
-
-                    //Wersja z czekaniem na otwarcie:
-                    //if (c.EndTime < actualTime)
-                    //{
-                    //   return double.MaxValue;
-                    //}
-                    //if (c.StartTime > actualTime) actualTime = c.StartTime;
-                    //koniec wersji z czekaniem na otwarcie
-
-                    actualTime += TimeSpan.FromMinutes(c.Unld);
-                    if (c.RealStartTime > actualTime || c.EndTime < actualTime)
-                    {
-
-                        return double.MaxValue; //TODO: sprawdzić czy cały rozładunek musi się zmieścić w oknie czasowym
-                    }
-                    load += c.Size;
-                    if (load < 0)
-                    {
-                        return double.MaxValue;
-                    }
+                    return failed;
                 }
-                if (p.IsDepot(r.Sequence[i]))
+                prevLocation = actClient.Location;
+                visitList.Add(actClient.Id);
+                if (i < r.Sequence.Length-1 && r.DepotAfter[i])
                 {
-                    var d = p.GetDepot(r.Sequence[i]);
-                    if (d.StartTime > actualTime || d.EndTime < actualTime)
-                    {
-                        return double.MaxValue; //wersja bez czekania
-                    }
-
-                    //Wersja z czekaniem na otwarcie:
-                    //if (d.EndTime < actualTime)
-                    //{
-                    //    return double.MaxValue;
-                    //}
-                    //if (d.StartTime > actualTime) actualTime = d.StartTime;
-                    //koniec wersji z czekaniem na otwarcie
-
+                    var nextClient = p.GetClient(r.Sequence[i + 1]);
+                    var depot = p.GetClosestValidDepot(actClientId, nextClient.Id, actualTime);
+                    if (depot == null) return failed;
+                    cost += (actClient.Location | depot.Location);
+                    prevLocation = depot.Location;
                     load = p.Fleet[0].Capacity;
-                    //Zakładamy, że pobyt w depocie trwa 0 czasu;
-                }
-                if (cost > bestCost)
-                {
-                    return double.MaxValue;
+                    visitList.Add(depot.Id);
                 }
             }
-            return cost;
+            var lastClient = p.GetClient(visitList.Last());
+            var lastDepot = p.GetClosestValidDepot(lastClient.Id, actualTime);
+            if (lastDepot == null) return failed;
+            cost += lastDepot.Location | lastClient.Location;
+            visitList.Add(lastDepot.Id);
+            return new Tuple<uint[], double>(visitList.ToArray(), cost);
         }
 
         private static Route AddDepotsToRoute(this Route r, bool[] depotSequence)
@@ -79,17 +62,7 @@ namespace DVRP
             return new Route(r.Sequence, depotSequence);
         }
 
-        public static Route[] GenerateAndAddDepotsToRoute(this Route r, Problem p, bool[][] l)
-        {
-            int minDepotCount = Math.Abs(r.Sequence.Sum<uint>((s) => (p.GetClient(s).Size)));
-            minDepotCount /= p.Fleet[0].Capacity;
-            //Generowanie kombinacji depotów i konwersja ich indeksów na id
-            //AssignDepotIds(Permuter.GenerateCombinations((uint)r.Sequence.Length + 1, (uint)p.Depots.Count() + 1), p);
-            //Usuwanie kombinacji zaczynających się lub kończących się na "sztucznym" depocie (oznaczającym "nie jedź do depotu")
-            //combinedDepots = combinedDepots.Where(depotArray => depotArray.First() != uint.MaxValue && depotArray.Last() != uint.MaxValue).ToArray();
-            //Dodanie depotów do trasy
-            return l.Where((p)=>(p.Sum<bool>((d)=>(d?1:0))>=minDepotCount-1).Select(depotSequence => r.AddDepotsToRoute(depotSequence)).ToArray();
-        }
+        
 
         private static uint[][] AssignDepotIds(uint[][] tab, Problem p)
         {
@@ -130,23 +103,40 @@ namespace DVRP
            
            
             double bestCost = double.MaxValue;
-            Route[] bestSequence = null;
+            uint[][] bestSequence = null;
             foreach (var sequence in routes)
             {
-                var currentCost = sequence.Sum(route => route.CalculteRouteCost(ProblemInstance, bestCost));
+                uint[][] seq;
+                var currentCost = CalculateResult(sequence, out seq, bestCost);
                 if (currentCost < bestCost)
                 {
                     bestCost = currentCost;
-                    bestSequence = sequence;
+                    bestSequence = seq;
                 }
             }
             var s = new Solution(bestSequence != null ? bestSequence.ToList() : null, bestCost);
             return s.Serialize();
         }
 
+        private double CalculateResult(Route[] sequence, out uint[][] seq, double bestcost)
+        {
+            var l = new List<uint[]>();
+            double actCost = 0;
+            seq = null;
+            foreach (var route in sequence)
+            {
+                var res = route.CalculteRouteCost(ProblemInstance, bestcost);
+                actCost += res.Item2;
+                if(actCost>=bestcost) return Double.MaxValue;
+                l.Add(res.Item1);
+            }
+            seq = l.ToArray();
+            return actCost;
+        }
+
         public double CountSigleVehicleCost(Route r, double bestCost)
         {
-            return r.CalculteRouteCost(ProblemInstance, bestCost);
+            return r.CalculteRouteCost(ProblemInstance, bestCost).Item2;
         }
 
         public override byte[][] DivideProblem(int threadCount)
@@ -211,8 +201,8 @@ namespace DVRP
                 var l = new List<Route>();
                 foreach (Route r in routes)
                 {
-                    var lll = r.GenerateAndAddDepotsToRoute(ProblemInstance, list);
-                    current = CombineRoutes(current, lll);
+                    //var lll = r.GenerateAndAddDepotsToRoute(ProblemInstance, list);
+                    //current = CombineRoutes(current, lll);
                 }
                 combinedDestinations.AddRange(current);
             }
