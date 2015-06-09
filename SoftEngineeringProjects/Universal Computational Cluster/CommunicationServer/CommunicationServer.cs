@@ -24,7 +24,8 @@ namespace Common.Components
             Status = "Status",
             SolveRequest = "SolveRequest",
             PartialProblems = "PartialProblems",
-            SolutionRequest = "SolutionRequest";
+            SolutionRequest = "SolutionRequest",
+            Solution = "Solution";
 
         #endregion
 
@@ -84,6 +85,9 @@ namespace Common.Components
             //SolutionRequest
             SchemaTypes.Add(SolutionRequest,
                 new Tuple<string, Type>(Resources.SolutionRequest, typeof(SolutionRequest)));
+            //Solutions
+            SchemaTypes.Add(Solution,
+                new Tuple<string, Type>(Resources.Solution, typeof(Solutions)));
         }
 
         /// <summary>
@@ -261,6 +265,10 @@ namespace Common.Components
                     if (!IsPrimary) ChangeServerFromBuckupToPrimary();
                     MsgHandler_SolutionRequest((SolutionRequest)message, socket);
                     return;
+                case Solution:
+                     if (!IsPrimary) ChangeServerFromBuckupToPrimary();
+                    MsgHandler_Solution((Solutions)message, socket);
+                    return;
                 default:
                     base.HandleMessage(message, key, socket);
                     return;
@@ -283,7 +291,7 @@ namespace Common.Components
         ///     Obsługa otrzymanego komunikatu na temat rozwiązań
         /// </summary>
         /// <param name="solutions"></param>
-        protected override void MsgHandler_Solution(Solutions solutions)
+        protected override void MsgHandler_Solution(Solutions solutions, Socket socket)
         {
             //TODO: save solution
             throw new NotImplementedException();

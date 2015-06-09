@@ -106,7 +106,7 @@ namespace Common.Components
         /// Metoda odbierająca odpowiedź na solution request - odpowiedzią jest Solution
         /// </summary>
         /// <param name="solutions"></param>
-        protected override void MsgHandler_Solution(Solutions solutions)
+        protected override void MsgHandler_Solution(Solutions solutions, Socket socket)
         {
             foreach (var solutionsSolution in solutions.Solutions1)
             {

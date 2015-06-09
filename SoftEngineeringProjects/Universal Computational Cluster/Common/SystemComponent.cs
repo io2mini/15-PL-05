@@ -217,14 +217,14 @@ namespace Common
                     MsgHandler_Error((Error)message);
                     return;
                 case Solution:
-                    MsgHandler_Solution((Solutions)message);
+                    MsgHandler_Solution((Solutions)message, socket);
                     return;
                 default:
                     throw new InvalidOperationException("Unknown msg key"); //TODO: własny wyjątek;
             }
         }
 
-        protected virtual void MsgHandler_Solution(Solutions solutions)
+        protected virtual void MsgHandler_Solution(Solutions solutions, Socket socket) //Wywoływane w TMie i w Cliencie, przenieść tam
         {
             throw new NotImplementedException();
             // TODO: Implementacja statru obliczen na danym komponencie
