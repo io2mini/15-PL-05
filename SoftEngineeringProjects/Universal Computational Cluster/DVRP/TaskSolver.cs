@@ -74,27 +74,21 @@ namespace DVRP
             return cost;
         }
 
-        private static Route AddDepotsToRoute(this Route r, uint[] depotSequence)
+        private static Route AddDepotsToRoute(this Route r, bool[] depotSequence)
         {
-            var l = new List<uint> { depotSequence[0] };
-            for (int i = 0; i < r.Sequence.Length; i++)
-            {
-                l.Add(r.Sequence[i]);
-                if (depotSequence[i + 1] != uint.MaxValue)
-                    l.Add(depotSequence[i + 1]);
-            }
-            //zwrócenie listy z usuniętym "sztucznym" depotem (oznaczającym "nie jedź do depotu")
-            return new Route(l.ToArray());
+            return new Route(r.Sequence, depotSequence);
         }
 
-        public static Route[] GenerateAndAddDepotsToRoute(this Route r, Problem p, List<uint[][]> l)
+        public static Route[] GenerateAndAddDepotsToRoute(this Route r, Problem p, bool[][] l)
         {
+            int minDepotCount = Math.Abs(r.Sequence.Sum<uint>((s) => (p.GetClient(s).Size)));
+            minDepotCount /= p.Fleet[0].Capacity;
             //Generowanie kombinacji depotów i konwersja ich indeksów na id
-            var combinedDepots = l[r.Sequence.Length + 1];//AssignDepotIds(Permuter.GenerateCombinations((uint)r.Sequence.Length + 1, (uint)p.Depots.Count() + 1), p);
+            //AssignDepotIds(Permuter.GenerateCombinations((uint)r.Sequence.Length + 1, (uint)p.Depots.Count() + 1), p);
             //Usuwanie kombinacji zaczynających się lub kończących się na "sztucznym" depocie (oznaczającym "nie jedź do depotu")
             //combinedDepots = combinedDepots.Where(depotArray => depotArray.First() != uint.MaxValue && depotArray.Last() != uint.MaxValue).ToArray();
             //Dodanie depotów do trasy
-            return combinedDepots.Select(depotSequence => r.AddDepotsToRoute(depotSequence)).ToArray();
+            return l.Where((p)=>(p.Sum<bool>((d)=>(d?1:0))>=minDepotCount-1).Select(depotSequence => r.AddDepotsToRoute(depotSequence)).ToArray();
         }
 
         private static uint[][] AssignDepotIds(uint[][] tab, Problem p)
@@ -133,9 +127,7 @@ namespace DVRP
 
             var task = Task.Deserialize(partialData);
             var routes = GeneratePermutedClients(task.Brackets);
-            var L = routes.LongCount();
-            L++;
-            L--;
+           
            
             double bestCost = double.MaxValue;
             Route[] bestSequence = null;
@@ -159,6 +151,7 @@ namespace DVRP
 
         public override byte[][] DivideProblem(int threadCount)
         {
+            ProblemInstance.GenerateDepotDistances();
             var brackets = Permuter.GenerateLengthBrackets(ProblemInstance.Vehicles.Count, ProblemInstance.Clients.Count);
             var seqCount = ((double)brackets.GetLength(0) / (double)threadCount);
             var tasksForNodes = new List<byte[]> { ProblemInstance.Serialize() };
@@ -185,7 +178,22 @@ namespace DVRP
                 ProblemInstance.Clients.Count, brackets);
             var RouteClients = DivideClients(permutedClients).ToList();
             var combinedDestinations = new List<Route[]>();
-
+            var maxClientCount = permutedClients.Aggregate(0,
+                (current, combination) => combination.Select(routeSeq => routeSeq.Length).Concat(new[] { current }).Max());
+            var booleanCombinations = new List<bool[]> { new bool[] { } };
+            for (int i = 1; i < maxClientCount; i++)
+            {
+                var predecessors = booleanCombinations.Where(b => b.Length == i).ToList();
+                foreach (bool[] predecessor in predecessors)
+                {
+                    var l1 = predecessor.ToList();
+                    l1.Add(false);
+                    booleanCombinations.Add(l1.ToArray());
+                    var l2 = predecessor.ToList();
+                    l2.Add(true);
+                    booleanCombinations.Add(l2.ToArray());
+                }
+            }
             var list = new List<uint[][]> { null };
             //wartownik
             for (int i = 1; i < ProblemInstance.Clients.Count + 2; i++)
