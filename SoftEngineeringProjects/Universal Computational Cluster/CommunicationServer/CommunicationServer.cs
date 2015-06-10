@@ -147,6 +147,7 @@ namespace Common.Components
                 {
                     var message = MessageQueue.Dequeue();
                     //Console.WriteLine(Message.Item1);
+                    if(message!=null)
                     Validate(message.Item1, message.Item2);
                 }
             }

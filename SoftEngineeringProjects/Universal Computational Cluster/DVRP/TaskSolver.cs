@@ -66,8 +66,8 @@ namespace DVRP
 
         public static Route[] GenerateAndAddDepotsToRoute(this Route r, Problem p, bool[][] l)
         {
-            int minDepotCount = (int)Math.Abs(r.Sequence.Sum(s => (p.GetClient(s).Size)));
-            minDepotCount /= p.Fleet[0].Capacity;
+            //int minDepotCount = (int)Math.Abs(r.Sequence.Sum(s => (p.GetClient(s).Size)));
+            //minDepotCount /= p.Fleet[0].Capacity;
             //Generowanie kombinacji depotów i konwersja ich indeksów na id
             //AssignDepotIds(Permuter.GenerateCombinations((uint)r.Sequence.Length + 1, (uint)p.Depots.Count() + 1), p);
             //Usuwanie kombinacji zaczynających się lub kończących się na "sztucznym" depocie (oznaczającym "nie jedź do depotu")
@@ -78,7 +78,7 @@ namespace DVRP
             //usprawnienie: wybrać najoptymalniejszy Route tutaj zamiast generować i przekazywać dalej
             double Min = double.MaxValue;
             Route best = null;
-            foreach (var array in l.Where(o => (o.Sum(d => (d ? 1 : 0)) >= minDepotCount - 2)))
+            foreach (var array in l)
             {
                 r.DepotAfter = array;
                 var current = r.CalculteRouteCost(p, Min);
