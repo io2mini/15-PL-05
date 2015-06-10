@@ -100,19 +100,20 @@ namespace DVRP
 
 
             var task = Task.Deserialize(partialData);
-            var routes = GeneratePermutedClients(task.Brackets);
-
-
-            double bestCost = double.MaxValue;
-            uint[][] bestSequence = null;
-            foreach (var sequence in routes)
+             uint[][] bestSequence = null;
+             double bestCost = double.MaxValue;
+            foreach (var array in task.Brackets)
             {
-                uint[][] seq;
-                var currentCost = CalculateResult(sequence, out seq, bestCost);
-                if (currentCost < bestCost)
+                var routes = GeneratePermutedClients(new [] {array});
+                foreach (var sequence in routes)
                 {
-                    bestCost = currentCost;
-                    bestSequence = seq;
+                    uint[][] seq;
+                    var currentCost = CalculateResult(sequence, out seq, bestCost);
+                    if (currentCost < bestCost)
+                    {
+                        bestCost = currentCost;
+                        bestSequence = seq;
+                    }
                 }
             }
             var s = new Solution(bestSequence != null ? bestSequence.ToList() : null, bestCost);
