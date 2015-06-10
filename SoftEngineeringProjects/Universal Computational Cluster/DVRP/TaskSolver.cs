@@ -72,7 +72,10 @@ namespace DVRP
             //Usuwanie kombinacji zaczynających się lub kończących się na "sztucznym" depocie (oznaczającym "nie jedź do depotu")
             //combinedDepots = combinedDepots.Where(depotArray => depotArray.First() != uint.MaxValue && depotArray.Last() != uint.MaxValue).ToArray();
             //Dodanie depotów do trasy
-            return l.Where(o => (o.Sum(d => (d ? 1 : 0)) >= minDepotCount - 1)).Select(r.AddDepotsToRoute).ToArray();
+
+            //return l.Where(o => (o.Sum(d => (d ? 1 : 0)) >= minDepotCount - 1)).Select(r.AddDepotsToRoute).ToArray();
+            //usprawnienie: wybrać najoptymalniejszy Route tutaj zamiast generować i przekazywać dalej
+            return l.Select(r.AddDepotsToRoute).ToArray();
         }
 
         
