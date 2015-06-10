@@ -20,7 +20,7 @@ namespace Common.Components
         private ulong ProblemID;
         private Thread SolutionRequester;
         private bool ExistingProblem { get; set; }
-        public Mutex HasFinalSolutionMutex { get; private set; }
+        public bool HasFinalSolutionMutex { get; private set; }
 
         public void SendSolveRequestMessage(Problem problem)
         {
@@ -39,7 +39,7 @@ namespace Common.Components
             SchemaTypes.Add(Solutions, new Tuple<string, Type>(Resources.Solution, typeof(Solutions)));
 
             // TODO: To musi być gdzieś indziej
-            HasFinalSolutionMutex = new Mutex(true);
+            HasFinalSolutionMutex = false;
         }
 
         public void Start(Problem problem, bool existingProblem)
@@ -123,7 +123,7 @@ namespace Common.Components
                 if (solutionsSolution.TimeoutOccured)
                 {
                     Console.WriteLine("Solution wasn't found because of TimeOut parameter.");
-                    HasFinalSolutionMutex.ReleaseMutex();
+                    HasFinalSolutionMutex = true;
                     break;
                 }
 
@@ -139,11 +139,15 @@ namespace Common.Components
                 Console.WriteLine("Route:");
                 for (int i = 0; i < solution.VehicleLocationList.Count; i++)
                 {
-                    Console.Write("{0}  ", solution.VehicleLocationList[i]);
+                    for (int j = 0; j < solution.VehicleLocationList[j].Length; j++)
+                    {
+                        Console.Write("{0}  ", solution.VehicleLocationList[i][j]);
+                    }
+                    Console.WriteLine();
                 }
                 Console.WriteLine("\nFinding this solution takes approximately: {0}", solutionsSolution.ComputationsTime);
 
-                HasFinalSolutionMutex.ReleaseMutex();
+                HasFinalSolutionMutex = true;
                 break;
             }
         }
