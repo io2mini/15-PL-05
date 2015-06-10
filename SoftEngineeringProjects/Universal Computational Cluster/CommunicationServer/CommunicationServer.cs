@@ -11,6 +11,7 @@ using Common.Exceptions;
 using Common.Messages;
 using Common.Properties;
 using Timer = System.Timers.Timer;
+using System.IO;
 
 namespace Common.Components
 {
@@ -47,6 +48,7 @@ namespace Common.Components
         private readonly Dictionary<Tuple<ulong, ulong>, SolutionsSolution> _savedSolutions; //Tuple<Id_problemu, Id_podproblemu>
         private readonly Dictionary<ulong, SystemComponentType> _componentTypes;
         private readonly Dictionary<ulong, List<string>> _solvableProblemTypes;
+        private readonly Dictionary<ulong, DateTime> _problemTime;
 
         #endregion
 
@@ -54,6 +56,7 @@ namespace Common.Components
         {
             CommunicationInfos = new List<CommunicationInfo>();
             DeviceType = SystemComponentType.CommunicationServer;
+            _problemTime = new Dictionary<ulong, DateTime>();
             _firstFreeProblemId = _firstFreeComponentId = 0;
             _timers = new Dictionary<ulong, Timer>();
             _timerStoppers = new Dictionary<ulong, bool>();
@@ -114,6 +117,7 @@ namespace Common.Components
         /// </summary>
         public override void Start()
         {
+
             if (IsPrimary)
             {
                 InitializeMessageQueue(CommunicationServerInfo.CommunicationServerPort);
@@ -315,6 +319,15 @@ namespace Common.Components
                             .Select(actualKey => _savedSolutions[actualKey])
                             .ToArray()
                 };
+                var time = DateTime.Now - _problemTime[sol.Id];
+                
+                Console.WriteLine("\n--------------Czas obliczeń: {0}------------\n", time.TotalMilliseconds);
+                
+                FileStream f = new FileStream("results.txt",FileMode.Append);
+                File.WriteAllText(string.Format("results{0}.txt",sol.Id), "Problem " + sol.Id + " - Czas obliczeń (w ms): " + time.TotalMilliseconds);
+                StreamWriter w = new StreamWriter(f);
+                w.WriteLine("Problem {1} - Czas obliczeń: {0}", time.TotalMilliseconds, sol.Id);
+                f.Close();
                 SendMessageToComponent(_savedPartialProblems[message.Id].PartialProblems[0].NodeID, sol);
             }
         }
@@ -426,6 +439,7 @@ namespace Common.Components
         protected void MsgHandler_SolveRequest(SolveRequest solveRequest, Socket socket)
         {
             var problemId = _firstFreeProblemId++;
+            _problemTime.Add(problemId, DateTime.Now);
             /*
              * TODO:
              * 4. If specified, handle solve timeout.

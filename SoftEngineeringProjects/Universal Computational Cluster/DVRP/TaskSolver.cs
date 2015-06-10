@@ -118,6 +118,7 @@ namespace DVRP
              }
             foreach (var array in task.Brackets)
             {
+                GC.Collect();
                 var routes = GeneratePermutedClients(new [] {array},booleanCombinations);
                 foreach (var sequence in routes)
                 {
