@@ -20,7 +20,7 @@ namespace Common.Components
         private ulong ProblemID;
         private Thread SolutionRequester;
         private bool ExistingProblem { get; set; }
-        public bool HasFinalSolution { get; private set; }
+        public Mutex HasFinalSolutionMutex { get; private set; }
 
         public void SendSolveRequestMessage(Problem problem)
         {
@@ -37,6 +37,9 @@ namespace Common.Components
                 new Tuple<string, Type>(Resources.SolveRequestResponse, typeof (SolveRequestResponse)));
             //Solutions
             SchemaTypes.Add(Solutions, new Tuple<string, Type>(Resources.Solution, typeof(Solutions)));
+
+            // TODO: To musi być gdzieś indziej
+            HasFinalSolutionMutex = new Mutex(true);
         }
 
         public void Start(Problem problem, bool existingProblem)
@@ -120,13 +123,16 @@ namespace Common.Components
                 if (solutionsSolution.TimeoutOccured)
                 {
                     Console.WriteLine("Solution wasn't found because of TimeOut parameter.");
-                    HasFinalSolution = true;
+                    HasFinalSolutionMutex.ReleaseMutex();
                     break;
                 }
 
-                if (solutionsSolution.Type != SolutionsSolutionType.Final) 
+                if (solutionsSolution.Type != SolutionsSolutionType.Final)
+                {
+                    Console.WriteLine("Still waiting for solution.");
                     continue;
-
+                }
+                    
                 Console.WriteLine("Here is your final solution:");
                 Solution solution = DVRP.Solution.Deserialize(solutionsSolution.Data);
                 Console.WriteLine("Final cost: {0}", solution.Cost);
@@ -137,7 +143,7 @@ namespace Common.Components
                 }
                 Console.WriteLine("\nFinding this solution takes approximately: {0}", solutionsSolution.ComputationsTime);
 
-                HasFinalSolution = true;
+                HasFinalSolutionMutex.ReleaseMutex();
                 break;
             }
         }
