@@ -78,7 +78,7 @@ namespace DVRP
             //usprawnienie: wybrać najoptymalniejszy Route tutaj zamiast generować i przekazywać dalej
             double Min = double.MaxValue;
             Route best = null;
-            foreach (var array in l)
+            foreach (var array in l.Where(o => (o.Sum(d => (d ? 1 : 0)) >= minDepotCount - 2)))
             {
                 r.DepotAfter = array;
                 var current = r.CalculteRouteCost(p, Min);
