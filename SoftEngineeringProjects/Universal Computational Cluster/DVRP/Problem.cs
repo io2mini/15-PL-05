@@ -269,6 +269,9 @@ namespace DVRP
             int numberOfVehicles = 0;
             int vehiclesCapaticies = 0;
 
+            Dictionary<uint, uint> depotLocations = new Dictionary<uint, uint>();
+            Dictionary<uint, uint> clientsLocations = new Dictionary<uint, uint>();
+
             //string name;
             //int num_depots, num_capacities, num_visits, num_locations, num_vehicles, capacities;
 
@@ -324,6 +327,22 @@ namespace DVRP
                             timesAvivals.Add(Convert.ToUInt32(line[0]), new TimeSpan(0,Convert.ToInt32(line[1]),0));
                         } while (!problemFileLines[i + 1].Any(Char.IsLetter));
                         break;
+                    case "DEPOT_LOCATION_SECTION":
+                        do
+                        {
+                            i++;
+                            string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
+                            depotLocations.Add(Convert.ToUInt32(line[0]), Convert.ToUInt32(line[1]));
+                        } while (!problemFileLines[i + 1].Any(Char.IsLetter));
+                        break;
+                    case "VISIT_LOCATION_SECTION":
+                        do
+                        {
+                            i++;
+                            string[] line = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
+                            clientsLocations.Add(Convert.ToUInt32(line[0]), Convert.ToUInt32(line[1]));
+                        } while (!problemFileLines[i + 1].Any(Char.IsLetter));
+                        break;
                 }
 
                 string[] divLine = problemFileLines[i].Split(WHITESPACES, StringSplitOptions.RemoveEmptyEntries);
@@ -344,13 +363,13 @@ namespace DVRP
 
             for (int i = 0; i < depotsIds.Count; i++)
             {
-                depots.Add(new Depot(locations[depotsIds[i]], depotTimesWindows[depotsIds[i]].Item1, depotTimesWindows[depotsIds[i]].Item2, depotsIds[i]));
+                depots.Add(new Depot(locations[depotLocations[depotsIds[i]]], depotTimesWindows[depotsIds[i]].Item1, depotTimesWindows[depotsIds[i]].Item2, depotsIds[i]));
             }
             var maxEnd = depots.Max<Depot>((depot => (depot.EndTime.Ticks)));
          
             for (int i = 0; i < clientsIds.Count; i++)
             {
-                clients.Add(new Client(locations[clientsIds[i]], timesAvivals[clientsIds[i]], new TimeSpan(maxEnd), unld[clientsIds[i]], demands[clientsIds[i]], clientsIds[i]));
+                clients.Add(new Client(locations[clientsLocations[clientsIds[i]]], timesAvivals[clientsIds[i]], new TimeSpan(maxEnd), unld[clientsIds[i]], demands[clientsIds[i]], clientsIds[i]));
 
             }
             foreach (var C in clients)

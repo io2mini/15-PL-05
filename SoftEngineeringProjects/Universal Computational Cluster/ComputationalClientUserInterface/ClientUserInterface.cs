@@ -83,11 +83,10 @@ namespace Common.UserInterface
             }
 
             // Zawiśnij w oczekwianiu na odebranie rozwiązania
-            while (!computationalClient.HasFinalSolution) //TODO: naprawić ten busy waiting
-            {
-            }
-            //TODO: wyświetl rozwiązanie
+            computationalClient.HasFinalSolutionMutex.WaitOne(TimeSpan.FromSeconds(newProblem.SolvingTimeOut));
+
             Console.WriteLine("Computational Client ended successfully.");
+            Console.ReadLine();
         }
     }
 }
