@@ -83,7 +83,8 @@ namespace Common.UserInterface
             }
 
             // Zawiśnij w oczekwianiu na odebranie rozwiązania
-            computationalClient.HasFinalSolutionMutex.WaitOne(TimeSpan.FromSeconds(newProblem.SolvingTimeOut));
+            //computationalClient.HasFinalSolutionMutex.WaitOne(TimeSpan.FromSeconds(newProblem.SolvingTimeOut));
+            while (!computationalClient.HasFinalSolutionMutex) { }
 
             Console.WriteLine("Computational Client ended successfully.");
             Console.ReadLine();
