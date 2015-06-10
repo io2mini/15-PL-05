@@ -143,6 +143,7 @@ namespace Common.Components
                     {
                         Console.Write("{0}  ", solution.VehicleLocationList[i][j]);
                     }
+                    Console.WriteLine();
                 }
                 Console.WriteLine("\nFinding this solution takes approximately: {0}", solutionsSolution.ComputationsTime);
 
