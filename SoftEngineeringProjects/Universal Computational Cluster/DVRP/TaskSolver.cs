@@ -98,13 +98,27 @@ namespace DVRP
         {
             //TODO: handle timeout
 
-
             var task = Task.Deserialize(partialData);
              uint[][] bestSequence = null;
              double bestCost = double.MaxValue;
+
+             var booleanCombinations = new List<bool[]> { new bool[] { } };
+             for (var i = 0; i < ProblemInstance.Clients.Count; i++)
+             {
+                 var predecessors = booleanCombinations.Where(b => b.Length == i).ToList();
+                 foreach (bool[] predecessor in predecessors)
+                 {
+                     var l1 = predecessor.ToList();
+                     l1.Add(false);
+                     booleanCombinations.Add(l1.ToArray());
+                     l1 = predecessor.ToList();
+                     l1.Add(true);
+                     booleanCombinations.Add(l1.ToArray());
+                 }
+             }
             foreach (var array in task.Brackets)
             {
-                var routes = GeneratePermutedClients(new [] {array});
+                var routes = GeneratePermutedClients(new [] {array},booleanCombinations);
                 foreach (var sequence in routes)
                 {
                     uint[][] seq;
@@ -165,29 +179,13 @@ namespace DVRP
             return tasksForNodes.ToArray();
         }
 
-        public List<Route[]> GeneratePermutedClients(int[][] brackets)
+        public List<Route[]> GeneratePermutedClients(int[][] brackets,List<bool[]> booleanCombinations)
         {
             var permutedClients = Permuter.GenerateAndFillBrackets(ProblemInstance.Vehicles.Count,
                 ProblemInstance.Clients.Count, brackets);
             var routeClients = DivideClients(permutedClients).ToList();
             var combinedDestinations = new List<Route[]>();
-            var maxClientCount = permutedClients.Aggregate(0,
-                (current, combination) => combination.Select(routeSeq => routeSeq.Length).Concat(new[] { current }).Max());
-            var booleanCombinations = new List<bool[]> { new bool[] { } };
-            for (var i = 0; i < maxClientCount; i++)
-            {
-                var predecessors = booleanCombinations.Where(b => b.Length == i).ToList();
-                foreach (bool[] predecessor in predecessors)
-                {
-                    var l1 = predecessor.ToList();
-                    l1.Add(false);
-                    booleanCombinations.Add(l1.ToArray());
-                    l1 = predecessor.ToList();
-                    l1.Add(true);
-                    booleanCombinations.Add(l1.ToArray());
-                }
-            }
-            
+           
 
             // combinedDestinations = RouteClients.Select(routes => routes.Select(r => r.GenerateAndAddDepotsToRoute(ProblemInstance, list)).Select(lll => lll.ToArray()).ToList()).Aggregate(combinedDestinations, (current, l) => current.Union(l).ToList());
             //Powyższe wygenerowane resharperem z poniższego gdzie combinedDestinations to ll:
