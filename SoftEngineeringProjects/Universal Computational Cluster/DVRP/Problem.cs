@@ -97,7 +97,7 @@ namespace DVRP
             return !beforeClient
                 ? (from depot in depotList
                     let arrival = departure + TimeSpan.FromMinutes(client.Location | depot.Location)
-                    where arrival >= client.StartTime && arrival <= client.EndTime
+                    where arrival >= client.RealStartTime && arrival <= client.EndTime
                     select depot).FirstOrDefault()
                 : (from depot in depotList
                 let arrival = departure + TimeSpan.FromMinutes(client.Location | depot.Location)
@@ -117,7 +117,7 @@ namespace DVRP
             return (from depot in depotList
                     let departure = depot.StartTime
                     let arrival = departure + TimeSpan.FromMinutes(client.Location | depot.Location)
-                    where arrival >= client.StartTime && arrival <= client.EndTime
+                    where arrival >= client.RealStartTime && arrival <= client.EndTime
                     select depot).FirstOrDefault();
         }
 
@@ -148,7 +148,7 @@ namespace DVRP
             return (from depot in depotList
                     let arrival1 = departure + TimeSpan.FromMinutes(startClient.Location | depot.Location)
                     let arrival2 = arrival1 + TimeSpan.FromMinutes(depot.Location | endclient.Location)
-                    where arrival1 >= depot.StartTime && arrival1 <= depot.EndTime && arrival2 >= endclient.StartTime && arrival2 <= endclient.EndTime
+                    where arrival1 >= depot.StartTime && arrival1 <= depot.EndTime && arrival2 >= endclient.RealStartTime && arrival2 <= endclient.EndTime
                     select depot).FirstOrDefault();
         }
 
