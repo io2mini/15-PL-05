@@ -61,6 +61,7 @@ namespace DVRP
         internal static Route AddDepotsToRoute(this Route r, bool[] depotSequence)
         {
             return new Route(r.Sequence, depotSequence);
+            
         }
 
         public static Route[] GenerateAndAddDepotsToRoute(this Route r, Problem p, bool[][] l)
@@ -75,7 +76,20 @@ namespace DVRP
 
             //return l.Where(o => (o.Sum(d => (d ? 1 : 0)) >= minDepotCount - 1)).Select(r.AddDepotsToRoute).ToArray();
             //usprawnienie: wybrać najoptymalniejszy Route tutaj zamiast generować i przekazywać dalej
-            return l.Select(r.AddDepotsToRoute).ToArray();
+            double Min = double.MaxValue;
+            Route best = null;
+            foreach (var array in l)
+            {
+                r.DepotAfter = array;
+                var current = r.CalculteRouteCost(p, Min);
+                if (current.Item2 < Min)
+                {
+                    best = r.AddDepotsToRoute(array);
+                    Min = current.Item2;
+                }
+
+            }
+            return best==null?new Route[]{r}:new[] { best };
         }
 
         

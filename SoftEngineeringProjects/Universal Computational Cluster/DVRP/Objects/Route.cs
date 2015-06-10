@@ -6,7 +6,7 @@ namespace DVRP.Objects
     public class Route
     {
         public uint[] Sequence { get; private set; }
-        public bool[] DepotAfter { get; private set; }
+        public bool[] DepotAfter { get; set; }
 
         public Route(uint[] sequence)
         {
